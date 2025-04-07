@@ -1,0 +1,162 @@
+@font-face {
+    font-family: 'Cairo';
+    src: url('../storage/fonts/Cairo.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+:root{
+    --primary-color:#032221;
+    --secondary-color:#03624c;
+    --whites:#f1f7f6;
+    --gray: #707d7d;
+}
+body{
+    background-color: var(--primary-color);
+    display: flex;
+    flex-direction: row;
+    gap: 15px;
+    justify-content: center;
+    font-family: 'Cairo', sans-serif;
+}
+form{
+    text-align: center;
+}
+.board{
+    padding: 10px;
+    width: 70vw;
+    height: 95vh;
+    background-color: var(--gray);
+    color: var(--blacks);
+}
+.side{
+    width: 25vw;
+    height: 95vh;
+    
+    
+    display: grid;
+   grid-template-rows: repeat(2,1fr);
+   row-gap: 5vh;
+    
+
+}   
+.chick-in{
+    background-color: var(--secondary-color);
+    height: 46vh;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+}
+.service{
+    width: 25vw;
+    height: 46vh;
+    
+    background-color: var(--secondary-color);
+}
+.oon{
+    /* background-color: var(--whites); */
+    width: 20vw;
+    display: flex;
+    justify-content: center;
+    
+    place-self: center;
+    flex-direction: row;
+    gap: 25px;
+}
+.but{
+    width: 60px;
+    height: 40px;
+    background-color: var(--secondary-color);
+    cursor: pointer;
+    color: white;
+    border-radius: 8px;
+}
+
+.but:hover{
+    background-color: var(--primary-color);
+    transition: 50ms ease;
+}
+/* From Uiverse.io by e-coders */
+.button1 {
+    appearance: none;
+    background-color: var(--blacks);
+    border: 0.125em solid #1A1A1A;
+    border-radius: 0.9375em;
+    box-sizing: border-box;
+    color: var(--whites);
+    cursor: pointer;
+    display: inline-block;
+    font-family: 'Cairo',sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: normal;
+   
+    margin: 0;
+    min-height: 3.75em;
+    min-width: 0;
+    outline: none;
+    padding: 1em 2.3em;
+    text-align: center;
+    text-decoration: none;
+    transition: all 300ms cubic-bezier(.23, 1, 0.32, 1);
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+    will-change: transform;
+}
+
+.button1:disabled {
+    pointer-events: none;
+}
+
+.button1:hover {
+    color: #fff;
+    background-color: var(--primary-color);
+    
+    box-shadow: rgba(0, 0, 0, 0.25) 0 8px 15px;
+    transform: translateY(-2px);
+}
+
+.button1:active {
+    box-shadow: none;
+    transform: translateY(0);
+} 
+.inp-text{
+    width: 250px;
+    height: 30px;
+    border-radius: 8px;
+    background-color: #f1f1f1;
+    border: transparent;
+    
+}
+
+.input-form{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    position: relative;
+    gap: 5px;
+    text-align: center;
+    align-items: center;
+}
+.input-form label{
+   
+    width: 7vw;
+}
+.inp-text label{
+   
+    width: 7vw;
+}
+.form{
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+
+}
+.new-form{
+    gap: 10px;
+    height: 35vh;
+}
+.old-form{
+    height: 35vh;
+}
