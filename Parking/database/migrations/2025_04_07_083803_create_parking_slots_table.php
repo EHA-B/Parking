@@ -9,7 +9,7 @@ class CreateParkingSlotsTable extends Migration
     {  
         Schema::create('parking_slots', function (Blueprint $table) {  
             $table->id();  
-            $table->foreignId('slot_id')->constrained('slots')->onDelete('cascade');  
+        
             $table->foreignId('vic_id')->constrained('vics')->onDelete('cascade');  
             $table->string('parcode'); // Assuming this is for barcode  
             $table->timestamp('time_in')->nullable();  

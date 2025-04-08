@@ -8,7 +8,7 @@ class ParkingSlot extends Model
 {  
     use HasFactory;  
 
-    protected $fillable = ['slot_id', 'vic_id', 'parcode', 'time_in', 'time_out'];  
+    protected $fillable = [ 'vic_id', 'parcode', 'time_in', 'time_out'];  
 
     public function vic()  
     {  
