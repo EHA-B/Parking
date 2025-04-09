@@ -12,7 +12,28 @@
 
 <body>
     <section class="board">
-        <h1>hello</h1>
+       <div class="list-container">
+        <table class="table1">
+            <tr>
+            <th>ID</th>
+            <th>الزبون</th>
+            <th>فئة المركبة</th>
+            <th>نوع المركبة</th>
+            <th>رقم اللوحة</th>
+            <th>وقت الدخول</th>
+            <th>خدمات</th>
+            </tr>
+            <tr class="data">
+                <td>1</td>
+                <td>سيطان</td>
+                <td><img src="{{ asset('build/assets/motor.svg') }}" alt="Car" width="40"></td>
+                <td>bmw</td>
+                <td>1212</td>
+                <td>10:10</td>
+                <td>Add</td>
+            </tr>
+        </table>
+       </div>
     </section>
     <section class="side">
 
@@ -88,9 +109,7 @@
         <button type="submit" >ادخال</button>
 </form>
 </section>
-<section class="service">
-    <h1>hello</h1>
-</section>
+
 </section>
 </body>
     <script>
