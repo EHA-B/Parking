@@ -62,30 +62,29 @@
 <form action="{{route('dashboard.old')}}" id="form2" class="old-form" method="POST" enctype="multipart/form-data" style="display:none;">
     @csrf
 
-
-      <h2>Select a Customer</h2> 
-      <div class="form">
+    <h2>Select a Customer</h2> 
+    <div class="form">
         <div class="input-form">  
-            <select name="customer_id" class="inp-text" id="customerSelect">  
+            <select name="customer_id" class="inp-text" id="customerSelect" onchange="populateVehicles(this)">  
                 <option value="">Select an Old Customer</option>  
-              @foreach ($customers as $customer)
-              <option value="{{$customer->id}}">{{$customer->name}}</option>
-              @endforeach
-                  
+                @foreach ($customers as $customer)
+                <option value="{{$customer->id}}">
+                    {{$customer->name}}
+                </option>
+                @endforeach
             </select>  
             <label for="customerSelect">: اختيار عميل قديم</label>  
         </div>  
         <div class="input-form">
-            <input type="text" name="vehicle_type" class="inp-text" placeholder="vehicle...." id="vehicleInput">
-            <label for="vehicleInput">: نوع المركبة</label>
+            <select name="vehicle_type" class="inp-text" id="vehicleTypeSelect">
+                <option value="">Select Vehicle Type</option>
+            </select>
+            <label for="vehicleTypeSelect">: نوع المركبة</label>
         </div>
-        <div class="input-form">
-            <input type="text" name="plate" class="inp-text" placeholder="plate...." id="plateInput">
-            <label for="plateInput">: رقم اللوحة</label>
-        </div>
-        </div>
+        
+    </div>
 
-        <button type="submit" >ادخال</button>
+    <button type="submit">ادخال</button>
 </form>
 </section>
 <section class="service">
@@ -105,9 +104,40 @@
                     document.getElementById('form1').style.display = 'none';
                 
     }
+   
+    function populateVehicles(customerSelect) {
+        // Get the selected customer ID
+        const customerId = customerSelect.value;
+        
+        // Get the vehicle type select element
+        const vehicleTypeSelect = document.getElementById('vehicleTypeSelect');
+        
+        // Clear existing options
+        vehicleTypeSelect.innerHTML = '<option value="">Select Vehicle Type</option>';
+        
+        // If no customer is selected, return
+        if (!customerId) return;
+        
+        // Fetch vehicles for the selected customer via AJAX
+        fetch(`/get-customer-vehicles/${customerId}`)
+            .then(response => response.json())
+            .then(vehicles => {
+                // Populate the vehicle type select
+                vehicles.forEach(vehicle => {
+                    const option = document.createElement('option');
+                    option.value = vehicle.id;
+                    option.text = vehicle.brand;
+                    vehicleTypeSelect.appendChild(option);
+                });
+            })
+            .catch(error => {
+                console.error('Error fetching vehicles:', error);
+            });
+    }
 
-                // Initialize with New Customer form visible  
-                window.onload = showNewCustomer;  
+
+    // Initialize with New Customer form visible  
+    window.onload = showNewCustomer;  
     </script>
 
 </html>

@@ -19,6 +19,17 @@ class DashboardController extends Controller
         return view('dashboard.index',['customers'=>$customers ,'parking_slots'=>$parking_slots]);
     }
 
+ // Method to get vehicle types for a specific customer
+ public function getCustomerVehicles($customerId)
+ {
+     $customer = Customer::findOrFail($customerId);
+     
+     // Assuming the relationship is named 'vehicles'
+     $vehicles = $customer->vics;
+     
+     return response()->json($vehicles);
+ }
+
     public function oldCustomer(Request $request)
     {
         // Find the existing customer
@@ -27,7 +38,7 @@ class DashboardController extends Controller
         // Create a new vehicle for the existing customer
         $vic = Vic::create([
             'typ' => $request->vehicle_type,
-            'brand' => '', // Optional: you might want to add brand input to the form
+            'brand' => $request->brand, // Optional: you might want to add brand input to the form
             'plate' => $request->plate,
             'customer_id' => $customer->id
         ]);
@@ -67,12 +78,7 @@ class DashboardController extends Controller
             'hours' => 0
         ]);
 
-        $vic = Vic::create([
-            'typ' => $request->vehicle_type,
-            'brand' => $request->brand,
-            'plate' => $request->plate,
-            'customer_id' => $customer->id
-        ]);
+        $vic = Vic::find($request->vehicle_type);
 
         $parcode = $customer->id.$vic->id.$request->plateInput;
 
