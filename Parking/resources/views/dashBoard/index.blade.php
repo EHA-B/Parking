@@ -33,174 +33,18 @@
                         <td>10:10</td>
                         <td>Add</td>
                     </tr>
-                    <tr class="data">
-                        <td>1</td>
-                        <td>سيطان</td>
-                        <td><img src="{{ asset('build/assets/motor.svg') }}" alt="Car" width="40"></td>
-                        <td>bmw</td>
-                        <td>1212</td>
-                        <td>10:10</td>
-                        <td>Add</td>
-                    </tr>
-                    <tr class="data">
-                        <td>1</td>
-                        <td>سيطان</td>
-                        <td><img src="{{ asset('build/assets/motor.svg') }}" alt="Car" width="40"></td>
-                        <td>bmw</td>
-                        <td>1212</td>
-                        <td>10:10</td>
-                        <td>Add</td>
-                    </tr>
-                    <tr class="data">
-                        <td>1</td>
-                        <td>سيطان</td>
-                        <td><img src="{{ asset('build/assets/motor.svg') }}" alt="Car" width="40"></td>
-                        <td>bmw</td>
-                        <td>1212</td>
-                        <td>10:10</td>
-                        <td>Add</td>
-                    </tr>
-                    <tr class="data">
-                        <td>1</td>
-                        <td>سيطان</td>
-                        <td><img src="{{ asset('build/assets/motor.svg') }}" alt="Car" width="40"></td>
-                        <td>bmw</td>
-                        <td>1212</td>
-                        <td>10:10</td>
-                        <td>Add</td>
-                    </tr>
-                    <tr class="data">
-                        <td>1</td>
-                        <td>سيطان</td>
-                        <td><img src="{{ asset('build/assets/motor.svg') }}" alt="Car" width="40"></td>
-                        <td>bmw</td>
-                        <td>1212</td>
-                        <td>10:10</td>
-                        <td>Add</td>
-                    </tr>
-                    <tr class="data">
-                        <td>1</td>
-                        <td>سيطان</td>
-                        <td><img src="{{ asset('build/assets/motor.svg') }}" alt="Car" width="40"></td>
-                        <td>bmw</td>
-                        <td>1212</td>
-                        <td>10:10</td>
-                        <td>Add</td>
-                    </tr>
-                    <tr class="data">
-                        <td>1</td>
-                        <td>سيطان</td>
-                        <td><img src="{{ asset('build/assets/motor.svg') }}" alt="Car" width="40"></td>
-                        <td>bmw</td>
-                        <td>1212</td>
-                        <td>10:10</td>
-                        <td>Add</td>
-                    </tr>
-                    <tr class="data">
-                        <td>1</td>
-                        <td>سيطان</td>
-                        <td><img src="{{ asset('build/assets/motor.svg') }}" alt="Car" width="40"></td>
-                        <td>bmw</td>
-                        <td>1212</td>
-                        <td>10:10</td>
-                        <td>Add</td>
-                    </tr>
-                    <tr class="data">
-                        <td>1</td>
-                        <td>سيطان</td>
-                        <td><img src="{{ asset('build/assets/motor.svg') }}" alt="Car" width="40"></td>
-                        <td>bmw</td>
-                        <td>1212</td>
-                        <td>10:10</td>
-                        <td>Add</td>
-                    </tr>
-                    <tr class="data">
-                        <td>1</td>
-                        <td>سيطان</td>
-                        <td><img src="{{ asset('build/assets/motor.svg') }}" alt="Car" width="40"></td>
-                        <td>bmw</td>
-                        <td>1212</td>
-                        <td>10:10</td>
-                        <td>Add</td>
-                    </tr>
-                    <tr class="data">
-                        <td>1</td>
-                        <td>سيطان</td>
-                        <td><img src="{{ asset('build/assets/motor.svg') }}" alt="Car" width="40"></td>
-                        <td>bmw</td>
-                        <td>1212</td>
-                        <td>10:10</td>
-                        <td>Add</td>
-                    </tr>
-                    <tr class="data">
-                        <td>1</td>
-                        <td>سيطان</td>
-                        <td><img src="{{ asset('build/assets/motor.svg') }}" alt="Car" width="40"></td>
-                        <td>bmw</td>
-                        <td>1212</td>
-                        <td>10:10</td>
-                        <td>Add</td>
-                    </tr>
-                    <tr class="data">
-                        <td>1</td>
-                        <td>سيطان</td>
-                        <td><img src="{{ asset('build/assets/motor.svg') }}" alt="Car" width="40"></td>
-                        <td>bmw</td>
-                        <td>1212</td>
-                        <td>10:10</td>
-                        <td>Add</td>
-                    </tr>
-                    <tr class="data">
-                        <td>1</td>
-                        <td>سيطان</td>
-                        <td><img src="{{ asset('build/assets/motor.svg') }}" alt="Car" width="40"></td>
-                        <td>bmw</td>
-                        <td>1212</td>
-                        <td>10:10</td>
-                        <td>Add</td>
-                    </tr>
-                    <tr class="data">
-                        <td>1</td>
-                        <td>سيطان</td>
-                        <td><img src="{{ asset('build/assets/motor.svg') }}" alt="Car" width="40"></td>
-                        <td>bmw</td>
-                        <td>1212</td>
-                        <td>10:10</td>
-                        <td>Add</td>
-                    </tr>
-                    <tr class="data">
-                        <td>1</td>
-                        <td>سيطان</td>
-                        <td><img src="{{ asset('build/assets/motor.svg') }}" alt="Car" width="40"></td>
-                        <td>bmw</td>
-                        <td>1212</td>
-                        <td>10:10</td>
-                        <td>Add</td>
-                    </tr>
-                    <tr class="data">
-                        <td>1</td>
-                        <td>سيطان</td>
-                        <td><img src="{{ asset('build/assets/motor.svg') }}" alt="Car" width="40"></td>
-                        <td>bmw</td>
-                        <td>1212</td>
-                        <td>10:10</td>
-                        <td>Add</td>
-                    </tr>
-                    <tr class="data">
-                        <td>1</td>
-                        <td>سيطان</td>
-                        <td><img src="{{ asset('build/assets/motor.svg') }}" alt="Car" width="40"></td>
-                        <td>bmw</td>
-                        <td>1212</td>
-                        <td>10:10</td>
-                        <td>Add</td>
-                    </tr>
+           
                 </tbody>
             </table>
         </div>
     </section>
     <section class="side">
-
+        <div class="top-menu">
+            <a href="#" class="user"><img src="{{ asset('build/assets/users2.svg') }}" alt="users" width="55px"></a>
+            <a href="#" class="settings"><img src="{{ asset('build/assets/settings.svg') }}" alt="settings" width="50px"></a>
+            <a href="#" class="history"><img src="{{ asset('build/assets/history.svg') }}" alt="history" width="50px"></a>
+          
+        </div>
 
         <section class="chick-in">
             <div class="oon">
@@ -214,7 +58,7 @@
                 <h2>Enter a Customer</h2>
                 <div class="form">
                     <div class="input-form">
-                        <input type="text" name="name" class="inp-text" placeholder="name...." id="nameInput">
+                        <input autofocus type="text" name="name" class="inp-text" placeholder="name...." id="nameInput" >
                         <label for="nameInput">: الاسم الكامل</label>
                     </div>
                     <div class="input-form" id="newCustomerPhone">
