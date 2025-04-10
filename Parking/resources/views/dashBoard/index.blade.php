@@ -22,6 +22,7 @@
             <th>رقم اللوحة</th>
             <th>وقت الدخول</th>
             <th>خدمات</th>
+            <th>تحرير</th>
             </tr>
             @foreach($parking_slots as $parking_slot)
             <tr class="data">
@@ -33,9 +34,32 @@
                 <td>{{$parking_slot->vics->brand}}</td>
                 <td>{{$parking_slot->vics->plate}}</td>
                 <td>{{$parking_slot->time_in}}</td>
-                <td>Add</td>
+                <td>
+                    @if($parking_slot->vics->services->count() > 0)
+                        
+                            @foreach($parking_slot->vics->services as $service)
+                                @if($service->pivot->parking_slot_id == $parking_slot->id)
+                                    <li>
+                                        {{ $service->name }} 
+                                        ( التكلفة:  {{ $service->cost }})
+                                    </li>
+                                @endif
+                            @endforeach
+                        
+                    @else
+                        لا يوجد خدمات!
+                    @endif
+                </td>
+            
+                <td>
+                    <a href="{{ route('dashboard.checkout', ['vic_id'=> $parking_slot->vics->id,'parking_slot_id' => $parking_slot->id]) }}" class="btn btn-primary">خروج</a>
+                    <a href="{{ route('dashboard.add_service', ['vic_id'=> $parking_slot->vics->id,'parking_slot_id' => $parking_slot->id]) }}" class="btn btn-success">إضافة خدمة</a>
+                </td>
+
             </tr>
             @endforeach
+
+            
         </table>
        </div>
     </section>
