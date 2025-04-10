@@ -13,10 +13,10 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        $customers = Customer::with('vics')->get()->all();
-        $parking_slots = ParkingSlot::all();
+        $customers = Customer::with('vics')->get();
+        $parking_slots = ParkingSlot::with(['vics.customer','vics.services'])->get();
 
-        return view('dashboard.index',['customers'=>$customers ,'parking_slots'=>$parking_slots]);
+        return view('dashboard.index', ['customers' => $customers, 'parking_slots' => $parking_slots]);
     }
 
  // Method to get vehicle types for a specific customer
@@ -36,12 +36,8 @@ class DashboardController extends Controller
         $customer = Customer::findOrFail($request->customer_id);
 
         // Create a new vehicle for the existing customer
-        $vic = Vic::create([
-            'typ' => $request->vehicle_type,
-            'brand' => $request->brand, // Optional: you might want to add brand input to the form
-            'plate' => $request->plate,
-            'customer_id' => $customer->id
-        ]);
+      
+        $vic = Vic::find($request->vehicle_type);
 
         // Generate a unique parking code
         $parcode = $customer->id . $vic->id . $request->plate;
@@ -78,7 +74,14 @@ class DashboardController extends Controller
             'hours' => 0
         ]);
 
-        $vic = Vic::find($request->vehicle_type);
+        
+
+        $vic = Vic::create([
+            'typ' => $request->vehicle_type,
+            'brand' => $request->brand,
+            'plate' => $request->plate,
+            'customer_id' => $customer->id
+        ]);
 
         $parcode = $customer->id.$vic->id.$request->plateInput;
 
@@ -92,4 +95,8 @@ class DashboardController extends Controller
 
         return redirect()->route('dashboard.index');
     }
+
+
+
+
 }

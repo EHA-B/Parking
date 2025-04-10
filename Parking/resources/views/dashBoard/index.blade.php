@@ -12,7 +12,32 @@
 
 <body>
     <section class="board">
-        <h1>hello</h1>
+       <div class="list-container">
+        <table class="table1">
+            <tr>
+            <th>ID</th>
+            <th>الزبون</th>
+            <th>فئة المركبة</th>
+            <th>نوع المركبة</th>
+            <th>رقم اللوحة</th>
+            <th>وقت الدخول</th>
+            <th>خدمات</th>
+            </tr>
+            @foreach($parking_slots as $parking_slot)
+            <tr class="data">
+                <td>{{$parking_slot->id}} </td>
+                <td>{{$parking_slot->vics->customer->name}}</td>
+                <td>
+                    <img src="{{ $parking_slot->vics->typ == "مركبة صغيرة" ? asset('build/assets/motor.svg') : asset('build/assets/car.svg') }}" alt={{$parking_slot->vics->typ == "مركبة صغيرة" ? "Motor" : "Car"}} width="40">
+                </td>            
+                <td>{{$parking_slot->vics->brand}}</td>
+                <td>{{$parking_slot->vics->plate}}</td>
+                <td>{{$parking_slot->time_in}}</td>
+                <td>Add</td>
+            </tr>
+            @endforeach
+        </table>
+       </div>
     </section>
     <section class="side">
 
@@ -87,9 +112,7 @@
     <button type="submit">ادخال</button>
 </form>
 </section>
-<section class="service">
-    <h1>hello</h1>
-</section>
+
 </section>
 </body>
     <script>
