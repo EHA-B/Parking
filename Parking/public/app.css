@@ -271,3 +271,55 @@ form{
 .history:hover{
     transform: scale(1.1);
 }
+/* Popup Styles */
+.popup {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+}
+
+.popup-content {
+    position: relative;
+    background-color: var(--whites);
+    margin: 15% auto;
+    padding: 20px;
+    width: 50%;
+    border-radius: 15px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.close-popup {
+    position: absolute;
+    right: 20px;
+    top: 10px;
+    font-size: 28px;
+    font-weight: bold;
+    color: var(--gray);
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.close-popup:hover {
+    color: var(--primary-color);
+}
+
+/* Animation for popup */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.popup.show {
+    display: block;
+    animation: fadeIn 0.3s;
+}

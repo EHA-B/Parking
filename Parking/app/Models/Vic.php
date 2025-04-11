@@ -16,6 +16,11 @@ class Vic extends Model
         return $this->belongsTo(Customer::class);  
     }  
 
+    public function parkingSlots()  
+    {  
+        return $this->hasMany(ParkingSlot::class, 'vic_id');  
+    }  
+
     public function slots()  
     {  
         return $this->belongsToMany(Slot::class, 'parking_slots')->withPivot('id' ,'slot_id' ,'vic_id' ,'parcode' ,'time_in' ,'time_out' );  

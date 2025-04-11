@@ -6,6 +6,7 @@ use App\Models\Customer;
 use App\Models\ParkingSlot;
 use App\Models\Vic;
 use App\Models\History;
+use App\Models\Price;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -13,10 +14,18 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        $customers = Customer::with('vics')->get()->all();
-        $parking_slots = ParkingSlot::all();
+        $customers = Customer::with('vics')->get();
+        $parking_slots = ParkingSlot::with([
+            'vics.customer', 
+            'vics.services' => function($query) {
+                $query->withPivot('parking_slot_id');
+            }
+        ])->get();
 
-        return view('dashboard.index',['customers'=>$customers ,'parking_slots'=>$parking_slots]);
+        return view('dashboard.index', [
+            'customers' => $customers, 
+            'parking_slots' => $parking_slots
+        ]);
     }
 
  // Method to get vehicle types for a specific customer
@@ -36,12 +45,8 @@ class DashboardController extends Controller
         $customer = Customer::findOrFail($request->customer_id);
 
         // Create a new vehicle for the existing customer
-        $vic = Vic::create([
-            'typ' => $request->vehicle_type,
-            'brand' => $request->brand, // Optional: you might want to add brand input to the form
-            'plate' => $request->plate,
-            'customer_id' => $customer->id
-        ]);
+      
+        $vic = Vic::find($request->vehicle_type);
 
         // Generate a unique parking code
         $parcode = $customer->id . $vic->id . $request->plate;
@@ -54,16 +59,6 @@ class DashboardController extends Controller
             'time_out' => null
         ]);
 
-        // Optional: You might want to update customer hours or create a history entry
-        // For example, creating a history entry
-        // History::create([
-        //     'customer_name' => $customer->name,
-        //     'vic_typ' => $vic->typ,
-        //     'vic_plate' => $vic->plate,
-        //     'time_in' => Carbon::now(),
-        //     'time_out' => null,
-        //     'price' => 0 // You might want to calculate this dynamically
-        // ]);
 
         return redirect()->route('dashboard.index');
     }
@@ -78,7 +73,14 @@ class DashboardController extends Controller
             'hours' => 0
         ]);
 
-        $vic = Vic::find($request->vehicle_type);
+        
+
+        $vic = Vic::create([
+            'typ' => $request->vehicle_type,
+            'brand' => $request->brand,
+            'plate' => $request->plate,
+            'customer_id' => $customer->id
+        ]);
 
         $parcode = $customer->id.$vic->id.$request->plateInput;
 
@@ -92,4 +94,69 @@ class DashboardController extends Controller
 
         return redirect()->route('dashboard.index');
     }
+
+public function checkout($vic_id, $parking_slot_id)
+{
+    // Find the specific parking slot
+    $parking_slot = ParkingSlot::findOrFail($parking_slot_id);
+
+    // Calculate the total time parked
+    $time_in = Carbon::parse($parking_slot->time_in);
+    $time_out = Carbon::now();
+    $duration_minutes = $time_in->diffInMinutes($time_out);
+
+    // Update the parking slot with checkout time
+    $parking_slot->update([
+        'time_out' => $time_out
+    ]);
+
+    // Find the associated vehicle and customer
+    $vic = Vic::with('services')->findOrFail($vic_id);
+    $customer = $vic->customer;
+
+    // Update customer's total hours
+    $customer->increment('hours', $duration_minutes / 60);
+
+    // Get pricing based on vehicle type
+    $price_model = Price::first(); // Assuming there's only one pricing record
+    $price_per_minute = ($vic->typ === 'مركبة صغيرة') 
+        ? $price_model->moto_price 
+        : $price_model->car_price;
+
+    // Calculate total price
+    $total_price = $duration_minutes * $price_per_minute;
+
+    // Prepare services for JSON storage
+    $services = $vic->services->isEmpty() 
+        ? null 
+        : json_encode($vic->services->map(function ($service) {
+            return [
+                'name' => $service->name,
+                'price' => $service->cost
+            ];
+        })->toArray());
+
+    // Create a history record for the parking session
+    History::create([
+        'customer_name' => $customer->name,
+        'vic_typ' => $vic->typ,
+        'vic_plate' => $vic->plate,
+        'time_in' => $time_in,
+        'time_out' => $time_out,
+        'duration' => $duration_minutes,
+        'price' => $total_price,
+        'services' => $services // Store services as JSON string
+    ]);
+
+    $parking_slot->delete();
+    // Redirect back to the dashboard
+    return redirect()->route('dashboard.index')->with('success', 'Checkout completed successfully');
+}
+
+public function add_service(Request $request)
+{
+
+}
+
+
 }

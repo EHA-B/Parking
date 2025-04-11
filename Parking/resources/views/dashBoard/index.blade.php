@@ -22,28 +22,58 @@
                     <th>رقم اللوحة</th>
                     <th>وقت الدخول</th>
                     <th>خدمات</th>
+                    <th>تحرير</th>
                 </tr>
-                <tbody>
+                @foreach($parking_slots as $parking_slot)
                     <tr class="data">
-                        <td>1</td>
-                        <td>سيطان</td>
-                        <td><img src="{{ asset('build/assets/motor.svg') }}" alt="Car" width="40"></td>
-                        <td>bmw</td>
-                        <td>1212</td>
-                        <td>10:10</td>
-                        <td>Add</td>
+                        <td>{{$parking_slot->id}} </td>
+                        <td>{{$parking_slot->vics->customer->name}}</td>
+                        <td>
+                            <img src="{{ $parking_slot->vics->typ == "مركبة صغيرة" ? asset('build/assets/motor.svg') : asset('build/assets/car.svg') }}"
+                                alt={{$parking_slot->vics->typ == "مركبة صغيرة" ? "Motor" : "Car"}} width="40">
+                        </td>
+                        <td>{{$parking_slot->vics->brand}}</td>
+                        <td>{{$parking_slot->vics->plate}}</td>
+                        <td>{{$parking_slot->time_in}}</td>
+                        <td>
+                            @if($parking_slot->vics->services->count() > 0)
+
+                                @foreach($parking_slot->vics->services as $service)
+                                    @if($service->pivot->parking_slot_id == $parking_slot->id)
+                                        <li>
+                                            {{ $service->name }}
+                                            ( التكلفة: {{ $service->cost }})
+                                        </li>
+                                    @endif
+                                @endforeach
+
+                            @else
+                                لا يوجد خدمات!
+                            @endif
+                        </td>
+
+                        <td>
+                            <a href="{{ route('dashboard.checkout', ['vic_id' => $parking_slot->vics->id, 'parking_slot_id' => $parking_slot->id]) }}"
+                                class="btn btn-primary">خروج</a>
+                            <a onclick="openServicePopup({{ $parking_slot->vics->id }}, {{ $parking_slot->id }})"
+                                class="btn btn-success" style="cursor: pointer;">إضافة خدمة</a>
+                        </td>
+
                     </tr>
-           
-                </tbody>
+                @endforeach
+
+
             </table>
         </div>
     </section>
     <section class="side">
         <div class="top-menu">
             <a href="#" class="user"><img src="{{ asset('build/assets/users2.svg') }}" alt="users" width="55px"></a>
-            <a href="#" class="settings"><img src="{{ asset('build/assets/settings.svg') }}" alt="settings" width="50px"></a>
-            <a href="#" class="history"><img src="{{ asset('build/assets/history.svg') }}" alt="history" width="50px"></a>
-          
+            <a href="#" class="settings"><img src="{{ asset('build/assets/settings.svg') }}" alt="settings"
+                    width="50px"></a>
+            <a href="#" class="history"><img src="{{ asset('build/assets/history.svg') }}" alt="history"
+                    width="50px"></a>
+
         </div>
 
         <section class="chick-in">
@@ -58,7 +88,7 @@
                 <h2>Enter a Customer</h2>
                 <div class="form">
                     <div class="input-form">
-                        <input autofocus type="text" name="name" class="inp-text" placeholder="name...." id="nameInput" >
+                        <input autofocus type="text" name="name" class="inp-text" placeholder="name...." id="nameInput">
                         <label for="nameInput">: الاسم الكامل</label>
                     </div>
                     <div class="input-form" id="newCustomerPhone">
@@ -84,7 +114,7 @@
                     </div>
                 </div>
                 <br>
-               <button type="submit" class="button2"><span class="button-content">أدخل</span></button>
+                <button type="submit" class="button2"><span class="button-content">أدخل</span></button>
             </form>
 
             {{-- ---------------------------- --}}
@@ -116,12 +146,34 @@
                     </div>
 
                 </div>
-            <br>
+                <br>
                 <button type="submit" class="button2"><span class="button-content">أدخل</span></button>
             </form>
         </section>
 
     </section>
+
+    <!-- Popup Form -->
+    <div id="servicePopup" class="popup">
+        <div class="popup-content">
+            <span class="close-popup">&times;</span>
+            <h2>إضافة خدمة</h2>
+            <form id="serviceForm" method="POST">
+                @csrf
+                <div class="form">
+                    <div class="input-form">
+                        <input type="text" name="service_name" class="inp-text" placeholder="Service name...">
+                        <label>: اسم الخدمة</label>
+                    </div>
+                    <div class="input-form">
+                        <input type="number" name="service_price" class="inp-text" placeholder="Price...">
+                        <label>: السعر</label>
+                    </div>
+                    <button type="submit" class="button2"><span class="button-content">إضافة</span></button>
+                </div>
+            </form>
+        </div>
+    </div>
 </body>
 <script>
     function showNewCustomer() {
@@ -166,6 +218,49 @@
             });
     }
 
+    function openServicePopup(vicId, parkingSlotId) {
+        const popup = document.getElementById('servicePopup');
+        const form = document.getElementById('serviceForm');
+
+        // Set the form's action URL with the correct parameters
+        form.action = `/dashboard/add_service/${vicId}/${parkingSlotId}`;
+
+        popup.classList.add('show');
+    }
+
+    // Close popup when clicking the close button
+    document.querySelector('.close-popup').addEventListener('click', function () {
+        document.getElementById('servicePopup').classList.remove('show');
+    });
+
+    // Close popup when clicking outside
+    window.addEventListener('click', function (event) {
+        const popup = document.getElementById('servicePopup');
+        if (event.target === popup) {
+            popup.classList.remove('show');
+        }
+    });
+
+    // Handle form submission
+    document.getElementById('serviceForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        fetch(this.action, {
+            method: 'POST',
+            body: new FormData(this),
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('servicePopup').classList.remove('show');
+                    location.reload(); // Or use a more elegant way to update the table
+                }
+            })
+            .catch(error => console.error('Error:', error));
+    });
 
     // Initialize with New Customer form visible  
     window.onload = showNewCustomer;  

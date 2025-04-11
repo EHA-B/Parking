@@ -15,7 +15,9 @@ class CreateHistoriesTable extends Migration
             $table->string('vic_plate');  
             $table->timestamp('time_in')->nullable();  
             $table->timestamp('time_out')->nullable();  
-            $table->decimal('price', 8, 2); // Assuming price is recorded here  
+            $table->decimal('price', 8, 2); 
+            $table->json('services')->nullable(); // New JSON column for services
+            $table->integer('duration')->nullable();
             $table->timestamps();  
         });  
     }  

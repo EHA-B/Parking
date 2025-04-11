@@ -10,9 +10,9 @@ class ParkingSlot extends Model
 
     protected $fillable = [ 'vic_id', 'parcode', 'time_in', 'time_out'];  
 
-    public function vic()  
+    public function vics()  
     {  
-        return $this->belongsTo(Vic::class);  
+        return $this->belongsTo(Vic::class, 'vic_id');  
     }  
 
     public function slot()  
