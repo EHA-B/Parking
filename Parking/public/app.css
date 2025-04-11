@@ -323,3 +323,18 @@ form{
     display: block;
     animation: fadeIn 0.3s;
 }
+.btn{
+    background-color:maroon;
+    width: 60px;
+    padding: 3px;
+    text-decoration: none;
+    color: white;
+    border-radius: 5px;
+}
+.serv-btn{
+    background-color: var(--secondary-color);
+    color: white;
+    padding: 3px;
+    border-radius: 5px;
+    cursor: pointer;
+}

@@ -54,9 +54,9 @@
 
                         <td>
                             <a href="{{ route('dashboard.checkout', ['vic_id' => $parking_slot->vics->id, 'parking_slot_id' => $parking_slot->id]) }}"
-                                class="btn btn-primary">خروج</a>
+                                class="btn ">خروج</a>
                             <a onclick="openServicePopup({{ $parking_slot->vics->id }}, {{ $parking_slot->id }})"
-                                class="btn btn-success" style="cursor: pointer;">إضافة خدمة</a>
+                                class="serv-btn" >إضافة خدمة</a>
                         </td>
 
                     </tr>
