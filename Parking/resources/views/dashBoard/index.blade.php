@@ -112,6 +112,10 @@
                         <input type="text" name="plate" class="inp-text" placeholder="plate...." id="plateInput">
                         <label for="plateInput">: رقم اللوحة</label>
                     </div>
+                    <div class="input-form">
+                        <input type="text" name="notes" class="inp-text" placeholder="notes...." id="notes">
+                        <label for="notes">: ملاحظات</label>
+                    </div>
                 </div>
                 <br>
                 <button type="submit" class="button2"><span class="button-content">أدخل</span></button>
@@ -139,10 +143,34 @@
                         <label for="customerSelect">: اختيار عميل قديم</label>
                     </div>
                     <div class="input-form">
-                        <select name="vehicle_type" class="inp-text" id="vehicleTypeSelect">
+                        <select name="vehicle_choose" class="inp-text" id="vehicleTypeSelect" onchange="add_vic()">
                             <option value="">Select Vehicle Type</option>
                         </select>
                         <label for="vehicleTypeSelect">: نوع المركبة</label>
+                    </div>
+
+                    <div id="add_if" hidden="true">
+                        <div class="input-form">
+                            <select name="vehicle_type" class="inp-text" id="typInput">
+                                <option value="مركبة صغيرة">مركبة صغيرة</option>
+                                <option value="مركبة كبيرة">مركبة كبيرة</option>
+                            </select>
+                            <label for="typInput">: المركبة</label>
+                        </div>
+    
+                        <div class="input-form">
+                            <input type="text" name="brand" class="inp-text" placeholder="vehicle...." id="brandInput">
+                            <label for="brandInput">: نوع المركبة</label>
+                        </div>
+                        <div class="input-form">
+                            <input type="text" name="plate" class="inp-text" placeholder="plate...." id="plateInput">
+                            <label for="plateInput">: رقم اللوحة</label>
+                        </div>
+                    </div>
+
+                    <div class="input-form">
+                        <input type="text" name="notes" class="inp-text" placeholder="notes...." id="notes">
+                        <label for="notes">: ملاحظات</label>
                     </div>
 
                 </div>
@@ -212,6 +240,10 @@
                     option.text = vehicle.brand;
                     vehicleTypeSelect.appendChild(option);
                 });
+                const option = document.createElement('option');
+                    option.value = 'add_vic';
+                    option.text = "...اضافة مركبة";
+                    vehicleTypeSelect.appendChild(option);
             })
             .catch(error => {
                 console.error('Error fetching vehicles:', error);
@@ -261,6 +293,19 @@
             })
             .catch(error => console.error('Error:', error));
     });
+
+    function add_vic()
+    {
+        const add_id = document.getElementById('add_if');
+        const select = document.getElementById('vehicleTypeSelect');
+
+        if(select.value === 'add_vic'){
+            add_id.hidden = false;
+        }
+        else{
+            add_id.hidden = true;
+        }
+    }
 
     // Initialize with New Customer form visible  
     window.onload = showNewCustomer;  

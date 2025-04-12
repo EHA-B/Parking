@@ -14,6 +14,7 @@ class CreateParkingSlotsTable extends Migration
             $table->string('parcode'); // Assuming this is for barcode  
             $table->timestamp('time_in')->nullable();  
             $table->timestamp('time_out')->nullable()->default(null); // Default null for time out  
+            $table->string('notes');
             $table->timestamps();  
         });  
     }  

@@ -46,9 +46,21 @@ class DashboardController extends Controller
 
         // Create a new vehicle for the existing customer
       
-        $vic = Vic::find($request->vehicle_type);
+        $vic = Vic::find($request->vehicle_choose);
 
         // Generate a unique parking code
+       
+
+        if($request->vehicle_choose == "add_vic")
+        {
+            $vic = Vic::create([
+                'typ' => $request->vehicle_type,
+                'brand' => $request->brand,
+                'plate' => $request->plate,
+                'customer_id' => $customer->id
+            ]);
+
+        }
         $parcode = $customer->id . $vic->id . $request->plate;
 
         // Create a new parking slot entry
@@ -56,7 +68,8 @@ class DashboardController extends Controller
             'vic_id' => $vic->id,
             'parcode' => $parcode,
             'time_in' => Carbon::now(),
-            'time_out' => null
+            'time_out' => null,
+            'notes' => $request->notes ?? " "
         ]);
 
 
@@ -89,7 +102,8 @@ class DashboardController extends Controller
             'vic_id' => $vic->id,
             'parcode' => $parcode,
             'time_in' => Carbon::now(),
-            'time_out' => null
+            'time_out' => null,
+            'notes' => $request->notes ?? " "
         ]);
 
         return redirect()->route('dashboard.index');
@@ -145,7 +159,8 @@ public function checkout($vic_id, $parking_slot_id)
         'time_out' => $time_out,
         'duration' => $duration_minutes,
         'price' => $total_price,
-        'services' => $services // Store services as JSON string
+        'services' => $services,
+        'notes' => $parking_slot->notes // Store services as JSON string
     ]);
 
     $parking_slot->delete();

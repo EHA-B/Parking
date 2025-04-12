@@ -60,6 +60,7 @@
                         <th>Duration (mins)</th>
                         <th>Total Price</th>
                         <th>Services</th>
+                        <th>ملاحظات</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -70,7 +71,7 @@
                             <td>{{ $history->vic_plate }}</td>
                             <td>{{ $history->time_in ? \Carbon\Carbon::parse($history->time_in)->format('Y-m-d H:i') : 'N/A' }}</td>
                             <td>{{ $history->time_out ? \Carbon\Carbon::parse($history->time_out)->format('Y-m-d H:i') : 'N/A' }}</td>
-                            <td>{{ $history->duration ?? 'N/A' }}</td>
+                            <td>{{ number_format($history->duration ?? 'N/A',2) }}</td>
                             <td>{{ number_format($history->price, 2) }}</td>
                             <td>
                                 @if($history->services)
@@ -86,6 +87,7 @@
                                     No additional services
                                 @endif
                             </td>
+                            <td>{{$history->notes}} </td>
                         </tr>
                     @empty
                         <tr>

@@ -18,6 +18,7 @@ class CreateHistoriesTable extends Migration
             $table->decimal('price', 8, 2); 
             $table->json('services')->nullable(); // New JSON column for services
             $table->integer('duration')->nullable();
+            $table->string('notes');
             $table->timestamps();  
         });  
     }  
