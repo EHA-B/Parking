@@ -68,7 +68,7 @@
     </section>
     <section class="side">
         <div class="top-menu">
-            <a href="#" class="user"><img src="{{ asset('build/assets/users2.svg') }}" alt="users" width="55px"></a>
+            <a href="{{ route('customers.index') }}" class="user"><img src="{{ asset('build/assets/users2.svg') }}" alt="users" width="55px"></a>
             <a href="#" class="settings"><img src="{{ asset('build/assets/settings.svg') }}" alt="settings"
                     width="50px"></a>
             <a href="#" class="history"><img src="{{ asset('build/assets/history.svg') }}" alt="history"

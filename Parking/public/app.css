@@ -12,7 +12,7 @@
     --gray: #707d7d;
 }
 body{
-    background-color: var(--primary-color);
+    background-color: var(--gray);
     display: flex;
     flex-direction: row;
     gap: 5px;
@@ -173,9 +173,19 @@ form{
     padding-top: 5px;
     overflow: hidden;
 }
+.list-container1{
+    width: 100%;
+    height: 99%;
+    background-color: var(--whites);
+    box-shadow: #1A1A1A;
+    place-self: center;
+    border-radius: 15px;
+    overflow: hidden;
+    padding: 5px;
+}
 .table1{
     width: 99%;
-    background-color: var(--secondary-color);
+    background-color: var(--primary-color);
     padding: 3px;
     place-self: center;
     border-top-left-radius: 13px;
@@ -183,6 +193,7 @@ form{
     color: var(--whites);
     display: flex;
     flex-direction: column;
+    margin-top: 5px;
 }
 
 .table1 tbody {
@@ -330,11 +341,53 @@ form{
     text-decoration: none;
     color: white;
     border-radius: 5px;
+    cursor: pointer;
 }
 .serv-btn{
+    text-decoration: none;
     background-color: var(--secondary-color);
     color: white;
     padding: 3px;
     border-radius: 5px;
     cursor: pointer;
+}
+.cta {
+    position: relative;
+    margin: auto;
+    padding: 12px 18px;
+    transition: all 0.2s ease;
+    border: none;
+    background: none;
+    cursor: pointer;
+}
+
+.cta:before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: block;
+    border-radius: 50px;
+    background: #048869b9;
+    width: 45px;
+    height: 45px;
+    transition: all 0.3s ease;
+}
+
+.cta span {
+    position: relative;
+    font-family: 'Cairo', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: black;
+}
+
+.cta:hover:before {
+    width: 100%;
+    background: #048869b9;
+    text-decoration: none;
+}
+a.cta {
+    text-decoration: none;
 }
