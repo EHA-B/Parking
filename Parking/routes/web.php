@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\HistoryController;
+use App\Http\Controllers\PricingController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -20,3 +22,8 @@ use Illuminate\Support\Facades\Route;
     Route::get('/customers/{customer}/edit', [CustomerController::class, 'edit'])->name('customers.edit');
     Route::put('/customers/{customer}', [CustomerController::class, 'update'])->name('customers.update');
     Route::delete('/customers/{customer}', [CustomerController::class, 'destroy'])->name('customers.destroy');
+
+    Route::get('/pricing', [PricingController::class, 'index'])->name('pricing.index');
+    Route::post('/pricing/update', [PricingController::class, 'update'])->name('pricing.update');
+
+    Route::get('/history', [HistoryController::class, 'index'])->name('history.index');
