@@ -11,7 +11,10 @@
     <section class="board">
         <div class="list-container1">
             <br>
-            <a href="<?php echo route('customers.create'); ?>" class="cta "><span>أضف عميلاً</span></a>
+            <div class="boton">
+                <a href="<?php echo route('customers.create'); ?>" class="cta "><span>أضف عميلاً</span></a>
+                <a href="<?php echo route('dashboard.index'); ?>" class="serv-btn back">العودة للصفحة الرئيسية</a>
+            </div>
             
             <?php if(session('success')): ?>
                 <div class="alert alert-success">
@@ -43,7 +46,7 @@
                                 <form action="<?php echo route('customers.destroy', $customer->id); ?>" method="POST" style="display:inline-block;">
                                     <input type="hidden" name="_method" value="DELETE">
                                     <input type="hidden" name="_token" value="<?php echo csrf_token(); ?>">
-                                    <button type="submit" class="btn" onclick="return confirm('هل أنت متأكد من الحذف؟')">حذف</button>
+                                    <button type="submit" class="remove" onclick="return confirm('هل أنت متأكد من الحذف؟')">حذف</button>
                                 </form>
                             </div>
                         </td>
@@ -57,6 +60,7 @@
                 </tbody>
             </table>
         </div>
+        
     </section>
 </body>
 </html>

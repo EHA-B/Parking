@@ -45,7 +45,7 @@ form{
     background-color: var(--whites);
     height: 90vh;
     display: flex;
-    justify-content: center;
+    padding-top: 20px;
     flex-direction: column;
     border-radius: 15px;
 }
@@ -350,10 +350,12 @@ form{
     padding: 3px;
     border-radius: 5px;
     cursor: pointer;
+    height: 35px;
+    font-family: 'Cairo',sans-serif;
 }
 .cta {
     position: relative;
-    margin: auto;
+    
     padding: 12px 18px;
     transition: all 0.2s ease;
     border: none;
@@ -399,6 +401,20 @@ a.cta {
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    border-radius: 20px;
+    
+}
+.container1{
+    background-color: var(--whites);
+    padding: 5px;
+    place-self: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border-radius: 20px;
+    width: 35vw;
+    
 }
 .customer-details{
     background-color: var(--primary-color);
@@ -408,5 +424,37 @@ a.cta {
     flex-direction: column;
     align-items: center;
     border-radius: 5px;
-    
+    width: 35vw;
+}
+.remove{
+    background-color: maroon;
+    width: 50px;
+    font-family: 'Cairo',sans-serif;
+    padding: 3px;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+        cursor: pointer;
+        border: none;
+        height: 35px;
+}
+.det{
+    display: grid;
+    grid-template-columns: 75% 25%;
+    width: 100%;
+}
+.form-wrapper{
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding: 5px;
+}
+.boton {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    align-items: center;
+}
+#add_if .input-form{
+    padding-top: 15px;
 }
