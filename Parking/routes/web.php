@@ -27,3 +27,4 @@ use Illuminate\Support\Facades\Route;
     Route::post('/pricing/update', [PricingController::class, 'update'])->name('pricing.update');
 
     Route::get('/history', [HistoryController::class, 'index'])->name('history.index');
+    

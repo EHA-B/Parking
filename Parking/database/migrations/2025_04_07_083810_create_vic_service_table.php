@@ -10,7 +10,8 @@ class CreateVicServiceTable extends Migration
         Schema::create('vic_service', function (Blueprint $table) {  
             $table->id();  
             $table->foreignId('service_id')->constrained('services')->onDelete('cascade');  
-            $table->foreignId('vic_id')->constrained('vics')->onDelete('cascade');  
+            $table->foreignId('vic_id')->constrained('vics')->onDelete('cascade')->nullable();
+            $table->foreignId('item_id')->constrained('items')->onDelete('cascade')->nullable();  
             $table->foreignId('parking_slot_id')->constrained('parking_slots')->onDelete('cascade');  
             $table->timestamps();  
         });  
