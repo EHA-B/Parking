@@ -3,11 +3,36 @@
 
 <head>
     <link rel="stylesheet" href="{{ asset('app.css') }}">
-
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DashBoard</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <style>
+        .select2-container {
+            width: 250px !important;
+        }
+
+        .select2-selection {
+            height: 30px !important;
+            border-radius: 8px !important;
+            background-color: var(--gray) !important;
+            border: transparent !important;
+        }
+
+        .select2-selection:focus {
+            outline: none !important;
+            box-shadow: 0 0 5px var(--secondary-color) !important;
+        }
+
+        .select2-container--default .select2-selection--single {
+            border: none !important;
+        }
+
+        .select2-search__field {
+            direction: rtl;
+        }
+    </style>
 </head>
 
 <body>
@@ -70,8 +95,8 @@
         <div class="top-menu">
             <a href="{{route('customers.index')}}" class="user"><img src="{{ asset('build/assets/users2.svg') }}"
                     alt="customers" width="55px"></a>
-            <a href="#" class="settings" onclick="openPricingPopup()"><img
-                    src="{{ asset('build/assets/price.svg') }}" alt="settings" width="50px"></a>
+            <a href="#" class="settings" onclick="openPricingPopup()"><img src="{{ asset('build/assets/price.svg') }}"
+                    alt="settings" width="50px"></a>
             <a href="{{route('history.index')}}" class="history"><img src="{{ asset('build/assets/history.svg') }}"
                     alt="history" width="50px"></a>
 
@@ -86,7 +111,7 @@
                 enctype="multipart/form-data">
                 @csrf
 
-                <h2>Enter a Customer</h2>
+                <h2>ادخل عميل</h2>
                 <div class="form">
                     <div class="input-form">
                         <input autofocus type="text" name="name" class="inp-text" placeholder="name...." id="nameInput">
@@ -129,10 +154,10 @@
                 enctype="multipart/form-data" style="display:none;">
                 @csrf
 
-                <h2>Select a Customer</h2>
+                <h2>اختر عميل</h2>
                 <div class="form">
                     <div class="input-form">
-                        <select name="customer_id" class="inp-text" id="customerSelect"
+                        <select name="customer_id" class="inp-text select2-search" id="customerSelect"
                             onchange="populateVehicles(this)">
                             <option value="">Select an Old Customer</option>
                             @foreach ($customers as $customer)
@@ -145,7 +170,7 @@
                     </div>
                     <div class="input-form">
                         <select name="vehicle_choose" class="inp-text" id="vehicleTypeSelect" onchange="add_vic()">
-                            <option value="">Select Vehicle Type</option>
+                            <option value="">اختر نوع المركبة</option>
                         </select>
                         <label for="vehicleTypeSelect">: نوع المركبة</label>
                     </div>
@@ -186,24 +211,24 @@
     <div id="pricingPopup" class="popup">
         <div class="popup-content">
             <span class="close-popup" onclick="closePricingPopup()">&times;</span>
-            <h2>Parking Pricing Management</h2>
+            <h2>ادارة الاسعار</h2>
             <form id="pricingForm" action="{{ route('pricing.update') }}" method="POST">
                 @csrf
                 <div class="form">
                     <div class="input-form">
                         <input type="number" step="0.01" name="car_price" class="inp-text"
                             value="{{ old('car_price', $pricing->car_price ?? 0) }}" required>
-                        <label>Price per Minute for Cars</label>
+                        <label>سعر الدقيقة للسيارات</label>
                     </div>
 
                     <div class="input-form">
                         <input type="number" step="0.01" name="moto_price" class="inp-text"
                             value="{{ old('moto_price', $pricing->moto_price ?? 0) }}" required>
-                        <label>Price per Minute for Motorcycles</label>
+                        <label>سعر دقيقة للمتورات</label>
                     </div>
 
                     <button type="submit" class="button2">
-                        <span class="button-content">Update Pricing</span>
+                        <span class="button-content">عدل الاسعار</span>
                     </button>
                 </div>
             </form>
@@ -232,6 +257,8 @@
         </div>
     </div>
 </body>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
     function showNewCustomer() {
         document.getElementById('form1').style.display = 'block';
@@ -376,7 +403,20 @@
     });
 
     // Initialize with New Customer form visible  
-    window.onload = showNewCustomer;  
+    window.onload = showNewCustomer;
+
+    // Initialize Select2
+    $(document).ready(function () {
+        $('.select2-search').select2({
+            placeholder: 'ابحث عن عميل...',
+            dir: "rtl",
+            language: {
+                noResults: function () {
+                    return "لا يوجد نتائج";
+                }
+            }
+        });
+    });
 </script>
 
 </html>
