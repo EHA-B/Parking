@@ -8,7 +8,8 @@ class VicService extends Model
 {  
     use HasFactory;  
 
-    protected $fillable = ['service_id', 'vic_id','item_id', 'parking_slot_id'];  
+    protected $fillable = ['service_id', 'vic_id','item_id', 'parking_slot_id','item_quantity'];  
+    protected $table = 'vic_service';
 
     public function vic()  
     {  

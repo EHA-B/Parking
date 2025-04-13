@@ -11,6 +11,9 @@ class Vic extends Model
 
     protected $fillable = ['brand', 'typ', 'plate', 'customer_id'];  
 
+    // Add eager loading for items through vic_service
+    protected $with = ['items'];
+
     public function customer()  
     {  
         return $this->belongsTo(Customer::class);  
@@ -28,6 +31,14 @@ class Vic extends Model
 
     public function services()  
     {  
-        return $this->belongsToMany(Service::class, 'vic_service')->withPivot('id' ,'service_id' ,'vic_id' ,'parking_slot_id');;  
+        return $this->belongsToMany(Service::class, 'vic_service')->withPivot('id' ,'service_id' ,'vic_id' ,'parking_slot_id');  
     }  
+
+    // New method to get associated items
+    public function items()  
+    {  
+        return $this->belongsToMany(Item::class, 'vic_service', 'vic_id', 'item_id')
+            ->withPivot('item_quantity', 'parking_slot_id')
+            ->wherePivotNotNull('item_id');
+    }
 }  

@@ -6,7 +6,10 @@ use App\Models\Customer;
 use App\Models\ParkingSlot;
 use App\Models\Vic;
 use App\Models\History;
+use App\Models\Item;
 use App\Models\Price;
+use App\Models\Service;
+use App\Models\VicService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -22,9 +25,14 @@ class DashboardController extends Controller
             }
         ])->get();
 
+        $services = Service::all();
+        $items = Item::all();
+
         return view('dashboard.index', [
-            'customers' => $customers,
-            'parking_slots' => $parking_slots
+            'customers' => $customers, 
+            'parking_slots' => $parking_slots,
+            'services' => $services,
+            'items' => $items
         ]);
     }
 
@@ -167,10 +175,27 @@ class DashboardController extends Controller
         return redirect()->route('dashboard.index')->with('success', 'Checkout completed successfully');
     }
 
-    public function add_service(Request $request)
-    {
+public function add_service(Request $request, $vic_id, $parking_slot_id)
+{
+    $serviceSelect = $request->service_select;
+    $itemSelect = $request->item_select;
 
+    // Ensure at least one of service or item is selected
+    if ($serviceSelect == 'choose' && $itemSelect == 'choose') {
+        return redirect()->back()->with('error', 'Please select a service or an item');
     }
+
+    // Create VicService record
+    $vicService = VicService::create([
+        'service_id' => $serviceSelect != 'choose' ? $serviceSelect : null,
+        'vic_id' => $vic_id,
+        'item_id' => $itemSelect != 'choose' ? $itemSelect : null,
+        'parking_slot_id' => $parking_slot_id,
+        'item_quantity' => $request->item_quantity
+    ]);
+
+    return redirect()->back()->with('success', 'Service or item added successfully');
+}
 
 
 }
