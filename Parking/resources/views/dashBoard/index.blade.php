@@ -110,9 +110,10 @@
                         </td>
 
                         <td>
-                            <a href="{{ route('dashboard.checkout', ['vic_id' => $parking_slot->vics->id, 'parking_slot_id' => $parking_slot->id]) }}"
-                                class="btn "
-                                onclick="return showCheckoutConfirmation(event, {{ $parking_slot->vics->id }}, {{ $parking_slot->id }}, '{{ $parking_slot->vics->customer->name }}', '{{ $parking_slot->vics->plate }}', '{{ $parking_slot->vics->typ }}', '{{ \Carbon\Carbon::parse($parking_slot->time_in)->format('Y-m-d H:i:s') }}')">خروج</a>
+                            <div class="checkout-container" style="display: flex; align-items: center;">
+                                <a href="{{ route('dashboard.checkout', ['parcode' => $parking_slot->vics->customer->id.$parking_slot->vics->id.$parking_slot->vics->palte]) }}" 
+                                   class="btn checkout-btn" >خروج</a>
+                            </div>
                             <a onclick="openServicePopup({{ $parking_slot->vics->id }}, {{ $parking_slot->id }})"
                                 class="serv-btn">إضافة خدمة</a>
                         </td>
@@ -237,6 +238,10 @@
                 <button type="submit" class="button2"><span class="button-content">أدخل</span></button>
             </form>
         </section>
+        <input type="text" class="parcode-input" placeholder="رمز الخروج" style="margin-right: 10px; padding: 5px;">
+
+        <a href="{{ route('dashboard.checkout', ['parcode' => 'o']) }}"
+            class="btn" onclick="updateCheckoutLink(this)">خروج</a>
 
     </section>
 
@@ -317,59 +322,73 @@
         </div>
     </div>
 
-    <!-- Checkout Confirmation Popup -->
-    <div id="checkoutPopup" class="popup">
-        <div class="popup-content">
-            <span class="close-popup" onclick="closeCheckoutPopup()">&times;</span>
-            <h2>تأكيد الخروج</h2>
-            <div class="checkout-details">
-                <div class="detail-row">
-                    <span class="detail-label">اسم العميل:</span>
-                    <span id="checkout-customer-name" class="detail-value"></span>
+   
+    @if(isset($checkoutDetails))
+    <div id="checkoutModal" class="fixed inset-0 z-50 flex items-center justify-center overflow-x-hidden overflow-y-auto outline-none focus:outline-none">
+        <div class="relative w-auto max-w-3xl mx-auto my-6">
+            <div class="relative flex flex-col w-full bg-white border-0 rounded-lg shadow-lg outline-none focus:outline-none">
+                <div class="flex items-start justify-between p-5 border-b border-solid rounded-t border-blueGray-200">
+                    <h3 class="text-3xl font-semibold">Checkout Confirmation</h3>
                 </div>
-                <div class="detail-row">
-                    <span class="detail-label">رقم اللوحة:</span>
-                    <span id="checkout-plate" class="detail-value"></span>
+                <div class="relative flex-auto p-6">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <strong>Customer Name:</strong> {{ $checkoutDetails['customer_name'] }}
+                        </div>
+                        <div>
+                            <strong>Vehicle Type:</strong> {{ $checkoutDetails['vehicle_type'] }}
+                        </div>
+                        <div>
+                            <strong>Vehicle Plate:</strong> {{ $checkoutDetails['vehicle_plate'] }}
+                        </div>
+                        <div>
+                            <strong>Time In:</strong> {{ $checkoutDetails['time_in']->format('Y-m-d H:i:s') }}
+                        </div>
+                        <div>
+                            <strong>Time Out:</strong> {{ $checkoutDetails['time_out']->format('Y-m-d H:i:s') }}
+                        </div>
+                        <div>
+                            <strong>Duration:</strong> {{ number_format($checkoutDetails['duration_minutes'],2) }} minutes
+                        </div>
+                        <div class="col-span-2">
+                            <strong>Parking Price:</strong> {{ number_format($checkoutDetails['total_price'],2) }} 
+                        </div>
+                        <div class="col-span-2">
+                            <strong>Services Price:</strong> {{ $checkoutDetails['services_price'] }} 
+                        </div>
+                        <div class="col-span-2">
+                            <strong>Items Price:</strong> {{ $checkoutDetails['items_price'] }} 
+                        </div>
+                        <div class="col-span-2">
+                            <strong>Total Price:</strong> {{ number_format($checkoutDetails['total_price'] +  $checkoutDetails['services_price'] + $checkoutDetails['items_price'],2)}} 
+                        </div>
+                    </div>
                 </div>
-                <div class="detail-row">
-                    <span class="detail-label">نوع المركبة:</span>
-                    <span id="checkout-vehicle-type" class="detail-value"></span>
+                <div class="flex items-center justify-end p-6 border-t border-solid rounded-b border-blueGray-200">
+                    <form action="{{ route('dashboard.confirm-checkout') }}" method="POST">
+                        @csrf
+                        <input type="hidden" name="vic_id" value="{{ $checkoutDetails['vic_id'] }}">
+                        <input type="hidden" name="parking_slot_id" value="{{ $checkoutDetails['parking_slot_id'] }}">
+                        <a href="{{route('dashboard.index')}}" onclick="closeModal()" class="px-6 py-2 mr-2 text-red-500 background-transparent">
+                            Cancel
+                        </a>
+                        <button type="submit" class="px-6 py-2 text-white bg-green-500 rounded">
+                            Confirm Checkout
+                        </button>
+                    </form>
                 </div>
-                <div class="detail-row">
-                    <span class="detail-label">رقم مكان الوقوف:</span>
-                    <span id="checkout-parking-slot" class="detail-value"></span>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-label">وقت الدخول:</span>
-                    <span id="checkout-time-in" class="detail-value"></span>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-label">وقت الخروج:</span>
-                    <span id="checkout-time-out" class="detail-value"></span>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-label">المدة (بالدقائق):</span>
-                    <span id="checkout-duration" class="detail-value"></span>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-label">السعر لكل دقيقة:</span>
-                    <span id="checkout-price-per-minute" class="detail-value"></span>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-label">السعر الإجمالي:</span>
-                    <span id="checkout-total-price" class="detail-value"></span>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-label">الخدمات:</span>
-                    <div id="checkout-services" class="detail-value"></div>
-                </div>
-            </div>
-            <div class="checkout-actions">
-                <a id="confirm-checkout-btn" href="#" class="button2">تأكيد الخروج</a>
-                <button onclick="closeCheckoutPopup()" class="button2" style="background-color: #ccc;">إلغاء</button>
             </div>
         </div>
     </div>
+    <div id="modalOverlay" class="fixed inset-0 z-40 bg-black opacity-25"></div>
+
+    <script>
+        function closeModal() {
+            document.getElementById('checkoutModal').style.display = 'none';
+            document.getElementById('modalOverlay').style.display = 'none';
+        }
+    </script>
+    @endif
 </body>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
@@ -444,28 +463,6 @@
             popup.classList.remove('show');
         }
     });
-
-    // // Handle form submission
-    // document.getElementById('serviceForm').addEventListener('submit', function (e) {
-    //     e.preventDefault();
-
-    //     fetch(this.action, {
-    //         method: 'POST',
-    //         body: new FormData(this),
-    //         headers: {
-    //             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-    //         }
-    //     })
-    //         .then(response => response.json())
-    //         .then(data => {
-    //             if (data.success) {
-    //                 document.getElementById('servicePopup').classList.remove('show');
-    //                 location.reload(); // Or use a more elegant way to update the table
-    //             }
-    //         })
-    //         .catch(error => console.error('Error:', error));
-    // });
-
     function add_vic() {
         const add_id = document.getElementById('add_if');
         const select = document.getElementById('vehicleTypeSelect');
@@ -551,129 +548,18 @@
         });
     });
 
-    // Checkout confirmation functions
-    function showCheckoutConfirmation(event, vicId, parkingSlotId, customerName, plate, vehicleType, timeIn) {
-        event.preventDefault();
-
-        // Get current time for checkout
-        const now = new Date();
-        const timeOut = now.toLocaleString('en-US', {
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit'
-        });
-
-        // Parse the time_in string to a Date object
-        // The timeIn string might be in a format that JavaScript can't parse directly
-        // Let's try to parse it correctly
-        let timeInDate;
-        try {
-            // First try direct parsing
-            timeInDate = new Date(timeIn);
-
-            // Check if the date is valid
-            if (isNaN(timeInDate.getTime())) {
-                // If not valid, try to parse it manually
-                // Assuming the format is something like "2023-05-15 14:30:00"
-                const parts = timeIn.split(/[- :]/);
-                if (parts.length >= 6) {
-                    timeInDate = new Date(
-                        parseInt(parts[0]), // year
-                        parseInt(parts[1]) - 1, // month (0-based)
-                        parseInt(parts[2]), // day
-                        parseInt(parts[3]), // hour
-                        parseInt(parts[4]), // minute
-                        parseInt(parts[5])  // second
-                    );
-                } else {
-                    // If we can't parse it, use the current time
-                    timeInDate = now;
-                }
-            }
-        } catch (e) {
-            console.error("Error parsing date:", e);
-            timeInDate = now;
-        }
-
-        // Format time_in to Gregorian calendar
-        const formattedTimeIn = timeInDate.toLocaleString('en-US', {
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit'
-        });
-
-        // Calculate duration in minutes with decimal precision
-        const durationMs = now - timeInDate;
-        const durationMinutes = (durationMs / (1000 * 60)).toFixed(2);
-
-        // Get price per minute based on vehicle type
-        let pricePerMinute = 0;
-        if (vehicleType === 'مركبة صغيرة') {
-            pricePerMinute = {{ $pricing->moto_price ?? 0 }};
+    function updateCheckoutLink(linkElement) {
+        const parcodeInput = document.querySelector('.parcode-input');
+        const parcode = parcodeInput.value.trim();
+        
+        if (parcode) {
+            linkElement.href = "{{ route('dashboard.checkout', ['parcode' => ':parcode']) }}".replace(':parcode', parcode);
         } else {
-            pricePerMinute = {{ $pricing->car_price ?? 0 }};
+            // Optionally, you can show an alert or prevent navigation if no parcode is entered
+            alert('Please enter a checkout code');
+            return false;
         }
-
-        // Calculate total price
-        const totalPrice = (durationMinutes * pricePerMinute).toFixed(2);
-
-        // Populate the checkout details
-        document.getElementById('checkout-customer-name').textContent = customerName;
-        document.getElementById('checkout-plate').textContent = plate;
-        document.getElementById('checkout-vehicle-type').textContent = vehicleType;
-        document.getElementById('checkout-parking-slot').textContent = parkingSlotId;
-        document.getElementById('checkout-time-in').textContent = formattedTimeIn;
-        document.getElementById('checkout-time-out').textContent = timeOut;
-        document.getElementById('checkout-duration').textContent = durationMinutes;
-        document.getElementById('checkout-price-per-minute').textContent = pricePerMinute;
-        document.getElementById('checkout-total-price').textContent = totalPrice;
-
-        // Get services for this vehicle and parking slot
-        const servicesContainer = document.getElementById('checkout-services');
-        servicesContainer.innerHTML = '';
-
-        // Find the parking slot in the table
-        const parkingSlot = document.querySelector(`tr[data-parking-slot-id="${parkingSlotId}"]`);
-        if (parkingSlot) {
-            const servicesCell = parkingSlot.querySelector('td:nth-child(7)');
-            if (servicesCell) {
-                servicesContainer.innerHTML = servicesCell.innerHTML;
-            } else {
-                servicesContainer.innerHTML = 'لا يوجد خدمات';
-            }
-        } else {
-            servicesContainer.innerHTML = 'لا يوجد خدمات';
-        }
-
-        // Set the confirm button href
-        const confirmBtn = document.getElementById('confirm-checkout-btn');
-        confirmBtn.href = "{{ route('dashboard.checkout', ['vic_id' => ':vicId', 'parking_slot_id' => ':parkingSlotId']) }}"
-            .replace(':vicId', vicId)
-            .replace(':parkingSlotId', parkingSlotId);
-
-        // Show the popup
-        document.getElementById('checkoutPopup').classList.add('show');
-
-        return false;
     }
-
-    function closeCheckoutPopup() {
-        document.getElementById('checkoutPopup').classList.remove('show');
-    }
-
-    // Close checkout popup when clicking outside
-    window.addEventListener('click', function (event) {
-        const popup = document.getElementById('checkoutPopup');
-        if (event.target === popup) {
-            popup.classList.remove('show');
-        }
-    });
 </script>
 
 </html>

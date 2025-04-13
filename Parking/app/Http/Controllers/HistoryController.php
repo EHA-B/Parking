@@ -33,6 +33,35 @@ class HistoryController extends Controller
         // Order by most recent first
         $histories = $query->orderByDesc('time_in')->paginate(10);
 
+        // Parse services for each history record
+        $histories->transform(function ($history) {
+            // Safely decode services, defaulting to an empty array if null or invalid
+            $history->parsed_services = $history->services 
+                ? json_decode($history->services, true) 
+                : [];
+            
+            // Calculate total additional cost from services and items
+            $history->additional_cost = $this->calculateAdditionalCost($history->parsed_services);
+            
+            return $history;
+        });
+
         return view('history.index', compact('histories'));
+    }
+
+    /**
+     * Calculate total additional cost from services and items
+     */
+    private function calculateAdditionalCost($services)
+    {
+        if (empty($services)) {
+            return 0;
+        }
+
+        return array_reduce($services, function ($carry, $item) {
+            // Only add cost if it exists and is numeric
+            $cost = isset($item['price']) ? floatval($item['price']) : 0;
+            return $carry + $cost;
+        }, 0);
     }
 }
