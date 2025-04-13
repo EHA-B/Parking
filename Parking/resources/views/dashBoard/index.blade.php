@@ -36,17 +36,22 @@
                         <td>{{$parking_slot->vics->plate}}</td>
                         <td>{{$parking_slot->time_in}}</td>
                         <td>
-                            @if($parking_slot->vics->services->count() > 0)
-
+                            @if($parking_slot->vics->services->count() > 0 || $parking_slot->vics->items->count() > 0)
                                 @foreach($parking_slot->vics->services as $service)
                                     @if($service->pivot->parking_slot_id == $parking_slot->id)
                                         <li>
-                                            {{ $service->name }}
+                                            {{ $service->name }} 
                                             ( التكلفة: {{ $service->cost }})
                                         </li>
                                     @endif
                                 @endforeach
 
+                                @foreach($parking_slot->vics->items as $item)
+                                    <li>
+                                        {{$item->item}} 
+                                        العدد : {{$item->pivot->item_quantity}}
+                                    </li>
+                                @endforeach
                             @else
                                 لا يوجد خدمات!
                             @endif
@@ -189,14 +194,37 @@
             <form id="serviceForm" method="POST">
                 @csrf
                 <div class="form">
-                    <div class="input-form">
+                    <select name="service_select" class="inp-text" id="service_select">
+                            <option value="choose">اختر خدمة</option>
+                            @foreach ($services as $service)
+                                <option value="{{$service->id}}">
+                                    {{$service->name}} : التكلفة {{$service->cost}}
+                                </option>
+                            @endforeach
+                        </select>
+                        <label for="service_select">: اختيار خدمة</label>
+
+                        <select name="item_select" class="inp-text" id="item_select">
+                            <option value="choose">اختر مادة</option>
+                            @foreach ($items as $item)
+                                <option value="{{$item->id}}">
+                                    {{$item->item}} : السعر {{$item->price}} باقي : {{$item->quantity}}
+                                </option>
+                            @endforeach
+                        </select>
+                        <label for="item_select">: اختيار مواد</label>
+
+                        <div class="input-form">
+                            <input type="number" name="item_quantity" class="inp-text" placeholder="item_quantity...." id="item_quantity">
+                            <label for="item_quantity">: العدد</label>
+                        </div>
+
+                    {{-- <div class="input-form">
+
                         <input type="text" name="service_name" class="inp-text" placeholder="Service name...">
                         <label>: اسم الخدمة</label>
-                    </div>
-                    <div class="input-form">
-                        <input type="number" name="service_price" class="inp-text" placeholder="Price...">
-                        <label>: السعر</label>
-                    </div>
+                    </div> --}}
+                    
                     <button type="submit" class="button2"><span class="button-content">إضافة</span></button>
                 </div>
             </form>
@@ -254,8 +282,10 @@
         const popup = document.getElementById('servicePopup');
         const form = document.getElementById('serviceForm');
 
-        // Set the form's action URL with the correct parameters
-        form.action = `/dashboard/add_service/${vicId}/${parkingSlotId}`;
+        // Use the Laravel route helper with the correct route name
+        form.action = "{{ route('dashboard.add_service', ['vic_id' => ':vicId', 'parking_slot_id' => ':parkingSlotId']) }}"
+            .replace(':vicId', vicId)
+            .replace(':parkingSlotId', parkingSlotId);
 
         popup.classList.add('show');
     }
@@ -273,26 +303,26 @@
         }
     });
 
-    // Handle form submission
-    document.getElementById('serviceForm').addEventListener('submit', function (e) {
-        e.preventDefault();
+    // // Handle form submission
+    // document.getElementById('serviceForm').addEventListener('submit', function (e) {
+    //     e.preventDefault();
 
-        fetch(this.action, {
-            method: 'POST',
-            body: new FormData(this),
-            headers: {
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-            }
-        })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    document.getElementById('servicePopup').classList.remove('show');
-                    location.reload(); // Or use a more elegant way to update the table
-                }
-            })
-            .catch(error => console.error('Error:', error));
-    });
+    //     fetch(this.action, {
+    //         method: 'POST',
+    //         body: new FormData(this),
+    //         headers: {
+    //             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+    //         }
+    //     })
+    //         .then(response => response.json())
+    //         .then(data => {
+    //             if (data.success) {
+    //                 document.getElementById('servicePopup').classList.remove('show');
+    //                 location.reload(); // Or use a more elegant way to update the table
+    //             }
+    //         })
+    //         .catch(error => console.error('Error:', error));
+    // });
 
     function add_vic()
     {
