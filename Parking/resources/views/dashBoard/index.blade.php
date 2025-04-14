@@ -151,16 +151,16 @@
                 <h2>ادخل عميل</h2>
                 <div class="form">
                     <div class="input-form">
-                        <input autofocus type="text" name="name" class="inp-text" placeholder="name...." id="nameInput">
+                        <input autofocus type="text" name="name" class="inp-text" placeholder="name...." id="nameInput" required>
                         <label for="nameInput">: الاسم الكامل</label>
                     </div>
                     <div class="input-form" id="newCustomerPhone">
-                        <input type="text" name="phone" class="inp-text" placeholder="phone...." id="phoneInput">
+                        <input type="text" name="phone" class="inp-text" placeholder="phone...." id="phoneInput" required>
                         <label for="phoneInput">: رقم الهاتف</label>
                     </div>
 
                     <div class="input-form">
-                        <select name="vehicle_type" class="inp-text" id="typInput">
+                        <select name="vehicle_type" class="inp-text" id="typInput" >
                             <option value="مركبة صغيرة">مركبة صغيرة</option>
                             <option value="مركبة كبيرة">مركبة كبيرة</option>
                         </select>
@@ -168,11 +168,11 @@
                     </div>
 
                     <div class="input-form">
-                        <input type="text" name="brand" class="inp-text" placeholder="vehicle...." id="brandInput">
+                        <input type="text" name="brand" class="inp-text" placeholder="vehicle...." id="brandInput" required>
                         <label for="brandInput">: نوع المركبة</label>
                     </div>
                     <div class="input-form">
-                        <input type="text" name="plate" class="inp-text" placeholder="plate...." id="plateInput">
+                        <input type="text" name="plate" class="inp-text" placeholder="plate...." id="plateInput" required>
                         <label for="plateInput">: رقم اللوحة</label>
                     </div>
                     <div class="input-form">
@@ -194,7 +194,7 @@
                 <h2>اختر عميل</h2>
                 <div class="form">
                     <div class="input-form">
-                        <select name="customer_id" class="inp-text select2-search" id="customerSelect"
+                        <select name="customer_id" class="inp-text select2-search" id="customerSelect" required
                             onchange="populateVehicles(this)">
                             <option value="">Select an Old Customer</option>
                             @foreach ($customers as $customer)
@@ -206,7 +206,7 @@
                         <label for="customerSelect">: اختيار عميل قديم</label>
                     </div>
                     <div class="input-form">
-                        <select name="vehicle_choose" class="inp-text" id="vehicleTypeSelect" onchange="add_vic()">
+                        <select name="vehicle_choose" class="inp-text" id="vehicleTypeSelect" onchange="add_vic()" required>
                             <option value="">اختر نوع المركبة</option>
                         </select>
                         <label for="vehicleTypeSelect">: نوع المركبة</label>
@@ -214,7 +214,7 @@
 
                     <div id="add_if" hidden="true">
                         <div class="input-form">
-                            <select name="vehicle_type" class="inp-text" id="typInput">
+                            <select name="vehicle_type" class="inp-text" id="typInput" >
                                 <option value="مركبة صغيرة">مركبة صغيرة</option>
                                 <option value="مركبة كبيرة">مركبة كبيرة</option>
                             </select>
@@ -241,9 +241,9 @@
                 <button type="submit" class="button2"><span class="button-content">أدخل</span></button>
             </form>
         </section>
-        <input type="text" class="parcode-input" placeholder="رمز الخروج" style="margin-right: 10px; padding: 5px;">
+        <input autofocus type="text" class="parcode-input" placeholder="رمز الخروج" style="margin-right: 10px; padding: 5px;">
 
-        <a href="{{ route('dashboard.checkout', ['parcode' => 'o']) }}"
+        <a
             class="btn" onclick="updateCheckoutLink(this)">خروج</a>
 
     </section>
@@ -555,11 +555,12 @@
         const parcodeInput = document.querySelector('.parcode-input');
         const parcode = parcodeInput.value.trim();
         
-        if (parcode) {
+        // Check if parcode is a non-empty string of digits
+        if (/^\d+$/.test(parcode)) {
             linkElement.href = "{{ route('dashboard.checkout', ['parcode' => ':parcode']) }}".replace(':parcode', parcode);
         } else {
-            // Optionally, you can show an alert or prevent navigation if no parcode is entered
-            alert('Please enter a checkout code');
+            // Prevent navigation and optionally show a message
+            alert('يرجى إدخال رمز خروج صالح (أرقام فقط)');
             return false;
         }
     }

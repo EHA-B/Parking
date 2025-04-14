@@ -113,6 +113,8 @@ class DashboardController extends Controller
             'notes' => $request->notes ?? " "
         ]);
 
+        
+
         return redirect()->route('dashboard.index');
     }
 
