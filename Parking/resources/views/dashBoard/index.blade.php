@@ -109,11 +109,11 @@
                             @endif
                         </td>
 
-                        <td class="buts">
-
-                            <a href="{{ route('dashboard.checkout', ['parcode' => $parking_slot->parcode]) }}"
-                                class="btn checkout-btn">خروج</a>
-
+                        <td>
+                           
+                                <a href="{{ route('dashboard.checkout', ['parcode' => $parking_slot->parcode]) }}" 
+                                   class="btn checkout-btn" >خروج</a>
+                           
                             <a onclick="openServicePopup({{ $parking_slot->vics->id }}, {{ $parking_slot->id }})"
                                 class="serv-btn">إضافة خدمة</a>
                         </td>
@@ -133,6 +133,9 @@
                     alt="settings" width="50px"></a>
             <a href="{{route('history.index')}}" class="history"><img src="{{ asset('build/assets/history.svg') }}"
                     alt="history" width="50px"></a>
+            <a href="{{route('items-services.index')}}" class="history"><img src="{{ asset('build/assets/serv.svg') }}"
+                alt="items_services" width="50px"></a>
+                
 
         </div>
 
@@ -337,33 +340,39 @@
                 <div>
                     <strong>اسم العميل:</strong> {{ $checkoutDetails['customer_name'] }}
                 </div>
-                <div>
-                    <strong>نوع المركبة:</strong> {{ $checkoutDetails['vehicle_type'] }}
-                </div>
-                <div>
-                    <strong>رقم اللوحة:</strong> {{ $checkoutDetails['vehicle_plate'] }}
-                </div>
-                <div>
-                    <strong>وقت الدخول:</strong> {{ $checkoutDetails['time_in']->format('Y-m-d H:i:s') }}
-                </div>
-                <div>
-                    <strong>وقت الخروج:</strong> {{ $checkoutDetails['time_out']->format('Y-m-d H:i:s') }}
-                </div>
-                <div>
-                    <strong>المدة (بالدقائق):</strong> {{ number_format($checkoutDetails['duration_minutes'], 2) }}
-                </div>
-                <div>
-                    <strong>سعر الوقوف:</strong> {{ number_format($checkoutDetails['total_price'], 2) }}
-                </div>
-                <div>
-                    <strong>سعر الخدمات:</strong> {{ $checkoutDetails['services_price'] }}
-                </div>
-                <div>
-                    <strong>سعر المواد:</strong> {{ $checkoutDetails['items_price'] }}
-                </div>
-                <div>
-                    <strong>السعر الإجمالي:</strong>
-                    {{ number_format($checkoutDetails['total_price'] + $checkoutDetails['services_price'] + $checkoutDetails['items_price'], 2)}}
+                <div class="relative flex-auto p-6">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <strong>Customer Name:</strong> {{ $checkoutDetails['customer_name'] }}
+                        </div>
+                        <div>
+                            <strong>Vehicle Type:</strong> {{ $checkoutDetails['vehicle_type'] }}
+                        </div>
+                        <div>
+                            <strong>Vehicle Plate:</strong> {{ $checkoutDetails['vehicle_plate'] }}
+                        </div>
+                        <div>
+                            <strong>Time In:</strong> {{ $checkoutDetails['time_in']->format('Y-m-d H:i:s') }}
+                        </div>
+                        <div>
+                            <strong>Time Out:</strong> {{ $checkoutDetails['time_out']->format('Y-m-d H:i:s') }}
+                        </div>
+                        <div>
+                            <strong>Duration:</strong> {{ number_format($checkoutDetails['duration_minutes'] ,2) }} minutes
+                        </div>
+                        <div class="col-span-2">
+                            <strong>Parking Price:</strong> {{ number_format($checkoutDetails['base_parking_price'],2) }} 
+                        </div>
+                        <div class="col-span-2">
+                            <strong>Services Price:</strong> {{ $checkoutDetails['services_price'] }} 
+                        </div>
+                        <div class="col-span-2">
+                            <strong>Items Price:</strong> {{ $checkoutDetails['items_price'] }} 
+                        </div>
+                        <div class="col-span-2">
+                            <strong>Total Price:</strong> {{ number_format($checkoutDetails['total_price'] ,2)}} 
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="chick-out-actions">

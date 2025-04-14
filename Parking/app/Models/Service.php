@@ -10,6 +10,12 @@ class Service extends Model
 
     protected $fillable = ['name', 'cost'];  
 
+
+    public function setCostAttribute($value)
+    {
+        $this->attributes['cost'] = round($value, 2);
+    }
+
     public function vics()  
     {  
         return $this->belongsToMany(Vic::class, 'vic_service')->withPivot('id' ,'service_id' ,'vic_id' ,'parking_slot_id');  
