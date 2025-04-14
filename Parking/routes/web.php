@@ -3,7 +3,9 @@
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HistoryController;
+use App\Http\Controllers\ItemController;
 use App\Http\Controllers\PricingController;
+use App\Http\Controllers\ServiceController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -29,3 +31,6 @@ use Illuminate\Support\Facades\Route;
 
     Route::get('/history', [HistoryController::class, 'index'])->name('history.index');
 
+    Route::resource('items', ItemController::class)->except(['show', 'create', 'edit']);
+Route::resource('services', ServiceController::class)->except(['show', 'create', 'edit']);
+Route::get('items-services', [ItemController::class, 'index'])->name('items-services.index');

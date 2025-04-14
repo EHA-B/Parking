@@ -111,7 +111,7 @@
 
                         <td>
                             <div class="checkout-container" style="display: flex; align-items: center;">
-                                <a href="{{ route('dashboard.checkout', ['parcode' => $parking_slot->vics->customer->id.$parking_slot->vics->id.$parking_slot->vics->palte]) }}" 
+                                <a href="{{ route('dashboard.checkout', ['parcode' => $parking_slot->parcode]) }}" 
                                    class="btn checkout-btn" >خروج</a>
                             </div>
                             <a onclick="openServicePopup({{ $parking_slot->vics->id }}, {{ $parking_slot->id }})"
@@ -133,6 +133,9 @@
                     alt="settings" width="50px"></a>
             <a href="{{route('history.index')}}" class="history"><img src="{{ asset('build/assets/history.svg') }}"
                     alt="history" width="50px"></a>
+            <a href="{{route('items-services.index')}}" class="oo"><img src="{{ asset('build/assets/') }}"
+                alt="items_services" width="50px"></a>
+                
 
         </div>
 
@@ -348,10 +351,10 @@
                             <strong>Time Out:</strong> {{ $checkoutDetails['time_out']->format('Y-m-d H:i:s') }}
                         </div>
                         <div>
-                            <strong>Duration:</strong> {{ number_format($checkoutDetails['duration_minutes'],2) }} minutes
+                            <strong>Duration:</strong> {{ number_format($checkoutDetails['duration_minutes'] ,2) }} minutes
                         </div>
                         <div class="col-span-2">
-                            <strong>Parking Price:</strong> {{ number_format($checkoutDetails['total_price'],2) }} 
+                            <strong>Parking Price:</strong> {{ number_format($checkoutDetails['base_parking_price'],2) }} 
                         </div>
                         <div class="col-span-2">
                             <strong>Services Price:</strong> {{ $checkoutDetails['services_price'] }} 
@@ -360,7 +363,7 @@
                             <strong>Items Price:</strong> {{ $checkoutDetails['items_price'] }} 
                         </div>
                         <div class="col-span-2">
-                            <strong>Total Price:</strong> {{ number_format($checkoutDetails['total_price'] +  $checkoutDetails['services_price'] + $checkoutDetails['items_price'],2)}} 
+                            <strong>Total Price:</strong> {{ number_format($checkoutDetails['total_price'] ,2)}} 
                         </div>
                     </div>
                 </div>
