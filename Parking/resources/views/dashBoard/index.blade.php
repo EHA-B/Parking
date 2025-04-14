@@ -109,11 +109,11 @@
                             @endif
                         </td>
 
-                        <td>
-                            <div class="checkout-container" style="display: flex; align-items: center;">
-                                <a href="{{ route('dashboard.checkout', ['parcode' => $parking_slot->vics->customer->id.$parking_slot->vics->id.$parking_slot->vics->palte]) }}" 
-                                   class="btn checkout-btn" >خروج</a>
-                            </div>
+                        <td class="buts">
+
+                            <a href="{{ route('dashboard.checkout', ['parcode' => $parking_slot->parcode]) }}"
+                                class="btn checkout-btn">خروج</a>
+
                             <a onclick="openServicePopup({{ $parking_slot->vics->id }}, {{ $parking_slot->id }})"
                                 class="serv-btn">إضافة خدمة</a>
                         </td>
@@ -238,11 +238,12 @@
                 <button type="submit" class="button2"><span class="button-content">أدخل</span></button>
             </form>
         </section>
-        <input type="text" class="parcode-input" placeholder="رمز الخروج" style="margin-right: 10px; padding: 5px;">
+        <div class="input-form1">
+            <input type="text" class="parcode-input" placeholder="رمز الخروج" style="margin-right: 10px; padding: 5px;">
 
-        <a href="{{ route('dashboard.checkout', ['parcode' => 'o']) }}"
-            class="btn" onclick="updateCheckoutLink(this)">خروج</a>
-
+            <a href="{{ route('dashboard.checkout', ['parcode' => 'o']) }}" class="btn"
+                onclick="updateCheckoutLink(this)">خروج</a>
+        </div>
     </section>
 
     <!-- Pricing Popup -->
@@ -279,30 +280,33 @@
     <!-- Popup Form -->
     <div id="servicePopup" class="popup">
         <div class="popup-content">
-            <span class="close-popup">&times;</span>
+            <span class="close-popup" onclick="closeServicesPopup()">&times;</span>
             <h2>إضافة خدمة</h2>
             <form id="serviceForm" method="POST">
                 @csrf
                 <div class="form">
-                    <select name="service_select" class="inp-text" id="service_select">
-                        <option value="choose">اختر خدمة</option>
-                        @foreach ($services as $service)
-                            <option value="{{$service->id}}">
-                                {{$service->name}} : التكلفة {{$service->cost}}
-                            </option>
-                        @endforeach
-                    </select>
-                    <label for="service_select">: اختيار خدمة</label>
-
-                    <select name="item_select" class="inp-text" id="item_select">
-                        <option value="choose">اختر مادة</option>
-                        @foreach ($items as $item)
-                            <option value="{{$item->id}}">
-                                {{$item->item}} : السعر {{$item->price}} باقي : {{$item->quantity}}
-                            </option>
-                        @endforeach
-                    </select>
-                    <label for="item_select">: اختيار مواد</label>
+                    <div class="input-form">
+                        <select name="service_select" class="inp-text" id="service_select">
+                            <option value="choose">اختر خدمة</option>
+                            @foreach ($services as $service)
+                                <option value="{{$service->id}}">
+                                    {{$service->name}} : التكلفة {{$service->cost}}
+                                </option>
+                            @endforeach
+                        </select>
+                        <label for="service_select">: اختيار خدمة</label>
+                    </div>
+                    <div class="input-form">
+                        <select name="item_select" class="inp-text" id="item_select">
+                            <option value="choose">اختر مادة</option>
+                            @foreach ($items as $item)
+                                <option value="{{$item->id}}">
+                                    {{$item->item}} : السعر {{$item->price}} باقي : {{$item->quantity}}
+                                </option>
+                            @endforeach
+                        </select>
+                        <label for="item_select">: اختيار مواد</label>
+                    </div>
 
                     <div class="input-form">
                         <input type="number" name="item_quantity" class="inp-text" placeholder="item_quantity...."
@@ -322,72 +326,71 @@
         </div>
     </div>
 
-   
+
     @if(isset($checkoutDetails))
-    <div id="checkoutModal" class="fixed inset-0 z-50 flex items-center justify-center overflow-x-hidden overflow-y-auto outline-none focus:outline-none">
-        <div class="relative w-auto max-w-3xl mx-auto my-6">
-            <div class="relative flex flex-col w-full bg-white border-0 rounded-lg shadow-lg outline-none focus:outline-none">
-                <div class="flex items-start justify-between p-5 border-b border-solid rounded-t border-blueGray-200">
-                    <h3 class="text-3xl font-semibold">Checkout Confirmation</h3>
+        <div id="checkoutModal" class="chick-out-con">
+            <div class="chick-out-header">
+                <h2>تأكيد الخروج</h2>
+                <button onclick="closeModal()" class="close-btn">&times;</button>
+            </div>
+            <div class="chick-out-items">
+                <div>
+                    <strong>اسم العميل:</strong> {{ $checkoutDetails['customer_name'] }}
                 </div>
-                <div class="relative flex-auto p-6">
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <strong>Customer Name:</strong> {{ $checkoutDetails['customer_name'] }}
-                        </div>
-                        <div>
-                            <strong>Vehicle Type:</strong> {{ $checkoutDetails['vehicle_type'] }}
-                        </div>
-                        <div>
-                            <strong>Vehicle Plate:</strong> {{ $checkoutDetails['vehicle_plate'] }}
-                        </div>
-                        <div>
-                            <strong>Time In:</strong> {{ $checkoutDetails['time_in']->format('Y-m-d H:i:s') }}
-                        </div>
-                        <div>
-                            <strong>Time Out:</strong> {{ $checkoutDetails['time_out']->format('Y-m-d H:i:s') }}
-                        </div>
-                        <div>
-                            <strong>Duration:</strong> {{ number_format($checkoutDetails['duration_minutes'],2) }} minutes
-                        </div>
-                        <div class="col-span-2">
-                            <strong>Parking Price:</strong> {{ number_format($checkoutDetails['total_price'],2) }} 
-                        </div>
-                        <div class="col-span-2">
-                            <strong>Services Price:</strong> {{ $checkoutDetails['services_price'] }} 
-                        </div>
-                        <div class="col-span-2">
-                            <strong>Items Price:</strong> {{ $checkoutDetails['items_price'] }} 
-                        </div>
-                        <div class="col-span-2">
-                            <strong>Total Price:</strong> {{ number_format($checkoutDetails['total_price'] +  $checkoutDetails['services_price'] + $checkoutDetails['items_price'],2)}} 
-                        </div>
-                    </div>
+                <div>
+                    <strong>نوع المركبة:</strong> {{ $checkoutDetails['vehicle_type'] }}
                 </div>
-                <div class="flex items-center justify-end p-6 border-t border-solid rounded-b border-blueGray-200">
-                    <form action="{{ route('dashboard.confirm-checkout') }}" method="POST">
-                        @csrf
-                        <input type="hidden" name="vic_id" value="{{ $checkoutDetails['vic_id'] }}">
-                        <input type="hidden" name="parking_slot_id" value="{{ $checkoutDetails['parking_slot_id'] }}">
-                        <a href="{{route('dashboard.index')}}" onclick="closeModal()" class="px-6 py-2 mr-2 text-red-500 background-transparent">
-                            Cancel
-                        </a>
-                        <button type="submit" class="px-6 py-2 text-white bg-green-500 rounded">
-                            Confirm Checkout
-                        </button>
-                    </form>
+                <div>
+                    <strong>رقم اللوحة:</strong> {{ $checkoutDetails['vehicle_plate'] }}
+                </div>
+                <div>
+                    <strong>وقت الدخول:</strong> {{ $checkoutDetails['time_in']->format('Y-m-d H:i:s') }}
+                </div>
+                <div>
+                    <strong>وقت الخروج:</strong> {{ $checkoutDetails['time_out']->format('Y-m-d H:i:s') }}
+                </div>
+                <div>
+                    <strong>المدة (بالدقائق):</strong> {{ number_format($checkoutDetails['duration_minutes'], 2) }}
+                </div>
+                <div>
+                    <strong>سعر الوقوف:</strong> {{ number_format($checkoutDetails['total_price'], 2) }}
+                </div>
+                <div>
+                    <strong>سعر الخدمات:</strong> {{ $checkoutDetails['services_price'] }}
+                </div>
+                <div>
+                    <strong>سعر المواد:</strong> {{ $checkoutDetails['items_price'] }}
+                </div>
+                <div>
+                    <strong>السعر الإجمالي:</strong>
+                    {{ number_format($checkoutDetails['total_price'] + $checkoutDetails['services_price'] + $checkoutDetails['items_price'], 2)}}
                 </div>
             </div>
+            <div class="chick-out-actions">
+                <form action="{{ route('dashboard.confirm-checkout') }}" method="POST">
+                    @csrf
+                    <input type="hidden" name="vic_id" value="{{ $checkoutDetails['vic_id'] }}">
+                    <input type="hidden" name="parking_slot_id" value="{{ $checkoutDetails['parking_slot_id'] }}">
+                    <div class="action-buttons">
+                        <a href="{{route('dashboard.index')}}" onclick="closeModal()" class="cancel-btn">
+                            إلغاء
+                        </a>
+                        <button type="submit" class="confirm-btn">
+                            تأكيد الخروج
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
-    </div>
-    <div id="modalOverlay" class="fixed inset-0 z-40 bg-black opacity-25"></div>
 
-    <script>
-        function closeModal() {
-            document.getElementById('checkoutModal').style.display = 'none';
-            document.getElementById('modalOverlay').style.display = 'none';
-        }
-    </script>
+        <div id="modalOverlay" class="fixed inset-0 z-40 bg-black opacity-25"></div>
+
+        <script>
+            function closeModal() {
+                document.getElementById('checkoutModal').style.display = 'none';
+                document.getElementById('modalOverlay').style.display = 'none';
+            }
+        </script>
     @endif
 </body>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -484,6 +487,10 @@
         const popup = document.getElementById('pricingPopup');
         popup.classList.remove('show');
     }
+    function closeServicesPopup() {
+        const popup = document.getElementById('servicePopup');
+        popup.classList.remove('show');
+    }
 
     // Close pricing popup when clicking outside
     window.addEventListener('click', function (event) {
@@ -551,7 +558,7 @@
     function updateCheckoutLink(linkElement) {
         const parcodeInput = document.querySelector('.parcode-input');
         const parcode = parcodeInput.value.trim();
-        
+
         if (parcode) {
             linkElement.href = "{{ route('dashboard.checkout', ['parcode' => ':parcode']) }}".replace(':parcode', parcode);
         } else {
