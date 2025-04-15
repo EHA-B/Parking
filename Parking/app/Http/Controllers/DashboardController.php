@@ -29,7 +29,7 @@ class DashboardController extends Controller
         $items = Item::all();
 
         return view('dashboard.index', [
-            'customers' => $customers, 
+            'customers' => $customers,
             'parking_slots' => $parking_slots,
             'services' => $services,
             'items' => $items
@@ -80,7 +80,8 @@ class DashboardController extends Controller
         ]);
 
 
-        return redirect()->route('dashboard.index');
+        // Return the parcode with the redirect
+        return redirect()->route('dashboard.index')->with('new_parcode', $parcode);
     }
 
     public function newCustomer(Request $request)
@@ -113,16 +114,15 @@ class DashboardController extends Controller
             'notes' => $request->notes ?? " "
         ]);
 
-        
-
-        return redirect()->route('dashboard.index');
+        // Return the parcode with the redirect
+        return redirect()->route('dashboard.index')->with('new_parcode', $parcode);
     }
 
     public function checkout($parcode)
     {
         // Find the specific parking slot
-        
-        $parking_slot = ParkingSlot::where('parcode',$parcode)->First();
+
+        $parking_slot = ParkingSlot::where('parcode', $parcode)->First();
         // dd($parking_slot);
         $vic_id = $parking_slot->vics->id;
         // Calculate the total time parked
@@ -145,7 +145,7 @@ class DashboardController extends Controller
 
         // Calculate additional services and items price
         $services_price = $vic->services->sum('cost');
-        $items_price = $vic->items->sum(function($item) {
+        $items_price = $vic->items->sum(function ($item) {
             return $item->price * $item->pivot->item_quantity;
         });
 
@@ -170,7 +170,7 @@ class DashboardController extends Controller
 
         // Instead of immediately checking out, return to the dashboard with checkout details
         return view('dashboard.index', [
-            'customers' => Customer::with('vics')->get(), 
+            'customers' => Customer::with('vics')->get(),
             'parking_slots' => ParkingSlot::with([
                 'vics.customer',
                 'vics.services' => function ($query) {
@@ -256,7 +256,7 @@ class DashboardController extends Controller
         ]);
 
         $parking_slot->delete();
-        
+
         // Redirect back to the dashboard
         return redirect()->route('dashboard.index')->with('success', 'Checkout completed successfully');
     }
@@ -274,7 +274,7 @@ class DashboardController extends Controller
         // If an item is selected, update the item quantity
         if ($itemSelect != 'choose') {
             $item = Item::findOrFail($itemSelect);
-            
+
             // Check if requested quantity is available
             if ($request->item_quantity > $item->quantity) {
                 return redirect()->back()->with('error', 'Insufficient item quantity');
@@ -292,7 +292,7 @@ class DashboardController extends Controller
             'parking_slot_id' => $parking_slot_id,
             'item_quantity' => $request->item_quantity
         ]);
-        
+
         return redirect()->back()->with('success', 'Service or item added successfully');
     }
 }
