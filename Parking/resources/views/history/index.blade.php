@@ -36,13 +36,13 @@
                     <div class="input-form">
                         <input type="date" name="start_date" class="inp-text" 
                                value="{{ request('start_date') }}">
-                        <label>Start Date</label>
+                        <label>من</label>
                     </div>
 
                     <div class="input-form">
                         <input type="date" name="end_date" class="inp-text" 
                                value="{{ request('end_date') }}">
-                        <label>End Date</label>
+                        <label>الى</label>
                     </div>
 
                     <button type="submit" class="button2">
@@ -79,7 +79,7 @@
                             <td>
                                 @if($history->services)
                                     @php
-        $services = json_decode($history->services, true);
+                                      $services = json_decode($history->services, true);
                                     @endphp
                                     @if(is_array($services))
                                         @foreach($services as $service)
@@ -87,7 +87,7 @@
                                         @endforeach
                                     @endif
                                 @else
-                                    No additional services
+                                    لا يوجد خدمات
                                 @endif
                             </td>
                             <td>{{$history->notes}} </td>

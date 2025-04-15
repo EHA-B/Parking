@@ -229,7 +229,7 @@
                 <h2>ادخل عميل</h2>
                 <div class="form">
                     <div class="input-form">
-                        <input autofocus type="text" name="name" class="inp-text" placeholder="name...." id="nameInput">
+                        <input type="text" name="name" class="inp-text" placeholder="name...." id="nameInput">
                         <label for="nameInput">: الاسم الكامل</label>
                     </div>
                     <div class="input-form" id="newCustomerPhone">
