@@ -8,6 +8,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DashBoard</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <!-- Add JsBarcode library -->
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     <style>
         .select2-container {
             width: 250px !important;
@@ -59,12 +61,88 @@
             justify-content: space-between;
             margin-top: 20px;
         }
+
+        /* Barcode printing styles */
+        #barcode-container {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            text-align: center;
+        }
+
+        .print-button {
+            background-color: var(--secondary-color);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+            border: none;
+            font-family: 'Cairo', sans-serif;
+        }
+
+        .close-barcode {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            font-size: 20px;
+            cursor: pointer;
+            color: var(--gray);
+        }
+
+        .close-barcode:hover {
+            color: var(--primary-color);
+        }
+
+        #barcode-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
     </style>
 </head>
 
 <body>
+    <!-- Barcode overlay -->
+    <div id="barcode-overlay"></div>
+
+    <!-- Hidden barcode container -->
+    <div id="barcode-container">
+        <span class="close-barcode" onclick="closeBarcode()">&times;</span>
+        <h3>رمز وقوف السيارات</h3>
+        <svg id="barcode"></svg>
+        <div id="barcode-text"></div>
+        <button class="print-button" onclick="printBarcode()">طباعة الباركود</button>
+    </div>
+
     <section class="board">
         <div class="list-container">
+            @if(session('new_parcode'))
+                <div class="success-message"
+                    style="background-color: var(--secondary-color); color: white; padding: 10px; margin-bottom: 10px; border-radius: 5px; text-align: center;">
+                    تم إنشاء رمز وقوف السيارات بنجاح: {{ session('new_parcode') }}
+                </div>
+            @endif
+
+            @if(session('success'))
+                <div class="success-message"
+                    style="background-color: var(--secondary-color); color: white; padding: 10px; margin-bottom: 10px; border-radius: 5px; text-align: center;">
+                    {{ session('success') }}
+                </div>
+            @endif
+
             <table class="table1">
                 <tr>
                     <th>ID</th>
@@ -110,10 +188,10 @@
                         </td>
 
                         <td>
-                           
-                                <a href="{{ route('dashboard.checkout', ['parcode' => $parking_slot->parcode]) }}" 
-                                   class="btn checkout-btn" >خروج</a>
-                           
+
+                            <a href="{{ route('dashboard.checkout', ['parcode' => $parking_slot->parcode]) }}"
+                                class="btn checkout-btn">خروج</a>
+
                             <a onclick="openServicePopup({{ $parking_slot->vics->id }}, {{ $parking_slot->id }})"
                                 class="serv-btn">إضافة خدمة</a>
                         </td>
@@ -134,15 +212,15 @@
             <a href="{{route('history.index')}}" class="history"><img src="{{ asset('build/assets/history.svg') }}"
                     alt="history" width="50px"></a>
             <a href="{{route('items-services.index')}}" class="history"><img src="{{ asset('build/assets/serv.svg') }}"
-                alt="items_services" width="50px"></a>
-                
+                    alt="items_services" width="50px" ></a>
+
 
         </div>
 
         <section class="chick-in">
             <div class="oon">
-                <button type="button" class="button1" onclick="showNewCustomer()">New</button>
-                <button type="button" class="button1" onclick="showOldCustomer()">Old</button>
+                <button type="button" class="button1" onclick="showNewCustomer()">جديد</button>
+                <button type="button" class="button1" onclick="showOldCustomer()">قديم</button>
             </div>
             <form action="{{route('dashboard.new')}}" id="form1" method="POST" class="new-form"
                 enctype="multipart/form-data">
@@ -196,7 +274,7 @@
                     <div class="input-form">
                         <select name="customer_id" class="inp-text select2-search" id="customerSelect"
                             onchange="populateVehicles(this)">
-                            <option value="">Select an Old Customer</option>
+                            <option value="">اختر عميل قديم</option>
                             @foreach ($customers as $customer)
                                 <option value="{{$customer->id}}">
                                     {{$customer->name}}
@@ -341,36 +419,43 @@
                     <strong>اسم العميل:</strong> {{ $checkoutDetails['customer_name'] }}
                 </div>
                 <div class="relative flex-auto p-6">
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <strong>Customer Name:</strong> {{ $checkoutDetails['customer_name'] }}
+                    <div class="details-con">
+
+                        <div class="detail">
+                            <p> {{ $checkoutDetails['vehicle_type'] }}</p>
+                            <strong>:فئة المركبة</strong>
                         </div>
-                        <div>
-                            <strong>Vehicle Type:</strong> {{ $checkoutDetails['vehicle_type'] }}
+                        <div class="detail">
+                            <p>{{ $checkoutDetails['vehicle_plate'] }}</p>
+                            <strong>:رقم اللوحة</strong>
                         </div>
-                        <div>
-                            <strong>Vehicle Plate:</strong> {{ $checkoutDetails['vehicle_plate'] }}
+                        <div class="detail">
+                            <p>{{ $checkoutDetails['time_in']->format('Y-m-d H:i:s') }}</p>
+                            <strong>:وقت الدخول</strong>
                         </div>
-                        <div>
-                            <strong>Time In:</strong> {{ $checkoutDetails['time_in']->format('Y-m-d H:i:s') }}
+                        <div class="detail">
+                            <p>{{ $checkoutDetails['time_out']->format('Y-m-d H:i:s') }}</p>
+                            <strong>:وقت الخروج</strong>
                         </div>
-                        <div>
-                            <strong>Time Out:</strong> {{ $checkoutDetails['time_out']->format('Y-m-d H:i:s') }}
+                        <div class="detail">
+                            <p>{{ number_format($checkoutDetails['duration_minutes'], 2) }} minutes</p>
+                            <strong>:المدة</strong>
                         </div>
-                        <div>
-                            <strong>Duration:</strong> {{ number_format($checkoutDetails['duration_minutes'] ,2) }} minutes
+                        <div class="detail">
+                            <p>{{ number_format($checkoutDetails['base_parking_price'], 2) }}</p>
+                            <strong>:تكلفة الوقوف</strong>
                         </div>
-                        <div class="col-span-2">
-                            <strong>Parking Price:</strong> {{ number_format($checkoutDetails['base_parking_price'],2) }} 
+                        <div class="detail">
+                            <p>{{ $checkoutDetails['services_price'] }}</p>
+                            <strong>:تكلفة الخدمات</strong>
                         </div>
-                        <div class="col-span-2">
-                            <strong>Services Price:</strong> {{ $checkoutDetails['services_price'] }} 
+                        <div class="detail">
+                            <p>{{ $checkoutDetails['items_price'] }}</p>
+                            <strong>:تكلفة المواد</strong>
                         </div>
-                        <div class="col-span-2">
-                            <strong>Items Price:</strong> {{ $checkoutDetails['items_price'] }} 
-                        </div>
-                        <div class="col-span-2">
-                            <strong>Total Price:</strong> {{ number_format($checkoutDetails['total_price'] ,2)}} 
+                        <div class="detail">
+                            <p>{{ number_format($checkoutDetails['total_price'], 2) }}</p>
+                            <strong>:المجموع</strong>
                         </div>
                     </div>
                 </div>
@@ -575,6 +660,97 @@
             alert('Please enter a checkout code');
             return false;
         }
+    }
+
+    // Function to generate barcode
+    function generateBarcode(parcode) {
+        const barcodeElement = document.getElementById('barcode');
+        const barcodeText = document.getElementById('barcode-text');
+        const barcodeContainer = document.getElementById('barcode-container');
+        const barcodeOverlay = document.getElementById('barcode-overlay');
+
+        // Clear any previous barcode
+        barcodeElement.innerHTML = '';
+
+        // Generate the barcode
+        JsBarcode(barcodeElement, parcode, {
+            format: "CODE128",
+            lineColor: "#000",
+            width: 2,
+            height: 100,
+            displayValue: true
+        });
+
+        // Set the text below the barcode
+        barcodeText.textContent = parcode;
+
+        // Show the barcode container and overlay
+        barcodeContainer.style.display = 'block';
+        barcodeOverlay.style.display = 'block';
+    }
+
+    // Function to print barcode
+    function printBarcode() {
+        const printWindow = window.open('', '_blank');
+        const barcodeElement = document.getElementById('barcode').cloneNode(true);
+        const barcodeText = document.getElementById('barcode-text').cloneNode(true);
+
+        printWindow.document.write(`
+            <html>
+                <head>
+                    <title>طباعة الباركود</title>
+                    <style>
+                        body { 
+                            display: flex; 
+                            flex-direction: column;
+                            justify-content: center; 
+                            align-items: center; 
+                            height: 100vh; 
+                            margin: 0; 
+                            font-family: 'Cairo', sans-serif;
+                        }
+                        svg { 
+                            max-width: 100%; 
+                            height: auto; 
+                        }
+                        #barcode-text {
+                            margin-top: 10px;
+                            font-size: 18px;
+                            font-weight: bold;
+                        }
+                    </style>
+                </head>
+                <body>
+                    ${barcodeElement.outerHTML}
+                    ${barcodeText.outerHTML}
+                </body>
+            </html>
+        `);
+
+        printWindow.document.close();
+        printWindow.print();
+
+        // Close the barcode container after printing
+        setTimeout(() => {
+            closeBarcode();
+        }, 1000);
+    }
+
+    // Check for new parcode in session and generate barcode if present
+    document.addEventListener('DOMContentLoaded', function () {
+        @if(session('new_parcode'))
+            generateBarcode('{{ session('new_parcode') }}');
+        @endif
+
+        // Add event listener to close barcode when clicking on overlay
+        document.getElementById('barcode-overlay').addEventListener('click', function () {
+            closeBarcode();
+        });
+    });
+
+    function closeBarcode() {
+        document.getElementById('barcode-container').style.display = 'none';
+        document.getElementById('barcode-overlay').style.display = 'none';
     }
 </script>
 

@@ -18,7 +18,7 @@ body{
     gap: 5px;
     justify-content: center;
     font-family: 'Cairo', sans-serif;
-    overflow: hidden;
+
 }
 form{
     text-align: center;
@@ -546,7 +546,7 @@ a.cta {
 }
 
 .chick-out-header h2 {
-    color: var(--primary-color);
+    color: var(--blacks);
     margin: 0;
 }
 
@@ -569,15 +569,10 @@ a.cta {
     margin-bottom: 20px;
 }
 
-.chick-out-items div {
-    padding: 10px;
-    background-color: var(--gray);
-    border-radius: 8px;
-    color: var(--whites);
-}
+
 
 .chick-out-items strong {
-    color: var(--secondary-color);
+    color: #000;
     margin-right: 5px;
 }
 
@@ -630,4 +625,19 @@ a.cta {
     height: 100%;
     background-color: rgba(0, 0, 0, 0.5);
     z-index: 999;
+}
+.details-con{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: var(--gray);
+    border-radius: 5px;
+
+}
+.detail{
+    display: grid;
+    grid-template-columns: 65% 35%;
+    width: 100%;
+    place-items: center;
 }

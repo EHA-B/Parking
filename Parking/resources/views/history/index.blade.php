@@ -9,8 +9,11 @@
 <body>
     <section class="board">
         <div class="container">
-            <h2>Parking Session History</h2>
-
+              
+            <h2>سجل الموقف</h2>
+            <div class="boton">
+                <a href="<?php echo route('dashboard.index'); ?>" class="serv-btn back">العودة للصفحة الرئيسية</a>
+            </div>
             <!-- Filtering Form -->
             <form method="GET" action="{{ route('history.index') }}" class="filter-form">
                 <div class="form">
@@ -18,16 +21,16 @@
                         <input type="text" name="customer_name" class="inp-text" 
                                placeholder="Customer Name" 
                                value="{{ request('customer_name') }}">
-                        <label>Customer Name</label>
+                        <label>اسم الزبون</label>
                     </div>
 
                     <div class="input-form">
                         <select name="vic_typ" class="inp-text">
-                            <option value="">All Vehicle Types</option>
-                            <option value="car" {{ request('vic_typ') == 'car' ? 'selected' : '' }}>Car</option>
-                            <option value="moto" {{ request('vic_typ') == 'moto' ? 'selected' : '' }}>Motorcycle</option>
+                            <option value="">جميع الفئات</option>
+                            <option value="car" {{ request('vic_typ') == 'مركبة كبيرة' ? 'selected' : '' }}>مركبة كبيرة?</option>
+                            <option value="moto" {{ request('vic_typ') == 'مركبة صغيرة' ? 'selected' : '' }}>مركبة صغيرة?</option>
                         </select>
-                        <label>Vehicle Type</label>
+                        <label>فئة المركبة</label>
                     </div>
 
                     <div class="input-form">
@@ -52,14 +55,14 @@
             <table class="table1">
                 <thead>
                     <tr>
-                        <th>Customer</th>
-                        <th>Vehicle Type</th>
-                        <th>Vehicle Plate</th>
-                        <th>Time In</th>
-                        <th>Time Out</th>
-                        <th>Duration (mins)</th>
-                        <th>Total Price</th>
-                        <th>Services</th>
+                        <th>الزبون</th>
+                        <th>فئة المركبة</th>
+                        <th>رقم اللوحة</th>
+                        <th>وقت الدخول</th>
+                        <th>وقت الخروج</th>
+                        <th>المدة بالدقيقة</th>
+                        <th>التكلفة الكلية</th>
+                        <th>الخدمات</th>
                         <th>ملاحظات</th>
                     </tr>
                 </thead>
@@ -71,12 +74,12 @@
                             <td>{{ $history->vic_plate }}</td>
                             <td>{{ $history->time_in ? \Carbon\Carbon::parse($history->time_in)->format('Y-m-d H:i') : 'N/A' }}</td>
                             <td>{{ $history->time_out ? \Carbon\Carbon::parse($history->time_out)->format('Y-m-d H:i') : 'N/A' }}</td>
-                            <td>{{ number_format($history->duration ?? 'N/A',2) }}</td>
+                            <td>{{ number_format($history->duration ?? 'N/A', 2) }}</td>
                             <td>{{ number_format($history->price, 2) }}</td>
                             <td>
                                 @if($history->services)
                                     @php
-                                        $services = json_decode($history->services, true);
+        $services = json_decode($history->services, true);
                                     @endphp
                                     @if(is_array($services))
                                         @foreach($services as $service)
@@ -91,7 +94,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8" class="text-center">No history records found</td>
+                            <td colspan="8" class="text-center">لا يوجد سجلات بهذا البحث</td>
                         </tr>
                     @endforelse
                 </tbody>
