@@ -119,12 +119,13 @@ form{
     transform: translateY(0);
 } 
 .inp-text{
-    width: 250px;
+    width: 240px;
     height: 30px;
     border-radius: 8px;
     background-color: var(--gray);
     border: transparent;
     color: #1A1A1A;
+    
 }
 .inp-text:focus {
     outline: none;
@@ -274,6 +275,7 @@ form{
     color: #fff;
     border: none;
     cursor: pointer;
+    
 }
 
 .button2:hover::before {

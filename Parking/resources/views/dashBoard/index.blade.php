@@ -111,6 +111,22 @@
             background-color: rgba(0, 0, 0, 0.5);
             z-index: 999;
         }
+
+        /* Print button styling */
+        .print-btn {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            border: none;
+            font-family: 'Cairo', sans-serif;
+            margin: 0 10px;
+        }
+
+        .print-btn:hover {
+            background-color: var(--secondary-color);
+        }
     </style>
 </head>
 
@@ -143,6 +159,12 @@
                 </div>
             @endif
 
+            <div class="search-container" style="margin-bottom: 15px; display: flex; align-items: center;">
+                <input type="text" id="tableSearch" class="inp-text" placeholder="search..."
+                    style="flex: 1; padding: 4px; border-radius: 5px; margin-left:5px">
+                <label for="tableSearch" style="padding-left: 5px">:ابحث</label>
+            </div>
+
             <table class="table1">
                 <tr>
                     <th>ID</th>
@@ -156,7 +178,9 @@
                 </tr>
                 @foreach($parking_slots as $parking_slot)
                     <tr class="data" data-parking-slot-id="{{ $parking_slot->id }}">
-                        <td>{{$parking_slot->id}} </td>
+                        <td onclick="showParcodePopup('{{ $parking_slot->parcode }}')" style="cursor:pointer;">
+                            {{$parking_slot->id}}
+                        </td>
                         <td>{{$parking_slot->vics->customer->name}}</td>
                         <td>
                             <img src="{{ $parking_slot->vics->typ == "مركبة صغيرة" ? asset('build/assets/motor.svg') : asset('build/assets/car.svg') }}"
@@ -212,7 +236,7 @@
             <a href="{{route('history.index')}}" class="history"><img src="{{ asset('build/assets/history.svg') }}"
                     alt="history" width="50px"></a>
             <a href="{{route('items-services.index')}}" class="history"><img src="{{ asset('build/assets/serv.svg') }}"
-                    alt="items_services" width="50px" ></a>
+                    alt="items_services" width="50px"></a>
 
 
         </div>
@@ -233,12 +257,13 @@
                         <label for="nameInput">: الاسم الكامل</label>
                     </div>
                     <div class="input-form" id="newCustomerPhone">
-                        <input type="text" name="phone" class="inp-text" placeholder="phone...." id="phoneInput" required>
+                        <input type="text" name="phone" class="inp-text" placeholder="phone...." id="phoneInput"
+                            required>
                         <label for="phoneInput">: رقم الهاتف</label>
                     </div>
 
                     <div class="input-form">
-                        <select name="vehicle_type" class="inp-text" id="typInput" >
+                        <select name="vehicle_type" class="inp-text" id="typInput">
                             <option value="مركبة صغيرة">مركبة صغيرة</option>
                             <option value="مركبة كبيرة">مركبة كبيرة</option>
                         </select>
@@ -246,11 +271,13 @@
                     </div>
 
                     <div class="input-form">
-                        <input type="text" name="brand" class="inp-text" placeholder="vehicle...." id="brandInput" required>
+                        <input type="text" name="brand" class="inp-text" placeholder="vehicle...." id="brandInput"
+                            required>
                         <label for="brandInput">: نوع المركبة</label>
                     </div>
                     <div class="input-form">
-                        <input type="text" name="plate" class="inp-text" placeholder="plate...." id="plateInput" required>
+                        <input type="text" name="plate" class="inp-text" placeholder="plate...." id="plateInput"
+                            required>
                         <label for="plateInput">: رقم اللوحة</label>
                     </div>
                     <div class="input-form">
@@ -284,7 +311,8 @@
                         <label for="customerSelect">: اختيار عميل قديم</label>
                     </div>
                     <div class="input-form">
-                        <select name="vehicle_choose" class="inp-text" id="vehicleTypeSelect" onchange="add_vic()" required>
+                        <select name="vehicle_choose" class="inp-text" id="vehicleTypeSelect" onchange="add_vic()"
+                            required>
                             <option value="">اختر نوع المركبة</option>
                         </select>
                         <label for="vehicleTypeSelect">: نوع المركبة</label>
@@ -292,7 +320,7 @@
 
                     <div id="add_if" hidden="true">
                         <div class="input-form">
-                            <select name="vehicle_type" class="inp-text" id="typInput" >
+                            <select name="vehicle_type" class="inp-text" id="typInput">
                                 <option value="مركبة صغيرة">مركبة صغيرة</option>
                                 <option value="مركبة كبيرة">مركبة كبيرة</option>
                             </select>
@@ -320,11 +348,11 @@
             </form>
         </section>
         <div class="input-form1">
-        <input autofocus type="text" class="parcode-input" placeholder="رمز الخروج" style="margin-right: 10px; padding: 5px;">
+            <input autofocus type="text" class="parcode-input" placeholder="رمز الخروج"
+                style="margin-right: 10px; padding: 5px;">
 
-        <a
-            class="btn" onclick="updateCheckoutLink(this)">خروج</a>
-</div>
+            <a class="btn" onclick="updateCheckoutLink(this)">خروج</a>
+        </div>
         </div>
     </section>
 
@@ -470,6 +498,9 @@
                         <a href="{{route('dashboard.index')}}" onclick="closeModal()" class="cancel-btn">
                             إلغاء
                         </a>
+                        <button type="button" class="print-btn" onclick="printCheckoutDetails()">
+                            طباعة التفاصيل
+                        </button>
                         <button type="submit" class="confirm-btn">
                             تأكيد الخروج
                         </button>
@@ -484,6 +515,101 @@
             function closeModal() {
                 document.getElementById('checkoutModal').style.display = 'none';
                 document.getElementById('modalOverlay').style.display = 'none';
+            }
+
+            // Function to print checkout details
+            function printCheckoutDetails() {
+                // Create a hidden iframe
+                const printFrame = document.createElement('iframe');
+                printFrame.style.display = 'none';
+                document.body.appendChild(printFrame);
+
+                // Clone the details container
+                const detailsContainer = document.querySelector('.details-con').cloneNode(true);
+                const customerName = document.querySelector('.chick-out-items > div:first-child').cloneNode(true);
+
+                // Get current date and time
+                const now = new Date();
+                const dateTimeString = now.toLocaleString('ar-uk', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit'
+                });
+
+                // Create date/time element
+                const dateTimeElement = document.createElement('div');
+                dateTimeElement.id = 'datetime-text';
+                dateTimeElement.textContent = dateTimeString;
+
+                // Create title element
+                const titleElement = document.createElement('h2');
+                titleElement.textContent = 'تفاصيل الخروج';
+                titleElement.style.textAlign = 'center';
+                titleElement.style.marginBottom = '20px';
+
+                printFrame.contentWindow.document.write(`
+                            <html>
+                                <head>
+                                    <style>
+                                        body { 
+                                            display: flex; 
+                                            flex-direction: column;
+                                            justify-content: center; 
+                                            align-items: center; 
+                                            height: 100vh; 
+                                            margin: 0; 
+                                            font-family: 'Cairo', sans-serif;
+                                            padding: 15px;
+                                        }
+                                        .details-con {
+                                            width: 100%;
+                                            max-width: 600px;
+                                            margin: 0 auto;
+                                        }
+                                        .detail {
+                                            display: flex;
+                                            justify-content: space-between;
+                                            margin-bottom: 5px;
+                                            padding: 5px 0;
+                                            border-bottom: 1px solid #eee;
+                                        }
+                                        .detail strong {
+                                            font-weight: bold;
+                                        }
+                                        #datetime-text {
+                                            margin-bottom: 15px;
+                                            font-size: 10px;
+                                            font-weight: bold;
+                                        }
+                                        h2 {
+                                            color: #333;
+                                        }
+                                    </style>
+                                </head>
+                                <body>
+                                   
+                                    ${dateTimeElement.outerHTML}
+                                    ${customerName.outerHTML}
+                                    ${detailsContainer.outerHTML}
+                                </body>
+                            </html>
+                        `);
+
+                printFrame.contentWindow.document.close();
+
+                // Wait for content to load before printing
+                printFrame.onload = function () {
+                    printFrame.contentWindow.print();
+
+                    // Remove the iframe after printing
+                    setTimeout(() => {
+                        document.body.removeChild(printFrame);
+                    }, 1000);
+                };
             }
         </script>
     @endif
@@ -653,13 +779,31 @@
     function updateCheckoutLink(linkElement) {
         const parcodeInput = document.querySelector('.parcode-input');
         const parcode = parcodeInput.value.trim();
-        
+
         // Check if parcode is a non-empty string of digits
         if (/^\d+$/.test(parcode)) {
-            linkElement.href = "{{ route('dashboard.checkout', ['parcode' => ':parcode']) }}".replace(':parcode', parcode);
+            // Make an AJAX request to check if the parcode exists
+            fetch(`{{ route('dashboard.check-parcode') }}?parcode=${parcode}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.exists) {
+                        // If parcode exists, update the link and navigate
+                        linkElement.href = "{{ route('dashboard.checkout', ['parcode' => ':parcode']) }}".replace(':parcode', parcode);
+                        window.location.href = linkElement.href;
+                    } else {
+                        // Show error message if parcode doesn't exist
+                        alert('رمز الوقوف غير صحيح. يرجى التحقق من الرمز والمحاولة مرة أخرى.');
+                        parcodeInput.focus();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error checking parcode:', error);
+                    alert('حدث خطأ أثناء التحقق من رمز الوقوف. يرجى المحاولة مرة أخرى.');
+                });
         } else {
-            // Prevent navigation and optionally show a message
+            // Prevent navigation and show a message
             alert('يرجى إدخال رمز خروج صالح (أرقام فقط)');
+            parcodeInput.focus();
             return false;
         }
     }
@@ -693,27 +837,53 @@
 
     // Function to print barcode
     function printBarcode() {
-        const printWindow = window.open('', '_blank');
+        // Create a hidden iframe instead of opening a new window
+        const printFrame = document.createElement('iframe');
+        printFrame.style.display = 'none';
+        document.body.appendChild(printFrame);
+
         const barcodeElement = document.getElementById('barcode').cloneNode(true);
         const barcodeText = document.getElementById('barcode-text').cloneNode(true);
 
-        printWindow.document.write(`
+        // Get current date and time
+        const now = new Date();
+        const dateTimeString = now.toLocaleString('ar-uk', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+        });
+
+        // Create date/time element
+        const dateTimeElement = document.createElement('div');
+        dateTimeElement.id = 'datetime-text';
+        dateTimeElement.textContent = dateTimeString;
+
+        printFrame.contentWindow.document.write(`
             <html>
                 <head>
-                    <title>طباعة الباركود</title>
                     <style>
                         body { 
                             display: flex; 
                             flex-direction: column;
                             justify-content: center; 
                             align-items: center; 
-                            height: 100vh; 
+                            height: 50vh; 
                             margin: 0; 
                             font-family: 'Cairo', sans-serif;
+                            transform: translateY(5cm);
                         }
                         svg { 
                             max-width: 100%; 
                             height: auto; 
+                        }
+                        #datetime-text {
+                            margin-bottom: 15px;
+                            font-size: 16px;
+                            font-weight: bold;
                         }
                         #barcode-text {
                             margin-top: 10px;
@@ -723,19 +893,25 @@
                     </style>
                 </head>
                 <body>
+                  
                     ${barcodeElement.outerHTML}
-                    ${barcodeText.outerHTML}
+                  
                 </body>
             </html>
         `);
 
-        printWindow.document.close();
-        printWindow.print();
+        printFrame.contentWindow.document.close();
 
-        // Close the barcode container after printing
-        setTimeout(() => {
-            closeBarcode();
-        }, 1000);
+        // Wait for content to load before printing
+        printFrame.onload = function () {
+            printFrame.contentWindow.print();
+
+            // Remove the iframe after printing
+            setTimeout(() => {
+                document.body.removeChild(printFrame);
+                closeBarcode();
+            }, 1000);
+        };
     }
 
     // Check for new parcode in session and generate barcode if present
@@ -753,6 +929,45 @@
     function closeBarcode() {
         document.getElementById('barcode-container').style.display = 'none';
         document.getElementById('barcode-overlay').style.display = 'none';
+    }
+
+    // Table search functionality
+    document.getElementById('tableSearch').addEventListener('input', function () {
+        const searchText = this.value.toLowerCase();
+        const tableRows = document.querySelectorAll('.table1 tr.data');
+
+        tableRows.forEach(row => {
+            let text = '';
+            row.querySelectorAll('td').forEach(cell => {
+                text += cell.textContent.toLowerCase() + ' ';
+            });
+
+            if (text.includes(searchText)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    });
+
+    function clearSearch() {
+        const searchInput = document.getElementById('tableSearch');
+        searchInput.value = '';
+        // Trigger the input event to show all rows
+        searchInput.dispatchEvent(new Event('input'));
+        searchInput.focus();
+    }
+
+    // Function to show parking code popup
+    function showParcodePopup(parcode) {
+        // Generate the barcode
+        generateBarcode(parcode);
+
+        // Update the checkout input field with the parcode
+        const parcodeInput = document.querySelector('.parcode-input');
+        if (parcodeInput) {
+            parcodeInput.value = parcode;
+        }
     }
 </script>
 

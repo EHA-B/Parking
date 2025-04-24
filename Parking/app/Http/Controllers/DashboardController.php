@@ -261,6 +261,22 @@ class DashboardController extends Controller
         return redirect()->route('dashboard.index')->with('success', 'Checkout completed successfully');
     }
 
+    /**
+     * Check if a parking code exists
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function checkParcode(Request $request)
+    {
+        $parcode = $request->query('parcode');
+
+        // Check if the parking code exists in the database
+        $exists = ParkingSlot::where('parcode', $parcode)->exists();
+
+        return response()->json(['exists' => $exists]);
+    }
+
     public function add_service(Request $request, $vic_id, $parking_slot_id)
     {
         $serviceSelect = $request->service_select;
