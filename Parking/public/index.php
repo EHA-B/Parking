@@ -3,16 +3,14 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
-use App\Helpers\USBHelpers;
+
 
 define('LARAVEL_START', microtime(true));
 
 // Find the USB drive path
-$secretKeyPath = USBHelpers::findParkingUSB();
+$secretKeyPath = "D:/.strangeThing";
 
-if (!$secretKeyPath) {
-    die('USB drive named "Parking" not found. Please connect the correct USB drive.');
-}
+
 
 $encryptedEnvPath = __DIR__ . '/../.env.enc';
 $decryptedEnvPath = __DIR__ . '/../.env';
