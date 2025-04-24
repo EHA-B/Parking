@@ -319,11 +319,12 @@
                 <button type="submit" class="button2"><span class="button-content">أدخل</span></button>
             </form>
         </section>
+        <div class="input-form1">
         <input autofocus type="text" class="parcode-input" placeholder="رمز الخروج" style="margin-right: 10px; padding: 5px;">
 
         <a
             class="btn" onclick="updateCheckoutLink(this)">خروج</a>
-
+</div>
         </div>
     </section>
 

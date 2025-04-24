@@ -27,8 +27,8 @@
                     <div class="input-form">
                         <select name="vic_typ" class="inp-text">
                             <option value="">جميع الفئات</option>
-                            <option value="car" {{ request('vic_typ') == 'مركبة كبيرة' ? 'selected' : '' }}>مركبة كبيرة?</option>
-                            <option value="moto" {{ request('vic_typ') == 'مركبة صغيرة' ? 'selected' : '' }}>مركبة صغيرة?</option>
+                            <option value="car" {{ request('vic_typ') == 'مركبة كبيرة' ? 'selected' : '' }}>مركبة كبيرة</option>
+                            <option value="moto" {{ request('vic_typ') == 'مركبة صغيرة' ? 'selected' : '' }}>مركبة صغيرة</option>
                         </select>
                         <label>فئة المركبة</label>
                     </div>
@@ -36,13 +36,13 @@
                     <div class="input-form">
                         <input type="date" name="start_date" class="inp-text" 
                                value="{{ request('start_date') }}">
-                        <label>Start Date</label>
+                        <label>من</label>
                     </div>
 
                     <div class="input-form">
                         <input type="date" name="end_date" class="inp-text" 
                                value="{{ request('end_date') }}">
-                        <label>End Date</label>
+                        <label>الى</label>
                     </div>
 
                     <button type="submit" class="button2">
@@ -79,7 +79,7 @@
                             <td>
                                 @if($history->services)
                                     @php
-        $services = json_decode($history->services, true);
+                                      $services = json_decode($history->services, true);
                                     @endphp
                                     @if(is_array($services))
                                         @foreach($services as $service)
@@ -87,7 +87,7 @@
                                         @endforeach
                                     @endif
                                 @else
-                                    No additional services
+                                    لا يوجد خدمات
                                 @endif
                             </td>
                             <td>{{$history->notes}} </td>
