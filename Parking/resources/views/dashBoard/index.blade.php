@@ -552,52 +552,52 @@
                 titleElement.style.marginBottom = '20px';
 
                 printFrame.contentWindow.document.write(`
-                            <html>
-                                <head>
-                                    <style>
-                                        body { 
-                                            display: flex; 
-                                            flex-direction: column;
-                                            justify-content: center; 
-                                            align-items: center; 
-                                            height: 100vh; 
-                                            margin: 0; 
-                                            font-family: 'Cairo', sans-serif;
-                                            padding: 15px;
-                                        }
-                                        .details-con {
-                                            width: 100%;
-                                            max-width: 600px;
-                                            margin: 0 auto;
-                                        }
-                                        .detail {
-                                            display: flex;
-                                            justify-content: space-between;
-                                            margin-bottom: 5px;
-                                            padding: 5px 0;
-                                            border-bottom: 1px solid #eee;
-                                        }
-                                        .detail strong {
-                                            font-weight: bold;
-                                        }
-                                        #datetime-text {
-                                            margin-bottom: 15px;
-                                            font-size: 10px;
-                                            font-weight: bold;
-                                        }
-                                        h2 {
-                                            color: #333;
-                                        }
-                                    </style>
-                                </head>
-                                <body>
-                                   
-                                    ${dateTimeElement.outerHTML}
-                                    ${customerName.outerHTML}
-                                    ${detailsContainer.outerHTML}
-                                </body>
-                            </html>
-                        `);
+                                <html>
+                                    <head>
+                                        <style>
+                                            body { 
+                                                display: flex; 
+                                                flex-direction: column;
+                                                justify-content: center; 
+                                                align-items: center; 
+                                                height: 100vh; 
+                                                margin: 0; 
+                                                font-family: 'Cairo', sans-serif;
+                                                padding: 15px;
+                                            }
+                                            .details-con {
+                                                width: 100%;
+                                                max-width: 600px;
+                                                margin: 0 auto;
+                                            }
+                                            .detail {
+                                                display: flex;
+                                                justify-content: space-between;
+                                                margin-bottom: 5px;
+                                                padding: 5px 0;
+                                                border-bottom: 1px solid #eee;
+                                            }
+                                            .detail strong {
+                                                font-weight: bold;
+                                            }
+                                            #datetime-text {
+                                                margin-bottom: 15px;
+                                                font-size: 10px;
+                                                font-weight: bold;
+                                            }
+                                            h2 {
+                                                color: #333;
+                                            }
+                                        </style>
+                                    </head>
+                                    <body>
+
+                                        ${dateTimeElement.outerHTML}
+                                        ${customerName.outerHTML}
+                                        ${detailsContainer.outerHTML}
+                                    </body>
+                                </html>
+                            `);
 
                 printFrame.contentWindow.document.close();
 

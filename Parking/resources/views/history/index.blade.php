@@ -27,8 +27,8 @@
                     <div class="input-form">
                         <select name="vic_typ" class="inp-text">
                             <option value="">جميع الفئات</option>
-                            <option value="car" {{ request('vic_typ') == 'مركبة كبيرة' ? 'selected' : '' }}>مركبة كبيرة?</option>
-                            <option value="moto" {{ request('vic_typ') == 'مركبة صغيرة' ? 'selected' : '' }}>مركبة صغيرة?</option>
+                            <option value="car" {{ request('vic_typ') == 'مركبة كبيرة' ? 'selected' : '' }}>مركبة كبيرة</option>
+                            <option value="moto" {{ request('vic_typ') == 'مركبة صغيرة' ? 'selected' : '' }}>مركبة صغيرة</option>
                         </select>
                         <label>فئة المركبة</label>
                     </div>
