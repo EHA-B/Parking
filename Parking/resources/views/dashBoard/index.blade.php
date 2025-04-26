@@ -483,7 +483,7 @@
                             <strong>:تكلفة المواد</strong>
                         </div>
                         <div class="detail">
-                            <p>{{ number_format($checkoutDetails['total_price'], 2) }}</p>
+                            <p>{{ number_format(ceil($checkoutDetails['total_price'] / 100) * 100, 2) }}</p>
                             <strong>:المجموع</strong>
                         </div>
                     </div>

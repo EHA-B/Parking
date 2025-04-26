@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\File;
 define('LARAVEL_START', microtime(true));
 
 // Find the USB drive path
-$secretKeyPath = "D:/.strangeThing";
+$secretKeyPath = "D:/.strangThing";
 
 
 
