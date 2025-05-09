@@ -17,8 +17,12 @@ class PricingController extends Controller
     {
         try {
             $validatedData = $request->validate([
-                'car_price' => 'required|numeric|min:0',
-                'moto_price' => 'required|numeric|min:0'
+                'car_hourly_rate' => 'required|numeric|min:0',
+                'car_daily_rate' => 'required|numeric|min:0',
+                'car_monthly_rate' => 'required|numeric|min:0',
+                'moto_hourly_rate' => 'required|numeric|min:0',
+                'moto_daily_rate' => 'required|numeric|min:0',
+                'moto_monthly_rate' => 'required|numeric|min:0'
             ]);
 
             // Find or create the first pricing record
@@ -27,14 +31,11 @@ class PricingController extends Controller
                 $pricing = new Price();
             }
 
-            $pricing->car_price = $validatedData['car_price'];
-            $pricing->moto_price = $validatedData['moto_price'];
+            $pricing->fill($validatedData);
             $pricing->save();
 
-            return response()->json([
-                'success' => true,
-                'message' => 'تم تحديث الأسعار بنجاح'
-            ]);
+            return redirect()->back();
+
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
