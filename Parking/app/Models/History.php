@@ -8,5 +8,5 @@ class History extends Model
 {  
     use HasFactory;  
 
-    protected $fillable = ['customer_name', 'vic_typ', 'vic_plate', 'time_in', 'time_out', 'price','services','duration' ,'notes'];  
+    protected $fillable = ['customer_name', 'vic_typ', 'vic_plate', 'time_in', 'time_out', 'price','services','duration' ,'notes','parking_type'];  
 }  

@@ -46,18 +46,14 @@ class DashboardController extends Controller
 
         return response()->json($vehicles);
     }
-
+    // ... existing code ...
     public function oldCustomer(Request $request)
     {
         // Find the existing customer
         $customer = Customer::findOrFail($request->customer_id);
 
         // Create a new vehicle for the existing customer
-
         $vic = Vic::find($request->vehicle_choose);
-
-        // Generate a unique parking code
-
 
         if ($request->vehicle_choose == "add_vic") {
             $vic = Vic::create([
@@ -66,19 +62,19 @@ class DashboardController extends Controller
                 'plate' => $request->plate,
                 'customer_id' => $customer->id
             ]);
-
         }
         $parcode = $customer->id . $vic->id . $vic->plate;
 
         // Create a new parking slot entry
         $parking = ParkingSlot::create([
+            'price' => $request->manual_rate ? $request->manual_rate : null,
             'vic_id' => $vic->id,
             'parcode' => $parcode,
             'time_in' => Carbon::now(),
             'time_out' => null,
-            'notes' => $request->notes ?? " "
+            'notes' => $request->notes ?? " ",
+            'parking_type' => $request->parking_type ?? 'hourly'
         ]);
-
 
         // Return the parcode with the redirect
         return redirect()->route('dashboard.index')->with('new_parcode', $parcode);
@@ -86,15 +82,11 @@ class DashboardController extends Controller
 
     public function newCustomer(Request $request)
     {
-
         $customer = Customer::create([
-
             'name' => $request->name,
             'phone' => $request->phone,
             'hours' => 0
         ]);
-
-
 
         $vic = Vic::create([
             'typ' => $request->vehicle_type,
@@ -106,12 +98,13 @@ class DashboardController extends Controller
         $parcode = $customer->id . $vic->id . $vic->plate;
 
         $parking = ParkingSlot::create([
-
+            'price' => $request->manual_rate ? $request->manual_rate : null,
             'vic_id' => $vic->id,
             'parcode' => $parcode,
             'time_in' => Carbon::now(),
             'time_out' => null,
-            'notes' => $request->notes ?? " "
+            'notes' => $request->notes ?? " ",
+            'parking_type' => $request->parking_type ?? 'hourly'
         ]);
 
         // Return the parcode with the redirect
@@ -121,27 +114,40 @@ class DashboardController extends Controller
     public function checkout($parcode)
     {
         // Find the specific parking slot
-
         $parking_slot = ParkingSlot::where('parcode', $parcode)->First();
-        // dd($parking_slot);
         $vic_id = $parking_slot->vics->id;
+
         // Calculate the total time parked
         $time_in = Carbon::parse($parking_slot->time_in);
         $time_out = Carbon::now();
         $duration_minutes = $time_in->diffInMinutes($time_out);
+        $duration_hours = $duration_minutes / 60;
+        $duration_days = $duration_hours / 24;
 
         // Find the associated vehicle and customer
         $vic = Vic::with(['services', 'items'])->findOrFail($vic_id);
         $customer = $vic->customer;
 
-        // Get pricing based on vehicle type
-        $price_model = Price::first(); // Assuming there's only one pricing record
-        $price_per_minute = ($vic->typ === 'مركبة صغيرة')
-            ? $price_model->moto_price
-            : $price_model->car_price;
+        // Get pricing based on vehicle type and parking type
+        $price_model = Price::first();
+        $is_motorcycle = $vic->typ === 'مركبة صغيرة';
 
-        // Calculate base parking price
-        $total_price = $duration_minutes * $price_per_minute;
+        // Calculate base parking price based on parking type
+        $total_price = 0;
+        switch ($parking_slot->parking_type) {
+            case 'hourly':
+                $rate = $is_motorcycle ? $price_model->moto_hourly_rate : $price_model->car_hourly_rate;
+                $total_price = $duration_hours * $rate;
+                break;
+            case 'daily':
+                $rate = $is_motorcycle ? $price_model->moto_daily_rate : $price_model->car_daily_rate;
+                $total_price = ceil($duration_days) * $rate;
+                break;
+            case 'monthly':
+                $rate = $is_motorcycle ? $price_model->moto_monthly_rate : $price_model->car_monthly_rate;
+                $total_price = $rate;
+                break;
+        }
 
         // Calculate additional services and items price
         $services_price = $vic->services->sum('cost');
@@ -149,8 +155,9 @@ class DashboardController extends Controller
             return $item->price * $item->pivot->item_quantity;
         });
 
+
         // Calculate total price including services and items
-        $price_with_services = $total_price + $services_price + $items_price;
+        // $price_with_services = $total_price + $services_price + $items_price;
 
         // Prepare checkout details to pass to the view
         $checkoutDetails = [
@@ -160,15 +167,17 @@ class DashboardController extends Controller
             'time_in' => $time_in,
             'time_out' => $time_out,
             'duration_minutes' => $duration_minutes,
+            'parking_type' => $parking_slot->parking_type,
             'base_parking_price' => $total_price,
+            'manual_rate' => $parking_slot->price,
             'services_price' => $services_price,
             'items_price' => $items_price,
-            'total_price' => $price_with_services,
+
             'vic_id' => $vic_id,
             'parking_slot_id' => $parking_slot->id
         ];
 
-        // Instead of immediately checking out, return to the dashboard with checkout details
+        // Return to the dashboard with checkout details
         return view('dashboard.index', [
             'customers' => Customer::with('vics')->get(),
             'parking_slots' => ParkingSlot::with([
@@ -182,7 +191,7 @@ class DashboardController extends Controller
             'checkoutDetails' => $checkoutDetails
         ]);
     }
-
+    // ... existing code ...
     // Add a new method to handle the final checkout confirmation
     public function confirmCheckout(Request $request)
     {
@@ -192,27 +201,46 @@ class DashboardController extends Controller
         $time_in = Carbon::parse($parking_slot->time_in);
         $time_out = Carbon::now();
         $duration_minutes = $time_in->diffInMinutes($time_out);
+        $duration_hours = $duration_minutes / 60;
+        $duration_days = $duration_hours / 24;
 
         // Find the associated vehicle and customer
-        $vic = Vic::with('services')->findOrFail($request->vic_id);
+        $vic = Vic::with(['services', 'items'])->findOrFail($request->vic_id);
         $customer = $vic->customer;
 
-        // Get pricing based on vehicle type
-        $price_model = Price::first(); // Assuming there's only one pricing record
-        $price_per_minute = ($vic->typ === 'مركبة صغيرة')
-            ? $price_model->moto_price
-            : $price_model->car_price;
+        // Get pricing based on vehicle type and parking type
+        $price_model = Price::first();
+        $is_motorcycle = $vic->typ === 'مركبة صغيرة';
 
-        // Calculate total price
-        $total_price = $duration_minutes * $price_per_minute;
+        // Calculate base parking price based on parking type
+        $base_parking_price = 0;
+        switch ($parking_slot->parking_type) {
+            case 'hourly':
+                $rate = $is_motorcycle ? $price_model->moto_hourly_rate : $price_model->car_hourly_rate;
+                $base_parking_price = ceil($duration_hours) * $rate;
+                break;
+            case 'daily':
+                $rate = $is_motorcycle ? $price_model->moto_daily_rate : $price_model->car_daily_rate;
+                $base_parking_price = ceil($duration_days) * $rate;
+                break;
+            case 'monthly':
+                $rate = $is_motorcycle ? $price_model->moto_monthly_rate : $price_model->car_monthly_rate;
+                $base_parking_price = $rate;
+                break;
+        }
 
-        // Update the parking slot with checkout time
-        $parking_slot->update([
-            'time_out' => $time_out
-        ]);
+        // Use manual price if set (for daily/monthly), otherwise use calculated base price
+        $manual_rate = $parking_slot->price;
+        $final_base_price = $manual_rate !== null ? $manual_rate : $base_parking_price;
 
-        // Update customer's total hours
-        $customer->increment('hours', $duration_minutes / 60);
+        // Calculate additional services and items price
+        $services_price = $vic->services->sum('cost');
+        $items_price = $vic->items->sum(function ($item) {
+            return $item->price * $item->pivot->item_quantity;
+        });
+
+        // Calculate the total price for history
+        $total = $final_base_price + $items_price + $services_price;
 
         // Prepare services and items for JSON storage
         $services_and_items = [];
@@ -242,6 +270,14 @@ class DashboardController extends Controller
             $services_and_items = array_merge($services_and_items, $items);
         }
 
+        // Update the parking slot with checkout time
+        $parking_slot->update([
+            'time_out' => $time_out
+        ]);
+
+        // Update customer's total hours
+        $customer->increment('hours', $duration_minutes / 60);
+
         // Create a history record for the parking session
         History::create([
             'customer_name' => $customer->name,
@@ -250,9 +286,10 @@ class DashboardController extends Controller
             'time_in' => $time_in,
             'time_out' => $time_out,
             'duration' => $duration_minutes,
-            'price' => $total_price,
+            'price' => $total,
             'services' => $services_and_items ? json_encode($services_and_items) : null,
-            'notes' => $parking_slot->notes
+            'notes' => $parking_slot->notes,
+            'parking_type' => $parking_slot->parking_type
         ]);
 
         $parking_slot->delete();

@@ -35,3 +35,5 @@ Route::get('/history', [HistoryController::class, 'index'])->name('history.index
 Route::resource('items', ItemController::class)->except(['show', 'create', 'edit']);
 Route::resource('services', ServiceController::class)->except(['show', 'create', 'edit']);
 Route::get('items-services', [ItemController::class, 'index'])->name('items-services.index');
+
+Route::get('/history/report', [HistoryController::class, 'generateReport'])->name('history.report');

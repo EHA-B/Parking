@@ -173,54 +173,62 @@
                     <th>نوع المركبة</th>
                     <th>رقم اللوحة</th>
                     <th>وقت الدخول</th>
+                    <th>نوع الوقوف</th>
                     <th>خدمات</th>
                     <th>تحرير</th>
                 </tr>
                 @foreach($parking_slots as $parking_slot)
-                    <tr class="data" data-parking-slot-id="{{ $parking_slot->id }}">
-                        <td onclick="showParcodePopup('{{ $parking_slot->parcode }}')" style="cursor:pointer;">
-                            {{$parking_slot->id}}
-                        </td>
-                        <td>{{$parking_slot->vics->customer->name}}</td>
-                        <td>
-                            <img src="{{ $parking_slot->vics->typ == "مركبة صغيرة" ? asset('build/assets/motor.svg') : asset('build/assets/car.svg') }}"
-                                alt={{$parking_slot->vics->typ == "مركبة صغيرة" ? "Motor" : "Car"}} width="40">
-                        </td>
-                        <td>{{$parking_slot->vics->brand}}</td>
-                        <td>{{$parking_slot->vics->plate}}</td>
-                        <td>{{ \Carbon\Carbon::parse($parking_slot->time_in)->format('Y-m-d H:i:s') }}</td>
-                        <td>
-                            @if($parking_slot->vics->services->count() > 0 || $parking_slot->vics->items->count() > 0)
-                                @foreach($parking_slot->vics->services as $service)
-                                    @if($service->pivot->parking_slot_id == $parking_slot->id)
-                                        <li>
-                                            {{ $service->name }}
-                                            ( التكلفة: {{ $service->cost }})
-                                        </li>
+                            <tr class="data" data-parking-slot-id="{{ $parking_slot->id }}">
+                                <td onclick="showParcodePopup('{{ $parking_slot->parcode }}')" style="cursor:pointer;">
+                                    {{$parking_slot->id}}
+                                </td>
+                                <td>{{$parking_slot->vics->customer->name}}</td>
+                                <td>
+                                    <img src="{{ $parking_slot->vics->typ == "مركبة صغيرة" ? asset('build/assets/motor.svg') : asset('build/assets/car.svg') }}"
+                                        alt={{$parking_slot->vics->typ == "مركبة صغيرة" ? "Motor" : "Car"}} width="40">
+                                </td>
+                                <td>{{$parking_slot->vics->brand}}</td>
+                                <td>{{$parking_slot->vics->plate}}</td>
+                                <td>{{ \Carbon\Carbon::parse($parking_slot->time_in)->format('Y-m-d H:i:s') }}</td>
+                                <td>
+                                    {{
+                    $parking_slot->parking_type === 'hourly' ? 'ساعي' :
+                    ($parking_slot->parking_type === 'daily' ? 'يومي' :
+                        ($parking_slot->parking_type === 'monthly' ? 'شهري' : $parking_slot->parking_type))
+                                        }}
+                                </td>
+                                <td>
+                                    @if($parking_slot->vics->services->count() > 0 || $parking_slot->vics->items->count() > 0)
+                                        @foreach($parking_slot->vics->services as $service)
+                                            @if($service->pivot->parking_slot_id == $parking_slot->id)
+                                                <li>
+                                                    {{ $service->name }}
+                                                    ( التكلفة: {{ $service->cost }})
+                                                </li>
+                                            @endif
+                                        @endforeach
+
+                                        @foreach($parking_slot->vics->items as $item)
+                                            <li>
+                                                {{$item->item}}
+                                                العدد : {{$item->pivot->item_quantity}}
+                                            </li>
+                                        @endforeach
+                                    @else
+                                        لا يوجد خدمات!
                                     @endif
-                                @endforeach
+                                </td>
 
-                                @foreach($parking_slot->vics->items as $item)
-                                    <li>
-                                        {{$item->item}}
-                                        العدد : {{$item->pivot->item_quantity}}
-                                    </li>
-                                @endforeach
-                            @else
-                                لا يوجد خدمات!
-                            @endif
-                        </td>
+                                <td>
 
-                        <td>
+                                    <a href="{{ route('dashboard.checkout', ['parcode' => $parking_slot->parcode]) }}"
+                                        class="btn checkout-btn">خروج</a>
 
-                            <a href="{{ route('dashboard.checkout', ['parcode' => $parking_slot->parcode]) }}"
-                                class="btn checkout-btn">خروج</a>
+                                    <a onclick="openServicePopup({{ $parking_slot->vics->id }}, {{ $parking_slot->id }})"
+                                        class="serv-btn"> خدمة</a>
+                                </td>
 
-                            <a onclick="openServicePopup({{ $parking_slot->vics->id }}, {{ $parking_slot->id }})"
-                                class="serv-btn">إضافة خدمة</a>
-                        </td>
-
-                    </tr>
+                            </tr>
                 @endforeach
 
 
@@ -231,7 +239,7 @@
         <div class="top-menu">
             <a href="{{route('customers.index')}}" class="user"><img src="{{ asset('build/assets/users2.svg') }}"
                     alt="customers" width="55px"></a>
-            <a href="#" class="settings" onclick="openPricingPopup()"><img src="{{ asset('build/assets/price.svg') }}"
+            <a href="{{ route('pricing.index') }}" class="settings"><img src="{{ asset('build/assets/price.svg') }}"
                     alt="settings" width="50px"></a>
             <a href="{{route('history.index')}}" class="history"><img src="{{ asset('build/assets/history.svg') }}"
                     alt="history" width="50px"></a>
@@ -279,6 +287,21 @@
                         <input type="text" name="plate" class="inp-text" placeholder="plate...." id="plateInput"
                             required>
                         <label for="plateInput">: رقم اللوحة</label>
+                    </div>
+                    <div class="input-form">
+                        <select name="parking_type" id="parkingType" onchange="toggleManualPricing()" class="inp-text">
+                            <option value="hourly">ساعي</option>
+                            <option value="daily">يومي</option>
+                            <option value="monthly">شهري</option>
+                        </select>
+                        <label>نوع الوقوف</label>
+                    </div>
+                    <div id="manualPricing" style="display: none;">
+
+                        <div class="input-form">
+                            <input type="number" name="manual_rate" class="inp-text" placeholder="أدخل السعر">
+                            <label>السعر </label>
+                        </div>
                     </div>
                     <div class="input-form">
                         <input type="text" name="notes" class="inp-text" placeholder="notes...." id="notes">
@@ -334,6 +357,24 @@
                         <div class="input-form">
                             <input type="text" name="plate" class="inp-text" placeholder="plate...." id="plateInput">
                             <label for="plateInput">: رقم اللوحة</label>
+                        </div>
+                    </div>
+
+                    <div class="input-form">
+                        <select name="parking_type" id="oldParkingType" class="inp-text" required
+                            onchange="toggleOldManualPricing()">
+                            <option value="hourly">ساعي</option>
+                            <option value="daily">يومي</option>
+                            <option value="monthly">شهري</option>
+                        </select>
+                        <label>نوع الوقوف</label>
+                    </div>
+
+                    <div id="oldManualPricing" style="display: none;">
+
+                        <div class="input-form">
+                            <input type="number" name="manual_rate" class="inp-text" placeholder="أدخل السعر">
+                            <label>السعر </label>
                         </div>
                     </div>
 
@@ -441,7 +482,7 @@
         <div id="checkoutModal" class="chick-out-con">
             <div class="chick-out-header">
                 <h2>تأكيد الخروج</h2>
-                <button onclick="closeModal()" class="close-btn">&times;</button>
+
             </div>
             <div class="chick-out-items">
                 <div>
@@ -472,7 +513,11 @@
                         </div>
                         <div class="detail">
                             <p>{{ number_format($checkoutDetails['base_parking_price'], 2) }}</p>
-                            <strong>:تكلفة الوقوف</strong>
+                            <strong>: تكلفة الوقوف التلقائية</strong>
+                        </div>
+                        <div class="detail">
+                            <p>{{ number_format($checkoutDetails['manual_rate'], 2) }}</p>
+                            <strong>: تكلفة الوقوف الحقيقية</strong>
                         </div>
                         <div class="detail">
                             <p>{{ $checkoutDetails['services_price'] }}</p>
@@ -482,8 +527,15 @@
                             <p>{{ $checkoutDetails['items_price'] }}</p>
                             <strong>:تكلفة المواد</strong>
                         </div>
+                        @php
+                            $total = ($checkoutDetails['manual_rate'] !== null
+                                ? $checkoutDetails['manual_rate']
+                                : $checkoutDetails['base_parking_price']
+                            ) + $checkoutDetails['items_price'] + $checkoutDetails['services_price'];
+                            $roundedTotal = ceil($total / 100) * 100;
+                        @endphp
                         <div class="detail">
-                            <p>{{ number_format(ceil($checkoutDetails['total_price'] / 100) * 100, 2) }}</p>
+                            <p>{{ number_format($roundedTotal, 2) }}</p>
                             <strong>:المجموع</strong>
                         </div>
                     </div>
@@ -552,52 +604,52 @@
                 titleElement.style.marginBottom = '20px';
 
                 printFrame.contentWindow.document.write(`
-                                <html>
-                                    <head>
-                                        <style>
-                                            body { 
-                                                display: flex; 
-                                                flex-direction: column;
-                                                justify-content: center; 
-                                                align-items: center; 
-                                                height: 100vh; 
-                                                margin: 0; 
-                                                font-family: 'Cairo', sans-serif;
-                                                padding: 15px;
-                                            }
-                                            .details-con {
-                                                width: 100%;
-                                                max-width: 600px;
-                                                margin: 0 auto;
-                                            }
-                                            .detail {
-                                                display: flex;
-                                                justify-content: space-between;
-                                                margin-bottom: 5px;
-                                                padding: 5px 0;
-                                                border-bottom: 1px solid #eee;
-                                            }
-                                            .detail strong {
-                                                font-weight: bold;
-                                            }
-                                            #datetime-text {
-                                                margin-bottom: 15px;
-                                                font-size: 10px;
-                                                font-weight: bold;
-                                            }
-                                            h2 {
-                                                color: #333;
-                                            }
-                                        </style>
-                                    </head>
-                                    <body>
+                                                                                        <html>
+                                                                                            <head>
+                                                                                                <style>
+                                                                                                    body { 
+                                                                                                        display: flex; 
+                                                                                                        flex-direction: column;
+                                                                                                        justify-content: center; 
+                                                                                                        align-items: center; 
+                                                                                                        height: 100vh; 
+                                                                                                        margin: 0; 
+                                                                                                        font-family: 'Cairo', sans-serif;
+                                                                                                        padding: 15px;
+                                                                                                    }
+                                                                                                    .details-con {
+                                                                                                        width: 100%;
+                                                                                                        max-width: 600px;
+                                                                                                        margin: 0 auto;
+                                                                                                    }
+                                                                                                    .detail {
+                                                                                                        display: flex;
+                                                                                                        justify-content: space-between;
+                                                                                                        margin-bottom: 5px;
+                                                                                                        padding: 5px 0;
+                                                                                                        border-bottom: 1px solid #eee;
+                                                                                                    }
+                                                                                                    .detail strong {
+                                                                                                        font-weight: bold;
+                                                                                                    }
+                                                                                                    #datetime-text {
+                                                                                                        margin-bottom: 15px;
+                                                                                                        font-size: 10px;
+                                                                                                        font-weight: bold;
+                                                                                                    }
+                                                                                                    h2 {
+                                                                                                        color: #333;
+                                                                                                    }
+                                                                                                </style>
+                                                                                            </head>
+                                                                                            <body>
 
-                                        ${dateTimeElement.outerHTML}
-                                        ${customerName.outerHTML}
-                                        ${detailsContainer.outerHTML}
-                                    </body>
-                                </html>
-                            `);
+                                                                                                ${dateTimeElement.outerHTML}
+                                                                                                ${customerName.outerHTML}
+                                                                                                ${detailsContainer.outerHTML}
+                                                                                            </body>
+                                                                                        </html>
+                                                                                    `);
 
                 printFrame.contentWindow.document.close();
 
@@ -967,6 +1019,28 @@
         const parcodeInput = document.querySelector('.parcode-input');
         if (parcodeInput) {
             parcodeInput.value = parcode;
+        }
+    }
+
+    function toggleManualPricing() {
+        var parkingType = document.getElementById('parkingType').value;
+        var manualPricingDiv = document.getElementById('manualPricing');
+
+        // Show the manual pricing fields if daily or monthly is selected
+        if (parkingType === 'daily' || parkingType === 'monthly') {
+            manualPricingDiv.style.display = 'block';
+        } else {
+            manualPricingDiv.style.display = 'none';
+        }
+    }
+
+    function toggleOldManualPricing() {
+        var parkingType = document.getElementById('oldParkingType').value;
+        var manualPricingDiv = document.getElementById('oldManualPricing');
+        if (parkingType === 'daily' || parkingType === 'monthly') {
+            manualPricingDiv.style.display = 'block';
+        } else {
+            manualPricingDiv.style.display = 'none';
         }
     }
 </script>

@@ -28,12 +28,23 @@
                     <div class="input-form">
                         <select name="vic_typ" class="inp-text">
                             <option value="">جميع الفئات</option>
-                            <option value="car" {{ request('vic_typ') == 'مركبة كبيرة' ? 'selected' : '' }}>مركبة كبيرة
+                            <option value="مركبة كبيرة" {{ request('vic_typ') == 'مركبة كبيرة' ? 'selected' : '' }}>مركبة كبيرة
                             </option>
-                            <option value="moto" {{ request('vic_typ') == 'مركبة صغيرة' ? 'selected' : '' }}>مركبة صغيرة
+                            <option value="مركبة صغيرة" {{ request('vic_typ') == 'مركبة صغيرة' ? 'selected' : '' }}>مركبة صغيرة
                             </option>
                         </select>
                         <label>فئة المركبة</label>
+                    </div>
+
+                    <div class="input-form">
+                        <select name="parking_type" class="inp-text">
+                            <option value="">جميع أنواع المواقف</option>
+                            <option value="hourly" {{ request('parking_type') == 'hourly' ? 'selected' : '' }}>ساعي</option>
+                            <option value="daily" {{ request('parking_type') == 'daily' ? 'selected' : '' }}>يومي</option>
+                            <option value="monthly" {{ request('parking_type') == 'monthly' ? 'selected' : '' }}>شهري</option>
+
+                        </select>
+                        <label>نوع الموقف</label>
                     </div>
 
                     <div class="input-form">
@@ -57,6 +68,7 @@
                 <thead>
                     <tr>
                         <th>الزبون</th>
+                        <th>نوع الوقوف</th>
                         <th>فئة المركبة</th>
                         <th>رقم اللوحة</th>
                         <th>وقت الدخول</th>
@@ -68,9 +80,10 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse($histories as $history)
+                    @forelse($filteredHistories as $history)
                                     <tr>
                                         <td>{{ $history->customer_name }}</td>
+                                        <td>{{$history->parking_type}} </td>
                                         <td>{{ $history->vic_typ }}</td>
                                         <td>{{ $history->vic_plate }}</td>
                                         <td>{{ $history->time_in ? \Carbon\Carbon::parse($history->time_in)->format('Y-m-d H:i') : 'N/A' }}
@@ -145,7 +158,7 @@
                     }
                 </style>
 
-                @if ($histories->hasPages())
+                @if ($filteredHistories->hasPages())
                     <div class="pagination-controls">
                         {{-- Previous Page Link --}}
                         @if ($histories->onFirstPage())
@@ -172,6 +185,8 @@
                     </div>
                 @endif
             </div>
+
+            <a href="{{ route('history.report', request()->query()) }}">Generate Report</a>
         </div>
     </section>
 </body>
