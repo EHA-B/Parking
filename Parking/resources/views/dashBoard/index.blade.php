@@ -143,111 +143,97 @@
         <button class="print-button" onclick="printBarcode()">طباعة الباركود</button>
     </div>
 
-    <section class="board">
-        <div class="list-container">
-            @if(session('new_parcode'))
-                <div class="success-message"
-                    style="background-color: var(--secondary-color); color: white; padding: 10px; margin-bottom: 10px; border-radius: 5px; text-align: center;">
-                    تم إنشاء رمز وقوف السيارات بنجاح: {{ session('new_parcode') }}
-                </div>
-            @endif
+    <section class="left-side">
+        <div class="cards-contianer">
+            <div class="top-menu">
+                <a href="{{route('customers.index')}}" class="user"><img src="{{ asset('build/assets/users2.svg') }}"
+                        alt="customers" width="45px"></a>
+                <a href="{{ route('pricing.index') }}" class="settings"><img src="{{ asset('build/assets/price.svg') }}"
+                        alt="settings" width="40px"></a>
+                <a href="{{route('history.index')}}" class="history"><img src="{{ asset('build/assets/history.svg') }}"
+                        alt="history" width="40px"></a>
+                <a href="{{route('items-services.index')}}" class="history"><img
+                        src="{{ asset('build/assets/serv.svg') }}" alt="items_services" width="40px"></a>
 
-            @if(session('success'))
-                <div class="success-message"
-                    style="background-color: var(--secondary-color); color: white; padding: 10px; margin-bottom: 10px; border-radius: 5px; text-align: center;">
-                    {{ session('success') }}
-                </div>
-            @endif
 
-            <div class="search-container" style="margin-bottom: 15px; display: flex; align-items: center;">
-                <input type="text" id="tableSearch" class="inp-text" placeholder="search..."
-                    style="flex: 1; padding: 4px; border-radius: 5px; margin-left:5px">
-                <label for="tableSearch" style="padding-left: 5px">:ابحث</label>
+            </div>
+            <div class="cards">
+                <div class="card-body" onclick="carFormPopup('car')">
+                    <h1>Cars</h1>
+
+                </div>
+                <div class="card-body">
+                    <h1>Motors</h1>
+
+                </div>
+
             </div>
 
-            <table class="table1">
-                <tr>
-                    <th>ID</th>
-                    <th>الزبون</th>
-                    <th>فئة المركبة</th>
-                    <th>نوع المركبة</th>
-                    <th>رقم اللوحة</th>
-                    <th>وقت الدخول</th>
-                    <th>نوع الوقوف</th>
-                    <th>خدمات</th>
-                    <th>تحرير</th>
-                </tr>
-                @foreach($parking_slots as $parking_slot)
-                            <tr class="data" data-parking-slot-id="{{ $parking_slot->id }}">
-                                <td onclick="showParcodePopup('{{ $parking_slot->parcode }}')" style="cursor:pointer;">
-                                    {{$parking_slot->id}}
-                                </td>
-                                <td>{{$parking_slot->vics->customer->name}}</td>
-                                <td>
-                                    <img src="{{ $parking_slot->vics->typ == "مركبة صغيرة" ? asset('build/assets/motor.svg') : asset('build/assets/car.svg') }}"
-                                        alt={{$parking_slot->vics->typ == "مركبة صغيرة" ? "Motor" : "Car"}} width="40">
-                                </td>
-                                <td>{{$parking_slot->vics->brand}}</td>
-                                <td>{{$parking_slot->vics->plate}}</td>
-                                <td>{{ \Carbon\Carbon::parse($parking_slot->time_in)->format('Y-m-d H:i:s') }}</td>
-                                <td>
-                                    {{
-                    $parking_slot->parking_type === 'hourly' ? 'ساعي' :
-                    ($parking_slot->parking_type === 'daily' ? 'يومي' :
-                        ($parking_slot->parking_type === 'monthly' ? 'شهري' : $parking_slot->parking_type))
-                                        }}
-                                </td>
-                                <td>
-                                    @if($parking_slot->vics->services->count() > 0 || $parking_slot->vics->items->count() > 0)
-                                        @foreach($parking_slot->vics->services as $service)
-                                            @if($service->pivot->parking_slot_id == $parking_slot->id)
-                                                <li>
-                                                    {{ $service->name }}
-                                                    ( التكلفة: {{ $service->cost }})
-                                                </li>
-                                            @endif
-                                        @endforeach
-
-                                        @foreach($parking_slot->vics->items as $item)
-                                            <li>
-                                                {{$item->item}}
-                                                العدد : {{$item->pivot->item_quantity}}
-                                            </li>
-                                        @endforeach
-                                    @else
-                                        لا يوجد خدمات!
-                                    @endif
-                                </td>
-
-                                <td>
-
-                                    <a href="{{ route('dashboard.checkout', ['parcode' => $parking_slot->parcode]) }}"
-                                        class="btn checkout-btn">خروج</a>
-
-                                    <a onclick="openServicePopup({{ $parking_slot->vics->id }}, {{ $parking_slot->id }})"
-                                        class="serv-btn"> خدمة</a>
-                                </td>
-
-                            </tr>
-                @endforeach
-
-
-            </table>
         </div>
     </section>
-    <section class="side">
-        <div class="top-menu">
-            <a href="{{route('customers.index')}}" class="user"><img src="{{ asset('build/assets/users2.svg') }}"
-                    alt="customers" width="55px"></a>
-            <a href="{{ route('pricing.index') }}" class="settings"><img src="{{ asset('build/assets/price.svg') }}"
-                    alt="settings" width="50px"></a>
-            <a href="{{route('history.index')}}" class="history"><img src="{{ asset('build/assets/history.svg') }}"
-                    alt="history" width="50px"></a>
-            <a href="{{route('items-services.index')}}" class="history"><img src="{{ asset('build/assets/serv.svg') }}"
-                    alt="items_services" width="50px"></a>
+    <div id="carPopup" class="popup">
+        <div class="popup-content">
+            <form action="{{route('dashboard.new')}}" id="form1" method="POST" class="new-form"
+                enctype="multipart/form-data">
+                @csrf
 
+                <h2>ادخل عميل</h2>
+                <div class="form">
+                    <div class="input-form">
+                        <input type="text" name="name" class="inp-text" placeholder="name...." id="nameInput" required>
+                        <label for="nameInput">: الاسم الكامل</label>
+                    </div>
+                    <div class="input-form" id="newCustomerPhone">
+                        <input type="text" name="phone" class="inp-text" placeholder="phone...." id="phoneInput"
+                            required>
+                        <label for="phoneInput">: رقم الهاتف</label>
+                    </div>
 
+                    <div class="input-form">
+                        <select name="vehicle_type" class="inp-text" id="typInput">
+                            <option value="مركبة صغيرة">مركبة صغيرة</option>
+                            <option value="مركبة كبيرة">مركبة كبيرة</option>
+                        </select>
+                        <label for="typInput">: المركبة</label>
+                    </div>
+
+                    <div class="input-form">
+                        <input type="text" name="brand" class="inp-text" placeholder="vehicle...." id="brandInput"
+                            required>
+                        <label for="brandInput">: نوع المركبة</label>
+                    </div>
+                    <div class="input-form">
+                        <input type="text" name="plate" class="inp-text" placeholder="plate...." id="plateInput"
+                            required>
+                        <label for="plateInput">: رقم اللوحة</label>
+                    </div>
+                    <div class="input-form">
+                        <select name="parking_type" id="parkingType" onchange="toggleManualPricing()" class="inp-text">
+                            <option value="hourly">ساعي</option>
+                            <option value="daily">يومي</option>
+                            <option value="monthly">شهري</option>
+                        </select>
+                        <label>نوع الوقوف</label>
+                    </div>
+                    <div id="manualPricing" style="display: none;">
+
+                        <div class="input-form">
+                            <input type="number" name="manual_rate" class="inp-text" placeholder="أدخل السعر">
+                            <label>السعر </label>
+                        </div>
+                    </div>
+                    <div class="input-form">
+                        <input type="text" name="notes" class="inp-text" placeholder="notes...." id="notes">
+                        <label for="notes">: ملاحظات</label>
+                    </div>
+                </div>
+                <br>
+                <button type="submit" class="button2"><span class="button-content">أدخل</span></button>
+            </form>
         </div>
+    </div>
+    <!-- <section class="side">
+        
 
         <section class="chick-in">
             <div class="oon">
@@ -395,7 +381,7 @@
             <a class="btn" onclick="updateCheckoutLink(this)">خروج</a>
         </div>
         </div>
-    </section>
+    </section> -->
 
     <!-- Pricing Popup -->
     <div id="pricingPopup" class="popup">
@@ -479,191 +465,206 @@
 
 
     @if(isset($checkoutDetails))
-        <div id="checkoutModal" class="chick-out-con">
-            <div class="chick-out-header">
-                <h2>تأكيد الخروج</h2>
+                        <div id="checkoutModal" class="chick-out-con">
+                            <div class="chick-out-header">
+                                <h2>تأكيد الخروج</h2>
 
-            </div>
-            <div class="chick-out-items">
-                <div>
-                    <strong>اسم العميل:</strong> {{ $checkoutDetails['customer_name'] }}
-                </div>
-                <div class="relative flex-auto p-6">
-                    <div class="details-con">
+                            </div>
+                            <div class="chick-out-items">
+                                <div>
+                                    <strong>اسم العميل:</strong> {{ $checkoutDetails['customer_name'] }}
+                                </div>
+                                <div class="relative flex-auto p-6">
+                                    <div class="details-con">
 
-                        <div class="detail">
-                            <p> {{ $checkoutDetails['vehicle_type'] }}</p>
-                            <strong>:فئة المركبة</strong>
+                                        <div class="detail">
+                                            <p> {{ $checkoutDetails['vehicle_type'] }}</p>
+                                            <strong>:فئة المركبة</strong>
+                                        </div>
+                                        <div class="detail">
+                                            <p>{{ $checkoutDetails['vehicle_plate'] }}</p>
+                                            <strong>:رقم اللوحة</strong>
+                                        </div>
+                                        <div class="detail">
+                                            <p>{{ $checkoutDetails['time_in']->format('Y-m-d H:i:s') }}</p>
+                                            <strong>:وقت الدخول</strong>
+                                        </div>
+                                        <div class="detail">
+                                            <p>{{ $checkoutDetails['time_out']->format('Y-m-d H:i:s') }}</p>
+                                            <strong>:وقت الخروج</strong>
+                                        </div>
+                                        <div class="detail">
+                                            <p>{{ number_format($checkoutDetails['duration_minutes'], 2) }} minutes</p>
+                                            <strong>:المدة</strong>
+                                        </div>
+                                        <div class="detail">
+                                            <p>{{ number_format($checkoutDetails['base_parking_price'], 2) }}</p>
+                                            <strong>: تكلفة الوقوف التلقائية</strong>
+                                        </div>
+                                        <div class="detail">
+                                            <p>{{ number_format($checkoutDetails['manual_rate'], 2) }}</p>
+                                            <strong>: تكلفة الوقوف الحقيقية</strong>
+                                        </div>
+                                        <div class="detail">
+                                            <p>{{ $checkoutDetails['services_price'] }}</p>
+                                            <strong>:تكلفة الخدمات</strong>
+                                        </div>
+                                        <div class="detail">
+                                            <p>{{ $checkoutDetails['items_price'] }}</p>
+                                            <strong>:تكلفة المواد</strong>
+                                        </div>
+                                        @php
+        $total = ($checkoutDetails['manual_rate'] !== null
+            ? $checkoutDetails['manual_rate']
+            : $checkoutDetails['base_parking_price']
+        ) + $checkoutDetails['items_price'] + $checkoutDetails['services_price'];
+        $roundedTotal = ceil($total / 100) * 100;
+                                        @endphp
+                                        <div class="detail">
+                                            <p>{{ number_format($roundedTotal, 2) }}</p>
+                                            <strong>:المجموع</strong>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="chick-out-actions">
+                                <form action="{{ route('dashboard.confirm-checkout') }}" method="POST">
+                                    @csrf
+                                    <input type="hidden" name="vic_id" value="{{ $checkoutDetails['vic_id'] }}">
+                                    <input type="hidden" name="parking_slot_id" value="{{ $checkoutDetails['parking_slot_id'] }}">
+                                    <div class="action-buttons">
+                                        <a href="{{route('dashboard.index')}}" onclick="closeModal()" class="cancel-btn">
+                                            إلغاء
+                                        </a>
+                                        <button type="button" class="print-btn" onclick="printCheckoutDetails()">
+                                            طباعة التفاصيل
+                                        </button>
+                                        <button type="submit" class="confirm-btn">
+                                            تأكيد الخروج
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
                         </div>
-                        <div class="detail">
-                            <p>{{ $checkoutDetails['vehicle_plate'] }}</p>
-                            <strong>:رقم اللوحة</strong>
-                        </div>
-                        <div class="detail">
-                            <p>{{ $checkoutDetails['time_in']->format('Y-m-d H:i:s') }}</p>
-                            <strong>:وقت الدخول</strong>
-                        </div>
-                        <div class="detail">
-                            <p>{{ $checkoutDetails['time_out']->format('Y-m-d H:i:s') }}</p>
-                            <strong>:وقت الخروج</strong>
-                        </div>
-                        <div class="detail">
-                            <p>{{ number_format($checkoutDetails['duration_minutes'], 2) }} minutes</p>
-                            <strong>:المدة</strong>
-                        </div>
-                        <div class="detail">
-                            <p>{{ number_format($checkoutDetails['base_parking_price'], 2) }}</p>
-                            <strong>: تكلفة الوقوف التلقائية</strong>
-                        </div>
-                        <div class="detail">
-                            <p>{{ number_format($checkoutDetails['manual_rate'], 2) }}</p>
-                            <strong>: تكلفة الوقوف الحقيقية</strong>
-                        </div>
-                        <div class="detail">
-                            <p>{{ $checkoutDetails['services_price'] }}</p>
-                            <strong>:تكلفة الخدمات</strong>
-                        </div>
-                        <div class="detail">
-                            <p>{{ $checkoutDetails['items_price'] }}</p>
-                            <strong>:تكلفة المواد</strong>
-                        </div>
-                        @php
-                            $total = ($checkoutDetails['manual_rate'] !== null
-                                ? $checkoutDetails['manual_rate']
-                                : $checkoutDetails['base_parking_price']
-                            ) + $checkoutDetails['items_price'] + $checkoutDetails['services_price'];
-                            $roundedTotal = ceil($total / 100) * 100;
-                        @endphp
-                        <div class="detail">
-                            <p>{{ number_format($roundedTotal, 2) }}</p>
-                            <strong>:المجموع</strong>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="chick-out-actions">
-                <form action="{{ route('dashboard.confirm-checkout') }}" method="POST">
-                    @csrf
-                    <input type="hidden" name="vic_id" value="{{ $checkoutDetails['vic_id'] }}">
-                    <input type="hidden" name="parking_slot_id" value="{{ $checkoutDetails['parking_slot_id'] }}">
-                    <div class="action-buttons">
-                        <a href="{{route('dashboard.index')}}" onclick="closeModal()" class="cancel-btn">
-                            إلغاء
-                        </a>
-                        <button type="button" class="print-btn" onclick="printCheckoutDetails()">
-                            طباعة التفاصيل
-                        </button>
-                        <button type="submit" class="confirm-btn">
-                            تأكيد الخروج
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
 
-        <div id="modalOverlay" class="fixed inset-0 z-40 bg-black opacity-25"></div>
+                        <div id="modalOverlay" class="fixed inset-0 z-40 bg-black opacity-25"></div>
 
-        <script>
-            function closeModal() {
-                document.getElementById('checkoutModal').style.display = 'none';
-                document.getElementById('modalOverlay').style.display = 'none';
-            }
+                        <script>
+                            function carFormPopup(vic_type){
+                            const carpopup = document.getElementById('carPopup');
+                            const form =document.getElementById('form1');
 
-            // Function to print checkout details
-            function printCheckoutDetails() {
-                // Create a hidden iframe
-                const printFrame = document.createElement('iframe');
-                printFrame.style.display = 'none';
-                document.body.appendChild(printFrame);
+                            form.action = `{{ route('dashboard.add_service', ['vic_id' => ':vicId', 'parking_slot_id' => ':parkingSlotId']) }}`
+                                    .replace(':vicId', vic === 'car' ? 'car_id' : 'motor_id') // Replace with actual IDs if needed
+                                    .replace(':parkingSlotId', 'your_parking_slot_id'); // Replace with actual parking slot ID
 
-                // Clone the details container
-                const detailsContainer = document.querySelector('.details-con').cloneNode(true);
-                const customerName = document.querySelector('.chick-out-items > div:first-child').cloneNode(true);
+                                // Show the popup
+                                popup.classList.add('show');
+                            }
 
-                // Get current date and time
-                const now = new Date();
-                const dateTimeString = now.toLocaleString('ar-uk', {
-                    weekday: 'long',
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    second: '2-digit'
-                });
 
-                // Create date/time element
-                const dateTimeElement = document.createElement('div');
-                dateTimeElement.id = 'datetime-text';
-                dateTimeElement.textContent = dateTimeString;
 
-                // Create title element
-                const titleElement = document.createElement('h2');
-                titleElement.textContent = 'تفاصيل الخروج';
-                titleElement.style.textAlign = 'center';
-                titleElement.style.marginBottom = '20px';
+                            // ============================
+                            function closeModal() {
+                                document.getElementById('checkoutModal').style.display = 'none';
+                                document.getElementById('modalOverlay').style.display = 'none';
+                            }
 
-                printFrame.contentWindow.document.write(`
-                                                                                        <html>
-                                                                                            <head>
-                                                                                                <style>
-                                                                                                    body { 
-                                                                                                        display: flex; 
-                                                                                                        flex-direction: column;
-                                                                                                        justify-content: center; 
-                                                                                                        align-items: center; 
-                                                                                                        height: 100vh; 
-                                                                                                        margin: 0; 
-                                                                                                        font-family: 'Cairo', sans-serif;
-                                                                                                        padding: 15px;
-                                                                                                    }
-                                                                                                    .details-con {
-                                                                                                        width: 100%;
-                                                                                                        max-width: 600px;
-                                                                                                        margin: 0 auto;
-                                                                                                    }
-                                                                                                    .detail {
-                                                                                                        display: flex;
-                                                                                                        justify-content: space-between;
-                                                                                                        margin-bottom: 5px;
-                                                                                                        padding: 5px 0;
-                                                                                                        border-bottom: 1px solid #eee;
-                                                                                                    }
-                                                                                                    .detail strong {
-                                                                                                        font-weight: bold;
-                                                                                                    }
-                                                                                                    #datetime-text {
-                                                                                                        margin-bottom: 15px;
-                                                                                                        font-size: 10px;
-                                                                                                        font-weight: bold;
-                                                                                                    }
-                                                                                                    h2 {
-                                                                                                        color: #333;
-                                                                                                    }
-                                                                                                </style>
-                                                                                            </head>
-                                                                                            <body>
+                            // Function to print checkout details
+                            function printCheckoutDetails() {
+                                // Create a hidden iframe
+                                const printFrame = document.createElement('iframe');
+                                printFrame.style.display = 'none';
+                                document.body.appendChild(printFrame);
 
-                                                                                                ${dateTimeElement.outerHTML}
-                                                                                                ${customerName.outerHTML}
-                                                                                                ${detailsContainer.outerHTML}
-                                                                                            </body>
-                                                                                        </html>
-                                                                                    `);
+                                // Clone the details container
+                                const detailsContainer = document.querySelector('.details-con').cloneNode(true);
+                                const customerName = document.querySelector('.chick-out-items > div:first-child').cloneNode(true);
 
-                printFrame.contentWindow.document.close();
+                                // Get current date and time
+                                const now = new Date();
+                                const dateTimeString = now.toLocaleString('ar-uk', {
+                                    weekday: 'long',
+                                    year: 'numeric',
+                                    month: 'long',
+                                    day: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit',
+                                    second: '2-digit'
+                                });
 
-                // Wait for content to load before printing
-                printFrame.onload = function () {
-                    printFrame.contentWindow.print();
+                                // Create date/time element
+                                const dateTimeElement = document.createElement('div');
+                                dateTimeElement.id = 'datetime-text';
+                                dateTimeElement.textContent = dateTimeString;
 
-                    // Remove the iframe after printing
-                    setTimeout(() => {
-                        document.body.removeChild(printFrame);
-                    }, 1000);
-                };
-            }
-        </script>
+                                // Create title element
+                                const titleElement = document.createElement('h2');
+                                titleElement.textContent = 'تفاصيل الخروج';
+                                titleElement.style.textAlign = 'center';
+                                titleElement.style.marginBottom = '20px';
+
+                                printFrame.contentWindow.document.write(`
+                                                                                                            <html>
+                                                                                                                <head>
+                                                                                                                    <style>
+                                                                                                                        body { 
+                                                                                                                            display: flex; 
+                                                                                                                            flex-direction: column;
+                                                                                                                            justify-content: center; 
+                                                                                                                            align-items: center; 
+                                                                                                                            height: 100vh; 
+                                                                                                                            margin: 0; 
+                                                                                                                            font-family: 'Cairo', sans-serif;
+                                                                                                                            padding: 15px;
+                                                                                                                        }
+                                                                                                                        .details-con {
+                                                                                                                            width: 100%;
+                                                                                                                            max-width: 600px;
+                                                                                                                            margin: 0 auto;
+                                                                                                                        }
+                                                                                                                        .detail {
+                                                                                                                            display: flex;
+                                                                                                                            justify-content: space-between;
+                                                                                                                            margin-bottom: 5px;
+                                                                                                                            padding: 5px 0;
+                                                                                                                            border-bottom: 1px solid #eee;
+                                                                                                                        }
+                                                                                                                        .detail strong {
+                                                                                                                            font-weight: bold;
+                                                                                                                        }
+                                                                                                                        #datetime-text {
+                                                                                                                            margin-bottom: 15px;
+                                                                                                                            font-size: 10px;
+                                                                                                                            font-weight: bold;
+                                                                                                                        }
+                                                                                                                        h2 {
+                                                                                                                            color: #333;
+                                                                                                                        }
+                                                                                                                    </style>
+                                                                                                                </head>
+                                                                                                                <body>
+
+                                                                                                                    ${dateTimeElement.outerHTML}
+                                                                                                                    ${customerName.outerHTML}
+                                                                                                                    ${detailsContainer.outerHTML}
+                                                                                                                </body>
+                                                                                                            </html>
+                                                                                                        `);
+
+                                printFrame.contentWindow.document.close();
+
+                                // Wait for content to load before printing
+                                printFrame.onload = function () {
+                                    printFrame.contentWindow.print();
+
+                                    // Remove the iframe after printing
+                                    setTimeout(() => {
+                                        document.body.removeChild(printFrame);
+                                    }, 1000);
+                                };
+                            }
+                        </script>
     @endif
 </body>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
