@@ -19,6 +19,7 @@ class CreateHistoriesTable extends Migration
             $table->json('services')->nullable(); // New JSON column for services
             $table->integer('duration')->nullable();
             $table->string('notes');
+            $table->string('parking_type');
             $table->timestamps();  
         });  
     }  

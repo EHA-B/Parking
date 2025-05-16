@@ -137,7 +137,7 @@ class DashboardController extends Controller
         switch ($parking_slot->parking_type) {
             case 'hourly':
                 $rate = $is_motorcycle ? $price_model->moto_hourly_rate : $price_model->car_hourly_rate;
-                $total_price = ceil($duration_hours) * $rate;
+                $total_price = $duration_hours * $rate;
                 break;
             case 'daily':
                 $rate = $is_motorcycle ? $price_model->moto_daily_rate : $price_model->car_daily_rate;
@@ -288,7 +288,8 @@ class DashboardController extends Controller
             'duration' => $duration_minutes,
             'price' => $total,
             'services' => $services_and_items ? json_encode($services_and_items) : null,
-            'notes' => $parking_slot->notes
+            'notes' => $parking_slot->notes,
+            'parking_type' => $parking_slot->parking_type
         ]);
 
         $parking_slot->delete();
