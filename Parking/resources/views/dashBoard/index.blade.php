@@ -197,6 +197,94 @@
             text-decoration: none;
             cursor: pointer;
         }
+
+        /* Add these styles to your existing styles section */
+        .notification-container {
+            position: relative;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: red;
+            color: white;
+            border-radius: 50%;
+            padding: 2px 6px;
+            font-size: 12px;
+        }
+
+        .notification-panel {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            width: 300px;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+
+        .notification-header {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .notification-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .notification-item {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .notification-content {
+            flex: 1;
+            cursor: pointer;
+        }
+
+        .delete-notification {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 5px;
+            margin-right: 10px;
+            opacity: 0.6;
+            transition: opacity 0.2s;
+        }
+
+        .delete-notification:hover {
+            opacity: 1;
+        }
+
+        .notification-item:hover {
+            background-color: #f5f5f5;
+        }
+
+        .notification-item.unread {
+            background-color: #f0f7ff;
+        }
+
+        .mark-read-btn {
+            background: none;
+            border: none;
+            color: var(--secondary-color);
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .mark-read-btn:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 
@@ -205,7 +293,7 @@
     <div id="carModal" class="modal">
         <div class="modal-content">
             <span class="close-modal" onclick="closeCarModal()">&times;</span>
-            <h2>Cars</h2>
+            <h2>سيارات</h2>
             <div id="carModalContent" class="carModalContent">
                   <form action="{{route('dashboard.new')}}" id="form1" method="POST" class="new-form"
                 enctype="multipart/form-data">
@@ -363,7 +451,7 @@
     <div id="motorModal" class="modal">
         <div class="modal-content">
             <span class="close-modal" onclick="closeMotorModal()">&times;</span>
-            <h2>Motors</h2>
+            <h2>دراجات نارية</h2>
             <div id="motorModalContent" class="carModalContent">
                 <form action="{{route('dashboard.new')}}" id="motorForm" method="POST" class="new-form"
                     enctype="multipart/form-data">
@@ -440,6 +528,19 @@
                         style="margin-right: 10px; padding: 5px; background-color: gray;">
                 
                     <a class="btn" onclick="updateCheckoutLink(this)">خروج</a>
+                </div>
+                <div class="notification-container" style="position: relative; margin-right: 10px; width=50px">
+                    <img src="{{ asset('build/assets/notification.svg') }}" alt="notifications" width="40" style="cursor: pointer;" onclick="toggleNotifications()">
+                    <div id="notificationBadge" class="notification-badge" style="display: none;">0</div>
+                    <div id="notificationPanel" class="notification-panel" style="display: none;">
+                        <div class="notification-header">
+                            <h3>الإشعارات</h3>
+                            <button onclick="markAllAsRead()" class="mark-read-btn">تحديد الكل كمقروء</button>
+                        </div>
+                        <div id="notificationList" class="notification-list">
+                            <!-- Notifications will be populated here -->
+                        </div>
+                    </div>
                 </div>
                 <a href="{{route('customers.index')}}" class="user"><img src="{{ asset('build/assets/users2.svg') }}"
                         alt="customers" width="45px"></a>
@@ -1339,6 +1440,170 @@
             manualPricingDiv.style.display = 'none';
         }
     }
+
+    // Add these functions to your existing script section
+    function checkExpiredSubscriptions() {
+        const parkingSlots = @json($parking_slots);
+        const now = new Date();
+        const notifications = JSON.parse(localStorage.getItem('notifications') || '[]');
+        const deletedNotifications = JSON.parse(localStorage.getItem('deletedNotifications') || '[]');
+        
+        console.log('Checking expired subscriptions...');
+        console.log('Current time:', now);
+        
+        parkingSlots.forEach(slot => {
+            if (slot.parking_type === 'monthly') {
+                const timeIn = new Date(slot.time_in);
+                console.log('Checking slot:', {
+                    customer: slot.vics.customer.name,
+                    plate: slot.vics.plate,
+                    timeIn: timeIn,
+                    parkingType: slot.parking_type
+                });
+                
+                // Calculate the difference in days
+                const diffTime = Math.abs(now - timeIn);
+                const daysDiff = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                
+                console.log('Days difference:', daysDiff);
+                
+                if (daysDiff >= 30) {
+                    console.log('Subscription expired for:', slot.vics.customer.name);
+                    const notificationExists = notifications.some(n => 
+                        n.parkingSlotId === slot.id && n.type === 'expired_subscription'
+                    );
+                    
+                    // Check if this notification was previously deleted
+                    const wasDeleted = deletedNotifications.includes(slot.id);
+                    
+                    if (!notificationExists && !wasDeleted) {
+                        console.log('Creating new notification');
+                        notifications.push({
+                            id: Date.now(),
+                            parkingSlotId: slot.id,
+                            type: 'expired_subscription',
+                            message: `قضى ${slot.vics.customer.name} (${slot.vics.plate}) مدة شهر في الكراج`,
+                            isRead: false,
+                            createdAt: new Date().toISOString()
+                        });
+                    } else {
+                        console.log('Notification already exists or was deleted');
+                    }
+                }
+            }
+        });
+        
+        localStorage.setItem('notifications', JSON.stringify(notifications));
+        updateNotificationBadge();
+        renderNotifications();
+    }
+
+    function updateNotificationBadge() {
+        const notifications = JSON.parse(localStorage.getItem('notifications') || '[]');
+        const unreadCount = notifications.filter(n => !n.isRead).length;
+        const badge = document.getElementById('notificationBadge');
+        
+        if (unreadCount > 0) {
+            badge.style.display = 'block';
+            badge.textContent = unreadCount;
+        } else {
+            badge.style.display = 'none';
+        }
+    }
+
+    function renderNotifications() {
+        const notifications = JSON.parse(localStorage.getItem('notifications') || '[]');
+        const notificationList = document.getElementById('notificationList');
+        
+        // Sort notifications by date, newest first
+        notifications.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        
+        notificationList.innerHTML = notifications.map(notification => {
+            const date = new Date(notification.createdAt);
+            const formattedDate = date.toLocaleDateString('en-GB', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            
+            return `
+                <div class="notification-item ${notification.isRead ? '' : 'unread'}">
+                    <div class="notification-content" onclick="markAsRead(${notification.id})">
+                        <div>${notification.message}</div>
+                        <small>${formattedDate}</small>
+                    </div>
+                    <button class="delete-notification" onclick="deleteNotification(${notification.id})">
+                        <p style="font-size:15px; color:red ;">Delete</p>
+                    </button>
+                </div>
+            `;
+        }).join('');
+    }
+
+    function deleteNotification(notificationId) {
+        const notifications = JSON.parse(localStorage.getItem('notifications') || '[]');
+        const deletedNotifications = JSON.parse(localStorage.getItem('deletedNotifications') || '[]');
+        
+        // Find the notification to get its parkingSlotId
+        const notificationToDelete = notifications.find(n => n.id === notificationId);
+        if (notificationToDelete) {
+            // Add the parkingSlotId to deletedNotifications
+            deletedNotifications.push(notificationToDelete.parkingSlotId);
+            localStorage.setItem('deletedNotifications', JSON.stringify(deletedNotifications));
+        }
+        
+        // Remove the notification
+        const updatedNotifications = notifications.filter(n => n.id !== notificationId);
+        localStorage.setItem('notifications', JSON.stringify(updatedNotifications));
+        updateNotificationBadge();
+        renderNotifications();
+    }
+
+    function toggleNotifications() {
+        const panel = document.getElementById('notificationPanel');
+        panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function markAsRead(notificationId) {
+        const notifications = JSON.parse(localStorage.getItem('notifications') || '[]');
+        const index = notifications.findIndex(n => n.id === notificationId);
+        
+        if (index !== -1) {
+            notifications[index].isRead = true;
+            localStorage.setItem('notifications', JSON.stringify(notifications));
+            updateNotificationBadge();
+            renderNotifications();
+        }
+    }
+
+    function markAllAsRead() {
+        const notifications = JSON.parse(localStorage.getItem('notifications') || '[]');
+        notifications.forEach(n => n.isRead = true);
+        localStorage.setItem('notifications', JSON.stringify(notifications));
+        updateNotificationBadge();
+        renderNotifications();
+    }
+
+    // Check for expired subscriptions when the page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('Page loaded, checking subscriptions...');
+        checkExpiredSubscriptions();
+        
+        // Check every minute for testing (you can change this back to 3600000 for production)
+        setInterval(checkExpiredSubscriptions, 60000);
+    });
+
+    // Close notification panel when clicking outside
+    document.addEventListener('click', function(event) {
+        const panel = document.getElementById('notificationPanel');
+        const container = document.querySelector('.notification-container');
+        
+        if (!container.contains(event.target)) {
+            panel.style.display = 'none';
+        }
+    });
 </script>
 
 </html>
