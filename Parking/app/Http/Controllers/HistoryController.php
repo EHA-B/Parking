@@ -14,13 +14,13 @@ class HistoryController extends Controller
         // Parse services for each history record
         $filteredHistories->transform(function ($history) {
             // Safely decode services, defaulting to an empty array if null or invalid
-            $history->parsed_services = $history->services 
-                ? json_decode($history->services, true) 
+            $history->parsed_services = $history->services
+                ? json_decode($history->services, true)
                 : [];
-            
+
             // Calculate total additional cost from services and items
             $history->additional_cost = $this->calculateAdditionalCost($history->parsed_services);
-            
+
             return $history;
         });
 
@@ -64,11 +64,14 @@ class HistoryController extends Controller
         }
 
         // Date range filtering
-        if ($request->filled('start_date') && $request->filled('end_date')) {
-            $query->whereBetween('time_in', [
-                $request->start_date . ' 00:00:00', 
-                $request->end_date . ' 23:59:59'
-            ]);
+        if ($request->filled('start_date')) {
+            $startDate = $request->start_date . ' 00:00:00';
+            $query->where('time_in', '>=', $startDate);
+        }
+
+        if ($request->filled('end_date')) {
+            $endDate = $request->end_date . ' 23:59:59';
+            $query->where('time_in', '<=', $endDate);
         }
 
         // Order by most recent first
@@ -80,27 +83,25 @@ class HistoryController extends Controller
     public function generateReport(Request $request)
     {
         $filteredHistories = $this->getFilteredHistories($request);
-        
+
         $price_sum = 0;
         $price_with_services = 0;
         $sum_service = 0;
-        foreach($filteredHistories as $history)
-        {
+        foreach ($filteredHistories as $history) {
             $services = json_decode($history->services, true);
-            
-            if($history->services)
-            {
+
+            if ($history->services) {
                 foreach ($services as $service) {
                     $sum_service += $service['price'];
                 }
 
-          
-        }
+
+            }
             $price_sum += $history->price;
-            $price_with_services = $price_sum + $sum_service;   
+            $price_with_services = $price_sum + $sum_service;
         }
 
         // Return the report view with the necessary data
-        return view('history.report', ['filteredHistories' => $filteredHistories , 'price_sum'=>$price_sum , 'price_with_services' => $price_with_services]);
+        return view('history.report', ['filteredHistories' => $filteredHistories, 'price_sum' => $price_sum, 'price_with_services' => $price_with_services]);
     }
 }
