@@ -2,14 +2,30 @@
 <html lang="en">
 
 <head>
-    <link rel="stylesheet" href="{{ asset('app.css') }}">
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DashBoard</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <!-- Add JsBarcode library -->
-    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+    
+    <!-- Preload critical assets -->
+    <link rel="preload" href="{{ asset('app.css') }}" as="style">
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" as="style">
+    
+    <!-- Load stylesheets -->
+    <link rel="stylesheet" href="{{ asset('app.css') }}">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    
+    <!-- Defer non-critical JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js" defer></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js" defer></script>
+    
+    <!-- Add resource hints -->
+    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    
+    <!-- Add cache control headers -->
+    <meta http-equiv="Cache-Control" content="public, max-age=31536000">
     <style>
         .select2-container {
             width: 250px !important;
@@ -452,7 +468,7 @@
                      <td>{{$parking_slot->vics->customer->name}}</td>
                      <td>
                          <img src="{{ $parking_slot->vics->typ == "مركبة صغيرة" ? asset('build/assets/motor.svg') : asset('build/assets/car.svg') }}"
-                             alt={{$parking_slot->vics->typ == "مركبة صغيرة" ? "Motor" : "Car"}} width="40">
+                             alt={{$parking_slot->vics->typ == "مركبة صغيرة" ? "Motor" : "Car"}} width="40" loading="lazy">
                      </td>
                      <td>{{$parking_slot->vics->brand}}</td>
                      <td>{{$parking_slot->vics->plate}}</td>
@@ -584,7 +600,7 @@
                     <a class="btn" onclick="updateCheckoutLink(this)">خروج</a>
                 </div>
                 <div class="notification-container" style="position: relative; margin-right: 10px; width=50px">
-                    <img src="{{ asset('build/assets/notification.svg') }}" alt="notifications" width="40" style="cursor: pointer;" onclick="toggleNotifications()">
+                    <img src="{{ asset('build/assets/notification.svg') }}" alt="notifications" width="40" style="cursor: pointer;" onclick="toggleNotifications()" loading="lazy">
                     <div id="notificationBadge" class="notification-badge" style="display: none;">0</div>
                     <div id="notificationPanel" class="notification-panel" style="display: none;">
                         <div class="notification-header">
@@ -597,13 +613,13 @@
                     </div>
                 </div>
                 <a href="{{route('customers.index')}}" class="user" id="pass"><img src="{{ asset('build/assets/users2.svg') }}"
-                        alt="customers" width="45px"></a>
+                        alt="customers" width="45px" loading="lazy"></a>
                 <a href="{{ route('pricing.index') }}" class="settings" id="pass1"><img src="{{ asset('build/assets/price.svg') }}"
-                        alt="settings" width="40px"></a>
+                        alt="settings" width="40px" loading="lazy"></a>
                 <a href="{{route('history.index')}}" class="history" id="pass2"><img src="{{ asset('build/assets/history.svg') }}"
-                        alt="history" width="40px"></a>
+                        alt="history" width="40px" loading="lazy"></a>
                 <a href="{{route('items-services.index')}}" class="history" id="pass3"><img
-                        src="{{ asset('build/assets/serv.svg') }}" alt="items_services" width="40px"></a>
+                        src="{{ asset('build/assets/serv.svg') }}" alt="items_services" width="40px" loading="lazy"></a>
                         <script>
                             document.getElementById('pass').addEventListener('click', function (event) {
                                     var password = prompt("ادخل كلمة المرور:");
@@ -644,19 +660,19 @@
                 <div class="card-body" onclick="carFormPopup()">
                     <h1>سيارات</h1>
                     <div class="card-img">
-                    <img src="{{ asset('build/assets/car.jpg') }}"/>
+                    <img src="{{ asset('build/assets/car.jpg') }}" loading="lazy"/>
                     </div>
                 </div>
                 <div class="card-body" onclick="motorFormPopup()">
                     <h1>دراجات نارية</h1>
                     <div class="card-img">
-                    <img src="{{ asset('build/assets/motor.jpg') }}" />
+                    <img src="{{ asset('build/assets/motor.jpg') }}" loading="lazy" />
                     </div>
                 </div>
                 <div class="card-body" onclick="garageFormPopup()">
                     <h1>الكراج</h1>
                     <div class="card-img">
-                    <img src="{{ asset('build/assets/parking.jpg') }}" />
+                    <img src="{{ asset('build/assets/parking.jpg') }}" loading="lazy" />
                     </div>
                 </div>
 
@@ -943,8 +959,6 @@
                         </script>
     @endif
 </body>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
     function showNewCustomer() {
         document.getElementById('form1').style.display = 'block';
@@ -1252,34 +1266,77 @@
         document.getElementById('barcode-overlay').style.display = 'none';
     }
 
-    // Table search functionality
-    document.getElementById('tableSearch').addEventListener('input', function () {
-        const searchText = this.value.toLowerCase();
-        const tableRows = document.querySelectorAll('.table1 tr.data');
+    // Debounce function to limit how often a function can be called
+    function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
 
+    // Optimized search functionality with debouncing
+    const debouncedSearch = debounce(function(searchText) {
+        const tableRows = document.querySelectorAll('.table1 tr.data');
         tableRows.forEach(row => {
             let text = '';
             row.querySelectorAll('td').forEach(cell => {
                 text += cell.textContent.toLowerCase() + ' ';
             });
+            row.style.display = text.includes(searchText.toLowerCase()) ? '' : 'none';
+        });
+    }, 250);
 
-            if (text.includes(searchText)) {
-                row.style.display = '';
-            } else {
-                row.style.display = 'none';
+    // Event delegation for table search
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('tableSearch');
+        if (searchInput) {
+            searchInput.addEventListener('input', (e) => debouncedSearch(e.target.value));
+        }
+
+        // Event delegation for notification panel
+        document.addEventListener('click', function(event) {
+            const panel = document.getElementById('notificationPanel');
+            const container = document.querySelector('.notification-container');
+            
+            if (!container.contains(event.target)) {
+                panel.style.display = 'none';
+            }
+        });
+
+        // Event delegation for status toggles
+        document.addEventListener('change', function(event) {
+            if (event.target.classList.contains('status-toggle')) {
+                const parkingSlotId = event.target.dataset.parkingSlotId;
+                
+                fetch(`/dashboard/toggle-status/${parkingSlotId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(data.message);
+                    } else {
+                        event.target.checked = !event.target.checked;
+                        alert(data.message);
+                    }
+                })
+                .catch(error => {
+                    event.target.checked = !event.target.checked;
+                    alert('An error occurred while updating the status');
+                });
             }
         });
     });
 
-    function clearSearch() {
-        const searchInput = document.getElementById('tableSearch');
-        searchInput.value = '';
-        // Trigger the input event to show all rows
-        searchInput.dispatchEvent(new Event('input'));
-        searchInput.focus();
-    }
-
-    // Function to show parking code popup
     function showParcodePopup(parcode) {
         // Generate the barcode
         generateBarcode(parcode);
@@ -1533,42 +1590,6 @@
             panel.style.display = 'none';
         }
     });
-
-    // Add this to your existing JavaScript
-    document.addEventListener('DOMContentLoaded', function() {
-        const statusToggles = document.querySelectorAll('.status-toggle');
-        
-        statusToggles.forEach(toggle => {
-            toggle.addEventListener('change', function() {
-                const parkingSlotId = this.dataset.parkingSlotId;
-                
-                fetch(`/dashboard/toggle-status/${parkingSlotId}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        // Show success message
-                        alert(data.message);
-                    } else {
-                        // Revert the toggle if there was an error
-                        this.checked = !this.checked;
-                        alert(data.message);
-                    }
-                })
-                .catch(error => {
-                    // Revert the toggle if there was an error
-                    this.checked = !this.checked;
-                    alert('An error occurred while updating the status');
-                });
-            });
-        });
-    });
 </script>
 
-</html>
 </html>
