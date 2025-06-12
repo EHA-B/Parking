@@ -410,6 +410,16 @@ form{
     height: 35px;
     font-family: 'Cairo',sans-serif;
 }
+.serv-btn1{
+    text-decoration: none;
+    background-color: maroon;
+    color: white;
+    padding: 3px;
+    border-radius: 5px;
+  
+    height: 35px;
+    font-family: 'Cairo',sans-serif;
+}
 .cta {
     position: relative;
     

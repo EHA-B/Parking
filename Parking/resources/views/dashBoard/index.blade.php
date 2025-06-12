@@ -285,6 +285,62 @@
         .mark-read-btn:hover {
             text-decoration: underline;
         }
+
+        /* Add this to your existing styles */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+        }
+
+        input:checked + .slider {
+            background-color: #2196F3;
+        }
+
+        input:focus + .slider {
+            box-shadow: 0 0 1px #2196F3;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        .slider.round {
+            border-radius: 34px;
+        }
+
+        .slider.round:before {
+            border-radius: 50%;
+        }
     </style>
 </head>
 
@@ -384,63 +440,61 @@
                     <th>رقم اللوحة</th>
                     <th>وقت الدخول</th>
                     <th>نوع الوقوف</th>
-                    <th>خدمات</th>
+                    <th>الحالة</th>
                     <th>تحرير</th>
                 </tr>
                 <tbody class="body-overflow">
                 @foreach($parking_slots as $parking_slot)
-                                        <tr class="data" data-parking-slot-id="{{ $parking_slot->id }}">
-                                            <td onclick="showParcodePopup('{{ $parking_slot->parcode }}')" style="cursor:pointer;">
-                                                {{$parking_slot->id}}
-                                            </td>
-                                            <td>{{$parking_slot->vics->customer->name}}</td>
-                                            <td>
-                                                <img src="{{ $parking_slot->vics->typ == "مركبة صغيرة" ? asset('build/assets/motor.svg') : asset('build/assets/car.svg') }}"
-                                                    alt={{$parking_slot->vics->typ == "مركبة صغيرة" ? "Motor" : "Car"}} width="40">
-                                            </td>
-                                            <td>{{$parking_slot->vics->brand}}</td>
-                                            <td>{{$parking_slot->vics->plate}}</td>
-                                            <td>{{ \Carbon\Carbon::parse($parking_slot->time_in)->format('Y-m-d H:i:s') }}</td>
-                                            <td>
-                                                {{
-                    $parking_slot->parking_type === 'hourly' ? 'ساعي' :
-                    ($parking_slot->parking_type === 'daily' ? 'يومي' :
-                        ($parking_slot->parking_type === 'monthly' ? 'شهري' : $parking_slot->parking_type))
-                                                    }}
-                                            </td>
-                                            <td>
-                                                @if($parking_slot->vics->services->count() > 0 || $parking_slot->vics->items->count() > 0)
-                                                    @foreach($parking_slot->vics->services as $service)
-                                                        @if($service->pivot->parking_slot_id == $parking_slot->id)
-                                                            <li>
-                                                                {{ $service->name }}
-                                                                ( التكلفة: {{ $service->cost }})
-                                                            </li>
-                                                        @endif
-                                                    @endforeach
-
-                                                    @foreach($parking_slot->vics->items as $item)
-                                                        <li>
-                                                            {{$item->item}}
-                                                            العدد : {{$item->pivot->item_quantity}}
-                                                        </li>
-                                                    @endforeach
-                                                @else
-                                                    لا يوجد خدمات!
-                                                @endif
-                                            </td>
-
-                                            <td>
-
-                                                <a href="{{ route('dashboard.checkout', ['parcode' => $parking_slot->parcode]) }}"
-                                                    class="btn checkout-btn">خروج</a>
-
-                                                <a onclick="openServicePopup({{ $parking_slot->vics->id }}, {{ $parking_slot->id }})"
-                                                    class="serv-btn"> خدمة</a>
-                                            </td>
-
-                                        </tr>
-                                        @endforeach
+                 <tr class="data" data-parking-slot-id="{{ $parking_slot->id }}">
+                     <td onclick="showParcodePopup('{{ $parking_slot->parcode }}')" style="cursor:pointer;">
+                         {{$parking_slot->id}}
+                     </td>
+                     <td>{{$parking_slot->vics->customer->name}}</td>
+                     <td>
+                         <img src="{{ $parking_slot->vics->typ == "مركبة صغيرة" ? asset('build/assets/motor.svg') : asset('build/assets/car.svg') }}"
+                             alt={{$parking_slot->vics->typ == "مركبة صغيرة" ? "Motor" : "Car"}} width="40">
+                     </td>
+                     <td>{{$parking_slot->vics->brand}}</td>
+                     <td>{{$parking_slot->vics->plate}}</td>
+                     <td>{{ \Carbon\Carbon::parse($parking_slot->time_in)->format('Y-m-d H:i:s') }}</td>
+                     <td>
+                        {{
+        $parking_slot->parking_type === 'hourly' ? 'ساعي' :
+        ($parking_slot->parking_type === 'daily' ? 'يومي' : 'شهري')
+                        }}
+                     </td>
+                     <td>
+                         <div style="display: flex; flex-direction: row; gap: 10px; align-items: center;">
+                         @if($parking_slot->parking_type === 'monthly')
+                             <p>خارج</p>
+                             <div>
+                                 <label class="switch">
+                                     <input type="checkbox" 
+                                            class="status-toggle" 
+                                            data-parking-slot-id="{{ $parking_slot->id }}"
+                                            {{ $parking_slot->status === 'in' ? 'checked' : '' }}>
+                                     <span class="slider round"></span>
+                                 </label>
+                                 </div>
+                                 <p>داخل</p>
+                         @endif
+                         </div>
+                     </td>
+                     <td class="action-td">
+                         <button onclick="openServicePopup({{ $parking_slot->vics->id }}, {{ $parking_slot->id }})" 
+                         class="serv-btn">
+                         <i class="fas fa-plus"></i> خدمة
+                     </button>
+                     <a href="{{ route('dashboard.checkout', ['parcode' => $parking_slot->parcode]) }}" class="btn checkout-btn">خروج</a>
+                     @if($parking_slot->parking_type === 'monthly')
+                       <a href="{{ route('dashboard.status-history', $parking_slot->vics->customer->id) }}" 
+                          class="serv-btn">
+                           حركة المركبة
+                       </a>
+                     @endif
+                     </td>
+                 </tr>
+                @endforeach
                                     </tbody>
 
 
@@ -542,15 +596,48 @@
                         </div>
                     </div>
                 </div>
-                <a href="{{route('customers.index')}}" class="user"><img src="{{ asset('build/assets/users2.svg') }}"
+                <a href="{{route('customers.index')}}" class="user" id="pass"><img src="{{ asset('build/assets/users2.svg') }}"
                         alt="customers" width="45px"></a>
-                <a href="{{ route('pricing.index') }}" class="settings"><img src="{{ asset('build/assets/price.svg') }}"
+                <a href="{{ route('pricing.index') }}" class="settings" id="pass1"><img src="{{ asset('build/assets/price.svg') }}"
                         alt="settings" width="40px"></a>
-                <a href="{{route('history.index')}}" class="history"><img src="{{ asset('build/assets/history.svg') }}"
+                <a href="{{route('history.index')}}" class="history" id="pass2"><img src="{{ asset('build/assets/history.svg') }}"
                         alt="history" width="40px"></a>
-                <a href="{{route('items-services.index')}}" class="history"><img
+                <a href="{{route('items-services.index')}}" class="history" id="pass3"><img
                         src="{{ asset('build/assets/serv.svg') }}" alt="items_services" width="40px"></a>
-
+                        <script>
+                            document.getElementById('pass').addEventListener('click', function (event) {
+                                    var password = prompt("ادخل كلمة المرور:");
+                                    if (password !== "123456") {
+                                        event.preventDefault(); // Block navigation if password is wrong
+                                        alert("كلمة المرور غير صحيحة");
+                                    }
+                                    // If correct, navigation proceeds
+                                });
+                            document.getElementById('pass1').addEventListener('click', function (event) {
+                                    var password = prompt("ادخل كلمة المرور:");
+                                    if (password !== "123456") {
+                                        event.preventDefault(); // Block navigation if password is wrong
+                                        alert("كلمة المرور غير صحيحة");
+                                    }
+                                    // If correct, navigation proceeds
+                                });
+                            document.getElementById('pass2').addEventListener('click', function (event) {
+                                    var password = prompt("ادخل كلمة المرور:");
+                                    if (password !== "123456") {
+                                        event.preventDefault(); // Block navigation if password is wrong
+                                        alert("كلمة المرور غير صحيحة");
+                                    }
+                                    // If correct, navigation proceeds
+                                });
+                            document.getElementById('pass3').addEventListener('click', function (event) {
+                                    var password = prompt("ادخل كلمة المرور:");
+                                    if (password !== "123456") {
+                                        event.preventDefault(); // Block navigation if password is wrong
+                                        alert("كلمة المرور غير صحيحة");
+                                    }
+                                    // If correct, navigation proceeds
+                                });
+                        </script>
 
             </div>
             <div class="cards">
@@ -579,156 +666,7 @@
        
     </section>
    
-    <!-- <section class="side">
-        
-
-        <section class="chick-in">
-            <div class="oon">
-                <button type="button" class="button1" onclick="showNewCustomer()">جديد</button>
-                <button type="button" class="button1" onclick="showOldCustomer()">قديم</button>
-            </div>
-            <form action="{{route('dashboard.new')}}" id="form1" method="POST" class="new-form"
-                enctype="multipart/form-data">
-                @csrf
-
-                <h2>ادخل عميل</h2>
-                <div class="form">
-                    <div class="input-form">
-                        <input type="text" name="name" class="inp-text" placeholder="name...." id="nameInput" required>
-                        <label for="nameInput">: الاسم الكامل</label>
-                    </div>
-                    <div class="input-form" id="newCustomerPhone">
-                        <input type="text" name="phone" class="inp-text" placeholder="phone...." id="phoneInput"
-                            required>
-                        <label for="phoneInput">: رقم الهاتف</label>
-                    </div>
-
-                    <div class="input-form">
-                        <select name="vehicle_type" class="inp-text" id="typInput">
-                            <option value="مركبة صغيرة">مركبة صغيرة</option>
-                            <option value="مركبة كبيرة">مركبة كبيرة</option>
-                        </select>
-                        <label for="typInput">: المركبة</label>
-                    </div>
-
-                    <div class="input-form">
-                        <input type="text" name="brand" class="inp-text" placeholder="vehicle...." id="brandInput"
-                            required>
-                        <label for="brandInput">: نوع المركبة</label>
-                    </div>
-                    <div class="input-form">
-                        <input type="text" name="plate" class="inp-text" placeholder="plate...." id="plateInput"
-                            required>
-                        <label for="plateInput">: رقم اللوحة</label>
-                    </div>
-                    <div class="input-form">
-                        <select name="parking_type" id="parkingType" onchange="toggleManualPricing()" class="inp-text">
-                            <option value="hourly">ساعي</option>
-                            <option value="daily">يومي</option>
-                            <option value="monthly">شهري</option>
-                        </select>
-                        <label>نوع الوقوف</label>
-                    </div>
-                    <div id="manualPricing" style="display: none;">
-
-                        <div class="input-form">
-                            <input type="number" name="manual_rate" class="inp-text" placeholder="أدخل السعر">
-                            <label>السعر </label>
-                        </div>
-                    </div>
-                    <div class="input-form">
-                        <input type="text" name="notes" class="inp-text" placeholder="notes...." id="notes">
-                        <label for="notes">: ملاحظات</label>
-                    </div>
-                </div>
-                <br>
-                <button type="submit" class="button2"><span class="button-content">أدخل</span></button>
-            </form>
-
-            {{-- ---------------------------- --}}
-
-
-            <form action="{{route('dashboard.old')}}" id="form2" class="old-form" method="POST"
-                enctype="multipart/form-data" style="display:none;">
-                @csrf
-
-                <h2>اختر عميل</h2>
-                <div class="form">
-                    <div class="input-form">
-                        <select name="customer_id" class="inp-text select2-search" id="customerSelect" required
-                            onchange="populateVehicles(this)">
-                            <option value="">اختر عميل قديم</option>
-                            @foreach ($customers as $customer)
-                                <option value="{{$customer->id}}">
-                                    {{$customer->name}}
-                                </option>
-                            @endforeach
-                        </select>
-                        <label for="customerSelect">: اختيار عميل قديم</label>
-                    </div>
-                    <div class="input-form">
-                        <select name="vehicle_choose" class="inp-text" id="vehicleTypeSelect" onchange="add_vic()"
-                            required>
-                            <option value="">اختر نوع المركبة</option>
-                        </select>
-                        <label for="vehicleTypeSelect">: نوع المركبة</label>
-                    </div>
-
-                    <div id="add_if" hidden="true">
-                        <div class="input-form">
-                            <select name="vehicle_type" class="inp-text" id="typInput">
-                                <option value="مركبة صغيرة">مركبة صغيرة</option>
-                                <option value="مركبة كبيرة">مركبة كبيرة</option>
-                            </select>
-                            <label for="typInput">: المركبة</label>
-                        </div>
-
-                        <div class="input-form">
-                            <input type="text" name="brand" class="inp-text" placeholder="vehicle...." id="brandInput">
-                            <label for="brandInput">: نوع المركبة</label>
-                        </div>
-                        <div class="input-form">
-                            <input type="text" name="plate" class="inp-text" placeholder="plate...." id="plateInput">
-                            <label for="plateInput">: رقم اللوحة</label>
-                        </div>
-                    </div>
-
-                    <div class="input-form">
-                        <select name="parking_type" id="oldParkingType" class="inp-text" required
-                            onchange="toggleOldManualPricing()">
-                            <option value="hourly">ساعي</option>
-                            <option value="daily">يومي</option>
-                            <option value="monthly">شهري</option>
-                        </select>
-                        <label>نوع الوقوف</label>
-                    </div>
-
-                    <div id="oldManualPricing" style="display: none;">
-
-                        <div class="input-form">
-                            <input type="number" name="manual_rate" class="inp-text" placeholder="أدخل السعر">
-                            <label>السعر </label>
-                        </div>
-                    </div>
-
-                    <div class="input-form">
-                        <input type="text" name="notes" class="inp-text" placeholder="notes...." id="notes">
-                        <label for="notes">: ملاحظات</label>
-                    </div>
-
-                </div>
-                <br>
-                <button type="submit" class="button2"><span class="button-content">أدخل</span></button>
-            </form>
-        </section>
-        <div class="input-form1">
-            <input autofocus type="text" class="parcode-input" placeholder="رمز الخروج"
-                style="margin-right: 10px; padding: 5px;">
-
-            <a class="btn" onclick="updateCheckoutLink(this)">خروج</a>
-        </div>
-        </div>
-    </section> -->
+   
 
     <!-- Pricing Popup -->
     <div id="pricingPopup" class="popup">
@@ -861,11 +799,11 @@
                                             <strong>:تكلفة المواد</strong>
                                         </div>
                                         @php
-    $total = ($checkoutDetails['manual_rate'] !== null
-        ? $checkoutDetails['manual_rate']
-        : $checkoutDetails['base_parking_price']
-    ) + $checkoutDetails['items_price'] + $checkoutDetails['services_price'];
-    $roundedTotal = ceil($total / 100) * 100;
+                                            $total = ($checkoutDetails['manual_rate'] !== null
+                                                ? $checkoutDetails['manual_rate']
+                                                : $checkoutDetails['base_parking_price']
+                                            ) + $checkoutDetails['items_price'] + $checkoutDetails['services_price'];
+                                            $roundedTotal = ceil($total / 100) * 100;
                                         @endphp
                                         <div class="detail">
                                             <p>{{ number_format($roundedTotal, 2) }}</p>
@@ -944,52 +882,51 @@
                                 titleElement.style.marginBottom = '20px';
 
                                 printFrame.contentWindow.document.write(`
-                                                                                                            <html>
-                                                                                                                <head>
-                                                                                                                    <style>
-                                                                                                                        body { 
-                                                                                                                            display: flex; 
-                                                                                                                            flex-direction: column;
-                                                                                                                            justify-content: center; 
-                                                                                                                            align-items: center; 
-                                                                                                                            height: 100vh; 
-                                                                                                                            margin: 0; 
-                                                                                                                            font-family: 'Cairo', sans-serif;
-                                                                                                                            padding: 15px;
-                                                                                                                        }
-                                                                                                                        .details-con {
-                                                                                                                            width: 100%;
-                                                                                                                            max-width: 600px;
-                                                                                                                            margin: 0 auto;
-                                                                                                                        }
-                                                                                                                        .detail {
-                                                                                                                            display: flex;
-                                                                                                                            justify-content: space-between;
-                                                                                                                            margin-bottom: 5px;
-                                                                                                                            padding: 5px 0;
-                                                                                                                            border-bottom: 1px solid #eee;
-                                                                                                                        }
-                                                                                                                        .detail strong {
-                                                                                                                            font-weight: bold;
-                                                                                                                        }
-                                                                                                                        #datetime-text {
-                                                                                                                            margin-bottom: 15px;
-                                                                                                                            font-size: 10px;
-                                                                                                                            font-weight: bold;
-                                                                                                                        }
-                                                                                                                        h2 {
-                                                                                                                            color: #333;
-                                                                                                                        }
-                                                                                                                    </style>
-                                                                                                                </head>
-                                                                                                                <body>
-
-                                                                                                                    ${dateTimeElement.outerHTML}
-                                                                                                                    ${customerName.outerHTML}
-                                                                                                                    ${detailsContainer.outerHTML}
-                                                                                                                </body>
-                                                                                                            </html>
-                                                                                                        `);
+                                        <html>
+                                            <head>
+                                                <style>
+                                                    body { 
+                                                        display: flex; 
+                                                        flex-direction: column;
+                                                        justify-content: center; 
+                                                        align-items: center; 
+                                                        height: 95vh; 
+                                                        margin: 0; 
+                                                        font-family: 'Cairo', sans-serif;
+                                                        padding: 10px;
+                                                    }
+                                                    .details-con {
+                                                        width: 100%;
+                                                        max-width: 600px;
+                                                        margin: 0 auto;
+                                                    }
+                                                    .detail {
+                                                        display: flex;
+                                                        justify-content: space-between;
+                                                        margin-bottom: 5px;
+                                                        padding: 5px 0;
+                                                        border-bottom: 1px solid #eee;
+                                                    }
+                                                    .detail strong {
+                                                        font-weight: bold;
+                                                    }
+                                                    #datetime-text {
+                                                        margin-bottom: 15px;
+                                                        font-size: 10px;
+                                                        font-weight: bold;
+                                                    }
+                                                    h2 {
+                                                        color: #333;
+                                                    }
+                                                </style>
+                                            </head>
+                                    
+                                                ${dateTimeElement.outerHTML}
+                                                ${customerName.outerHTML}
+                                                ${detailsContainer.outerHTML}
+                                            </body>
+                                        </html>
+                                    `);
 
                                 printFrame.contentWindow.document.close();
 
@@ -1235,59 +1172,51 @@
         document.body.appendChild(printFrame);
 
         const barcodeElement = document.getElementById('barcode').cloneNode(true);
-        const barcodeText = document.getElementById('barcode-text').cloneNode(true);
-
-        // Get current date and time
-        const now = new Date();
-        const dateTimeString = now.toLocaleString('ar-uk', {
-            weekday: 'long',
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit'
-        });
-
-        // Create date/time element
-        const dateTimeElement = document.createElement('div');
-        dateTimeElement.id = 'datetime-text';
-        dateTimeElement.textContent = dateTimeString;
 
         printFrame.contentWindow.document.write(`
             <html>
                 <head>
                     <style>
+                        @page {
+                            size: auto;
+                            margin: 0;
+                        }
                         body { 
                             display: flex; 
                             flex-direction: column;
-                            justify-content: center; 
+                            justify-content: space-between; 
                             align-items: center; 
-                            height: 50vh; 
+                            height: 6cm; 
                             margin: 0; 
+                            padding: 0.5cm;
                             font-family: 'Cairo', sans-serif;
-                            transform: translateY(5cm);
+                            box-sizing: border-box;
+                        }
+                        .notes-box {
+                            width: 100%;
+                            height: 2.5cm;
+                            border: 1px solid #000;
+                            margin-bottom: 0.5cm;
                         }
                         svg { 
                             max-width: 100%; 
-                            height: auto; 
+                            height: 2.5cm !important;
                         }
-                        #datetime-text {
-                            margin-bottom: 15px;
-                            font-size: 16px;
-                            font-weight: bold;
-                        }
-                        #barcode-text {
-                            margin-top: 10px;
-                            font-size: 18px;
-                            font-weight: bold;
+                        @media print {
+                            body {
+                                margin: 0;
+                                padding: 0.5cm;
+                                height: 6cm;
+                            }
+                            .notes-box {
+                                page-break-inside: avoid;
+                            }
                         }
                     </style>
                 </head>
                 <body>
-                  
+                    <div class="notes-box"></div>
                     ${barcodeElement.outerHTML}
-                  
                 </body>
             </html>
         `);
@@ -1604,6 +1533,42 @@
             panel.style.display = 'none';
         }
     });
+
+    // Add this to your existing JavaScript
+    document.addEventListener('DOMContentLoaded', function() {
+        const statusToggles = document.querySelectorAll('.status-toggle');
+        
+        statusToggles.forEach(toggle => {
+            toggle.addEventListener('change', function() {
+                const parkingSlotId = this.dataset.parkingSlotId;
+                
+                fetch(`/dashboard/toggle-status/${parkingSlotId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Show success message
+                        alert(data.message);
+                    } else {
+                        // Revert the toggle if there was an error
+                        this.checked = !this.checked;
+                        alert(data.message);
+                    }
+                })
+                .catch(error => {
+                    // Revert the toggle if there was an error
+                    this.checked = !this.checked;
+                    alert('An error occurred while updating the status');
+                });
+            });
+        });
+    });
 </script>
 
+</html>
 </html>

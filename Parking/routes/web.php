@@ -18,6 +18,8 @@ Route::get('/dashboard/checkout/{parcode}', [DashboardController::class, 'checko
 Route::post('/dashboard/confirm-checkout', [DashboardController::class, 'confirmCheckout'])->name('dashboard.confirm-checkout');
 Route::get('/dashboard/check-parcode', [DashboardController::class, 'checkParcode'])->name('dashboard.check-parcode');
 Route::post('/dashboard/add_service/{vic_id}/{parking_slot_id}', [DashboardController::class, 'add_service'])->name('dashboard.add_service');
+Route::post('/dashboard/toggle-status/{parking_slot_id}', [DashboardController::class, 'toggleStatus'])->name('dashboard.toggle-status');
+
 // Replace the existing resource route with these explicit routes
 Route::get('/customers', [CustomerController::class, 'index'])->name('customers.index');
 Route::get('/customers/create', [CustomerController::class, 'create'])->name('customers.create');
@@ -37,3 +39,5 @@ Route::resource('services', ServiceController::class)->except(['show', 'create',
 Route::get('items-services', [ItemController::class, 'index'])->name('items-services.index');
 
 Route::get('/history/report', [HistoryController::class, 'generateReport'])->name('history.report');
+
+Route::get('/dashboard/status-history/{customer_id}', [DashboardController::class, 'viewStatusHistory'])->name('dashboard.status-history');

@@ -15,7 +15,8 @@ class ParkingSlot extends Model
         'time_in',
         'time_out',
         'notes',
-        'parking_type' // 'hourly', 'daily', or 'monthly'
+        'parking_type', // 'hourly', 'daily', or 'monthly'
+        'status' // 'in' or 'out'
     ];
 
     public function vics()
