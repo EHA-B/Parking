@@ -12,6 +12,7 @@ use App\Models\Service;
 use App\Models\VicService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use App\Models\ParkingStatusHistory;
 
 class DashboardController extends Controller
 {
@@ -347,5 +348,80 @@ class DashboardController extends Controller
         ]);
 
         return redirect()->back()->with('success', 'Service or item added successfully');
+    }
+
+    public function toggleStatus($parking_slot_id)
+    {
+        $parking_slot = ParkingSlot::with('vics.customer')->findOrFail($parking_slot_id);
+
+        // Only allow toggling for monthly subscriptions
+        if ($parking_slot->parking_type !== 'monthly') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Status toggle is only available for monthly subscriptions'
+            ], 400);
+        }
+
+        // Toggle the status
+        $new_status = $parking_slot->status === 'in' ? 'out' : 'in';
+        $parking_slot->update(['status' => $new_status]);
+
+        // Record the status change in history
+        ParkingStatusHistory::create([
+            'parking_slot_id' => $parking_slot->id,
+            'customer_id' => $parking_slot->vics->customer->id,
+            'status' => $new_status,
+            'changed_at' => now()
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'status' => $new_status,
+            'message' => 'تم تعديل الحالة بنجاح'
+        ]);
+    }
+
+    public function viewStatusHistory($customer_id)
+    {
+        $history = ParkingStatusHistory::with(['parkingSlot.vics'])
+            ->where('customer_id', $customer_id)
+            ->orderBy('changed_at', 'desc')
+            ->get()
+            ->map(function ($record) {
+                // Convert UTC time to local time for display
+                $record->changed_at = $record->changed_at->setTimezone('Asia/Amman');
+                return $record;
+            });
+
+        return view('dashboard.status-history', [
+            'history' => $history
+        ]);
+    }
+
+    public function updateStatusTime(Request $request)
+    {
+        try {
+            $request->validate([
+                'record_id' => 'required|exists:parking_status_histories,id',
+                'new_time' => 'required|date'
+            ]);
+
+            $record = ParkingStatusHistory::findOrFail($request->record_id);
+            
+            // Convert the input time to UTC before saving
+            $newTime = Carbon::parse($request->new_time, 'Asia/Amman')->setTimezone('UTC');
+            $record->changed_at = $newTime;
+            $record->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'تم تحديث الوقت بنجاح'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'حدث خطأ أثناء تحديث الوقت: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }

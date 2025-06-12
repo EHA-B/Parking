@@ -197,6 +197,195 @@
             text-decoration: none;
             cursor: pointer;
         }
+
+        /* Add these styles to your existing styles section */
+        .notification-container {
+            position: relative;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: red;
+            color: white;
+            border-radius: 50%;
+            padding: 2px 6px;
+            font-size: 12px;
+        }
+
+        .notification-panel {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            width: 300px;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+
+        .notification-header {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .notification-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .notification-item {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .notification-content {
+            flex: 1;
+            cursor: pointer;
+        }
+
+        .delete-notification {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 5px;
+            margin-right: 10px;
+            opacity: 0.6;
+            transition: opacity 0.2s;
+        }
+
+        .delete-notification:hover {
+            opacity: 1;
+        }
+
+        .notification-item:hover {
+            background-color: #f5f5f5;
+        }
+
+        .notification-item.unread {
+            background-color: #f0f7ff;
+        }
+
+        .mark-read-btn {
+            background: none;
+            border: none;
+            color: var(--secondary-color);
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .mark-read-btn:hover {
+            text-decoration: underline;
+        }
+
+        /* Add this to your existing styles */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+        }
+
+        input:checked + .slider {
+            background-color: #2196F3;
+        }
+
+        input:focus + .slider {
+            box-shadow: 0 0 1px #2196F3;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        .slider.round {
+            border-radius: 34px;
+        }
+
+        .slider.round:before {
+            border-radius: 50%;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.4);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 500px;
+            border-radius: 5px;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: black;
+        }
+
+        #paymentInfo {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+
+        #paymentInfo p {
+            margin: 10px 0;
+            font-size: 16px;
+        }
     </style>
 </head>
 
@@ -205,7 +394,7 @@
     <div id="carModal" class="modal">
         <div class="modal-content">
             <span class="close-modal" onclick="closeCarModal()">&times;</span>
-            <h2>Cars</h2>
+            <h2>سيارات</h2>
             <div id="carModalContent" class="carModalContent">
                   <form action="{{route('dashboard.new')}}" id="form1" method="POST" class="new-form"
                 enctype="multipart/form-data">
@@ -296,63 +485,66 @@
                     <th>رقم اللوحة</th>
                     <th>وقت الدخول</th>
                     <th>نوع الوقوف</th>
-                    <th>خدمات</th>
+                    <th>الحالة</th>
                     <th>تحرير</th>
                 </tr>
                 <tbody class="body-overflow">
                 @foreach($parking_slots as $parking_slot)
-                                        <tr class="data" data-parking-slot-id="{{ $parking_slot->id }}">
-                                            <td onclick="showParcodePopup('{{ $parking_slot->parcode }}')" style="cursor:pointer;">
-                                                {{$parking_slot->id}}
-                                            </td>
-                                            <td>{{$parking_slot->vics->customer->name}}</td>
-                                            <td>
-                                                <img src="{{ $parking_slot->vics->typ == "مركبة صغيرة" ? asset('build/assets/motor.svg') : asset('build/assets/car.svg') }}"
-                                                    alt={{$parking_slot->vics->typ == "مركبة صغيرة" ? "Motor" : "Car"}} width="40">
-                                            </td>
-                                            <td>{{$parking_slot->vics->brand}}</td>
-                                            <td>{{$parking_slot->vics->plate}}</td>
-                                            <td>{{ \Carbon\Carbon::parse($parking_slot->time_in)->format('Y-m-d H:i:s') }}</td>
-                                            <td>
-                                                {{
-                    $parking_slot->parking_type === 'hourly' ? 'ساعي' :
-                    ($parking_slot->parking_type === 'daily' ? 'يومي' :
-                        ($parking_slot->parking_type === 'monthly' ? 'شهري' : $parking_slot->parking_type))
-                                                    }}
-                                            </td>
-                                            <td>
-                                                @if($parking_slot->vics->services->count() > 0 || $parking_slot->vics->items->count() > 0)
-                                                    @foreach($parking_slot->vics->services as $service)
-                                                        @if($service->pivot->parking_slot_id == $parking_slot->id)
-                                                            <li>
-                                                                {{ $service->name }}
-                                                                ( التكلفة: {{ $service->cost }})
-                                                            </li>
-                                                        @endif
-                                                    @endforeach
-
-                                                    @foreach($parking_slot->vics->items as $item)
-                                                        <li>
-                                                            {{$item->item}}
-                                                            العدد : {{$item->pivot->item_quantity}}
-                                                        </li>
-                                                    @endforeach
-                                                @else
-                                                    لا يوجد خدمات!
-                                                @endif
-                                            </td>
-
-                                            <td>
-
-                                                <a href="{{ route('dashboard.checkout', ['parcode' => $parking_slot->parcode]) }}"
-                                                    class="btn checkout-btn">خروج</a>
-
-                                                <a onclick="openServicePopup({{ $parking_slot->vics->id }}, {{ $parking_slot->id }})"
-                                                    class="serv-btn"> خدمة</a>
-                                            </td>
-
-                                        </tr>
-                                        @endforeach
+                 <tr class="data" data-parking-slot-id="{{ $parking_slot->id }}">
+                     <td onclick="showParcodePopup('{{ $parking_slot->parcode }}')" style="cursor:pointer;">
+                         {{$parking_slot->id}}
+                     </td>
+                     <td>{{$parking_slot->vics->customer->name}}</td>
+                     <td>
+                         <img src="{{ $parking_slot->vics->typ == "مركبة صغيرة" ? asset('build/assets/motor.svg') : asset('build/assets/car.svg') }}"
+                             alt={{$parking_slot->vics->typ == "مركبة صغيرة" ? "Motor" : "Car"}} width="40">
+                     </td>
+                     <td>{{$parking_slot->vics->brand}}</td>
+                     <td>{{$parking_slot->vics->plate}}</td>
+                     <td>{{ \Carbon\Carbon::parse($parking_slot->time_in)->format('Y-m-d H:i:s') }}</td>
+                     <td>
+                        {{
+        $parking_slot->parking_type === 'hourly' ? 'ساعي' :
+        ($parking_slot->parking_type === 'daily' ? 'يومي' : 'شهري')
+                        }}
+                     </td>
+                     <td>
+                         <div style="display: flex; flex-direction: row; gap: 10px; align-items: center;">
+                         @if($parking_slot->parking_type === 'monthly')
+                             <p>خارج</p>
+                             <div>
+                                 <label class="switch">
+                                     <input type="checkbox" 
+                                            class="status-toggle" 
+                                            data-parking-slot-id="{{ $parking_slot->id }}"
+                                            {{ $parking_slot->status === 'in' ? 'checked' : '' }}>
+                                     <span class="slider round"></span>
+                                 </label>
+                                 </div>
+                                 <p>داخل</p>
+                         @endif
+                         </div>
+                     </td>
+                     <td class="action-td">
+                         <button onclick="openServicePopup({{ $parking_slot->vics->id }}, {{ $parking_slot->id }})" 
+                         class="serv-btn">
+                         <i class="fas fa-plus"></i> خدمة
+                     </button>
+                     <a href="{{ route('dashboard.checkout', ['parcode' => $parking_slot->parcode]) }}" class="btn checkout-btn">خروج</a>
+                     @if($parking_slot->parking_type === 'monthly')
+                       <a href="{{ route('dashboard.status-history', $parking_slot->vics->customer->id) }}" 
+                          class="serv-btn">
+                           حركة المركبة
+                       </a>
+                     @endif
+                     @if($parking_slot->parking_type === 'monthly')
+                         <button onclick="openPaymentModal({{ $parking_slot->id }})" class="serv-btn">
+                             <i class="fas fa-money-bill"></i> دفع
+                         </button>
+                     @endif
+                     </td>
+                 </tr>
+                @endforeach
                                     </tbody>
 
 
@@ -363,7 +555,7 @@
     <div id="motorModal" class="modal">
         <div class="modal-content">
             <span class="close-modal" onclick="closeMotorModal()">&times;</span>
-            <h2>Motors</h2>
+            <h2>دراجات نارية</h2>
             <div id="motorModalContent" class="carModalContent">
                 <form action="{{route('dashboard.new')}}" id="motorForm" method="POST" class="new-form"
                     enctype="multipart/form-data">
@@ -431,6 +623,39 @@
         <button class="print-button" onclick="printBarcode()">طباعة الباركود</button>
     </div>
 
+    <!-- Payment Modal -->
+    <div id="paymentModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closePaymentModal()">&times;</span>
+            <h2>دفع شهري</h2>
+            <div id="paymentInfo">
+                <p>المبلغ الكلي: <span id="totalAmount">0</span></p>
+                <p>المبلغ المدفوع: <span id="paidAmount">0</span></p>
+                <p>المبلغ المتبقي: <span id="remainingAmount">0</span></p>
+            </div>
+            <form id="paymentForm">
+                <div class="input-form">
+                    <input type="number" name="amount" id="paymentAmount" class="inp-text" required>
+                    <label>المبلغ</label>
+                </div>
+                <div class="input-form">
+                    <select hidden name="payment_method" id="paymentMethod" class="inp-text" required>
+                        <option value="cash">نقدي</option>
+                        
+                    </select>
+                
+                </div>
+                <div class="input-form">
+                    <input type="text" name="notes" id="paymentNotes" class="inp-text">
+                    <label>ملاحظات</label>
+                </div>
+                <button type="submit" class="button2">
+                    <span class="button-content">تأكيد الدفع</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
     <section class="left-side">
         
         <div class="cards-contianer">
@@ -441,15 +666,61 @@
                 
                     <a class="btn" onclick="updateCheckoutLink(this)">خروج</a>
                 </div>
-                <a href="{{route('customers.index')}}" class="user"><img src="{{ asset('build/assets/users2.svg') }}"
+                <div class="notification-container" style="position: relative; margin-right: 10px; width=50px">
+                    <img src="{{ asset('build/assets/notification.svg') }}" alt="notifications" width="40" style="cursor: pointer;" onclick="toggleNotifications()">
+                    <div id="notificationBadge" class="notification-badge" style="display: none;">0</div>
+                    <div id="notificationPanel" class="notification-panel" style="display: none;">
+                        <div class="notification-header">
+                            <h3>الإشعارات</h3>
+                            <button onclick="markAllAsRead()" class="mark-read-btn">تحديد الكل كمقروء</button>
+                        </div>
+                        <div id="notificationList" class="notification-list">
+                            <!-- Notifications will be populated here -->
+                        </div>
+                    </div>
+                </div>
+                <a href="{{route('customers.index')}}" class="user" id="pass"><img src="{{ asset('build/assets/users2.svg') }}"
                         alt="customers" width="45px"></a>
-                <a href="{{ route('pricing.index') }}" class="settings"><img src="{{ asset('build/assets/price.svg') }}"
+                <a href="{{ route('pricing.index') }}" class="settings" id="pass1"><img src="{{ asset('build/assets/price.svg') }}"
                         alt="settings" width="40px"></a>
-                <a href="{{route('history.index')}}" class="history"><img src="{{ asset('build/assets/history.svg') }}"
+                <a href="{{route('history.index')}}" class="history" id="pass2"><img src="{{ asset('build/assets/history.svg') }}"
                         alt="history" width="40px"></a>
-                <a href="{{route('items-services.index')}}" class="history"><img
+                <a href="{{route('items-services.index')}}" class="history" id="pass3"><img
                         src="{{ asset('build/assets/serv.svg') }}" alt="items_services" width="40px"></a>
-
+                        <script>
+                            document.getElementById('pass').addEventListener('click', function (event) {
+                                    var password = prompt("ادخل كلمة المرور:");
+                                    if (password !== "123456") {
+                                        event.preventDefault(); // Block navigation if password is wrong
+                                        alert("كلمة المرور غير صحيحة");
+                                    }
+                                    // If correct, navigation proceeds
+                                });
+                            document.getElementById('pass1').addEventListener('click', function (event) {
+                                    var password = prompt("ادخل كلمة المرور:");
+                                    if (password !== "123456") {
+                                        event.preventDefault(); // Block navigation if password is wrong
+                                        alert("كلمة المرور غير صحيحة");
+                                    }
+                                    // If correct, navigation proceeds
+                                });
+                            document.getElementById('pass2').addEventListener('click', function (event) {
+                                    var password = prompt("ادخل كلمة المرور:");
+                                    if (password !== "123456") {
+                                        event.preventDefault(); // Block navigation if password is wrong
+                                        alert("كلمة المرور غير صحيحة");
+                                    }
+                                    // If correct, navigation proceeds
+                                });
+                            document.getElementById('pass3').addEventListener('click', function (event) {
+                                    var password = prompt("ادخل كلمة المرور:");
+                                    if (password !== "123456") {
+                                        event.preventDefault(); // Block navigation if password is wrong
+                                        alert("كلمة المرور غير صحيحة");
+                                    }
+                                    // If correct, navigation proceeds
+                                });
+                        </script>
 
             </div>
             <div class="cards">
@@ -478,156 +749,7 @@
        
     </section>
    
-    <!-- <section class="side">
-        
-
-        <section class="chick-in">
-            <div class="oon">
-                <button type="button" class="button1" onclick="showNewCustomer()">جديد</button>
-                <button type="button" class="button1" onclick="showOldCustomer()">قديم</button>
-            </div>
-            <form action="{{route('dashboard.new')}}" id="form1" method="POST" class="new-form"
-                enctype="multipart/form-data">
-                @csrf
-
-                <h2>ادخل عميل</h2>
-                <div class="form">
-                    <div class="input-form">
-                        <input type="text" name="name" class="inp-text" placeholder="name...." id="nameInput" required>
-                        <label for="nameInput">: الاسم الكامل</label>
-                    </div>
-                    <div class="input-form" id="newCustomerPhone">
-                        <input type="text" name="phone" class="inp-text" placeholder="phone...." id="phoneInput"
-                            required>
-                        <label for="phoneInput">: رقم الهاتف</label>
-                    </div>
-
-                    <div class="input-form">
-                        <select name="vehicle_type" class="inp-text" id="typInput">
-                            <option value="مركبة صغيرة">مركبة صغيرة</option>
-                            <option value="مركبة كبيرة">مركبة كبيرة</option>
-                        </select>
-                        <label for="typInput">: المركبة</label>
-                    </div>
-
-                    <div class="input-form">
-                        <input type="text" name="brand" class="inp-text" placeholder="vehicle...." id="brandInput"
-                            required>
-                        <label for="brandInput">: نوع المركبة</label>
-                    </div>
-                    <div class="input-form">
-                        <input type="text" name="plate" class="inp-text" placeholder="plate...." id="plateInput"
-                            required>
-                        <label for="plateInput">: رقم اللوحة</label>
-                    </div>
-                    <div class="input-form">
-                        <select name="parking_type" id="parkingType" onchange="toggleManualPricing()" class="inp-text">
-                            <option value="hourly">ساعي</option>
-                            <option value="daily">يومي</option>
-                            <option value="monthly">شهري</option>
-                        </select>
-                        <label>نوع الوقوف</label>
-                    </div>
-                    <div id="manualPricing" style="display: none;">
-
-                        <div class="input-form">
-                            <input type="number" name="manual_rate" class="inp-text" placeholder="أدخل السعر">
-                            <label>السعر </label>
-                        </div>
-                    </div>
-                    <div class="input-form">
-                        <input type="text" name="notes" class="inp-text" placeholder="notes...." id="notes">
-                        <label for="notes">: ملاحظات</label>
-                    </div>
-                </div>
-                <br>
-                <button type="submit" class="button2"><span class="button-content">أدخل</span></button>
-            </form>
-
-            {{-- ---------------------------- --}}
-
-
-            <form action="{{route('dashboard.old')}}" id="form2" class="old-form" method="POST"
-                enctype="multipart/form-data" style="display:none;">
-                @csrf
-
-                <h2>اختر عميل</h2>
-                <div class="form">
-                    <div class="input-form">
-                        <select name="customer_id" class="inp-text select2-search" id="customerSelect" required
-                            onchange="populateVehicles(this)">
-                            <option value="">اختر عميل قديم</option>
-                            @foreach ($customers as $customer)
-                                <option value="{{$customer->id}}">
-                                    {{$customer->name}}
-                                </option>
-                            @endforeach
-                        </select>
-                        <label for="customerSelect">: اختيار عميل قديم</label>
-                    </div>
-                    <div class="input-form">
-                        <select name="vehicle_choose" class="inp-text" id="vehicleTypeSelect" onchange="add_vic()"
-                            required>
-                            <option value="">اختر نوع المركبة</option>
-                        </select>
-                        <label for="vehicleTypeSelect">: نوع المركبة</label>
-                    </div>
-
-                    <div id="add_if" hidden="true">
-                        <div class="input-form">
-                            <select name="vehicle_type" class="inp-text" id="typInput">
-                                <option value="مركبة صغيرة">مركبة صغيرة</option>
-                                <option value="مركبة كبيرة">مركبة كبيرة</option>
-                            </select>
-                            <label for="typInput">: المركبة</label>
-                        </div>
-
-                        <div class="input-form">
-                            <input type="text" name="brand" class="inp-text" placeholder="vehicle...." id="brandInput">
-                            <label for="brandInput">: نوع المركبة</label>
-                        </div>
-                        <div class="input-form">
-                            <input type="text" name="plate" class="inp-text" placeholder="plate...." id="plateInput">
-                            <label for="plateInput">: رقم اللوحة</label>
-                        </div>
-                    </div>
-
-                    <div class="input-form">
-                        <select name="parking_type" id="oldParkingType" class="inp-text" required
-                            onchange="toggleOldManualPricing()">
-                            <option value="hourly">ساعي</option>
-                            <option value="daily">يومي</option>
-                            <option value="monthly">شهري</option>
-                        </select>
-                        <label>نوع الوقوف</label>
-                    </div>
-
-                    <div id="oldManualPricing" style="display: none;">
-
-                        <div class="input-form">
-                            <input type="number" name="manual_rate" class="inp-text" placeholder="أدخل السعر">
-                            <label>السعر </label>
-                        </div>
-                    </div>
-
-                    <div class="input-form">
-                        <input type="text" name="notes" class="inp-text" placeholder="notes...." id="notes">
-                        <label for="notes">: ملاحظات</label>
-                    </div>
-
-                </div>
-                <br>
-                <button type="submit" class="button2"><span class="button-content">أدخل</span></button>
-            </form>
-        </section>
-        <div class="input-form1">
-            <input autofocus type="text" class="parcode-input" placeholder="رمز الخروج"
-                style="margin-right: 10px; padding: 5px;">
-
-            <a class="btn" onclick="updateCheckoutLink(this)">خروج</a>
-        </div>
-        </div>
-    </section> -->
+   
 
     <!-- Pricing Popup -->
     <div id="pricingPopup" class="popup">
@@ -760,11 +882,11 @@
                                             <strong>:تكلفة المواد</strong>
                                         </div>
                                         @php
-    $total = ($checkoutDetails['manual_rate'] !== null
-        ? $checkoutDetails['manual_rate']
-        : $checkoutDetails['base_parking_price']
-    ) + $checkoutDetails['items_price'] + $checkoutDetails['services_price'];
-    $roundedTotal = ceil($total / 100) * 100;
+                                            $total = ($checkoutDetails['manual_rate'] !== null
+                                                ? $checkoutDetails['manual_rate']
+                                                : $checkoutDetails['base_parking_price']
+                                            ) + $checkoutDetails['items_price'] + $checkoutDetails['services_price'];
+                                            $roundedTotal = ceil($total / 100) * 100;
                                         @endphp
                                         <div class="detail">
                                             <p>{{ number_format($roundedTotal, 2) }}</p>
@@ -843,52 +965,51 @@
                                 titleElement.style.marginBottom = '20px';
 
                                 printFrame.contentWindow.document.write(`
-                                                                                                            <html>
-                                                                                                                <head>
-                                                                                                                    <style>
-                                                                                                                        body { 
-                                                                                                                            display: flex; 
-                                                                                                                            flex-direction: column;
-                                                                                                                            justify-content: center; 
-                                                                                                                            align-items: center; 
-                                                                                                                            height: 100vh; 
-                                                                                                                            margin: 0; 
-                                                                                                                            font-family: 'Cairo', sans-serif;
-                                                                                                                            padding: 15px;
-                                                                                                                        }
-                                                                                                                        .details-con {
-                                                                                                                            width: 100%;
-                                                                                                                            max-width: 600px;
-                                                                                                                            margin: 0 auto;
-                                                                                                                        }
-                                                                                                                        .detail {
-                                                                                                                            display: flex;
-                                                                                                                            justify-content: space-between;
-                                                                                                                            margin-bottom: 5px;
-                                                                                                                            padding: 5px 0;
-                                                                                                                            border-bottom: 1px solid #eee;
-                                                                                                                        }
-                                                                                                                        .detail strong {
-                                                                                                                            font-weight: bold;
-                                                                                                                        }
-                                                                                                                        #datetime-text {
-                                                                                                                            margin-bottom: 15px;
-                                                                                                                            font-size: 10px;
-                                                                                                                            font-weight: bold;
-                                                                                                                        }
-                                                                                                                        h2 {
-                                                                                                                            color: #333;
-                                                                                                                        }
-                                                                                                                    </style>
-                                                                                                                </head>
-                                                                                                                <body>
-
-                                                                                                                    ${dateTimeElement.outerHTML}
-                                                                                                                    ${customerName.outerHTML}
-                                                                                                                    ${detailsContainer.outerHTML}
-                                                                                                                </body>
-                                                                                                            </html>
-                                                                                                        `);
+                                        <html>
+                                            <head>
+                                                <style>
+                                                    body { 
+                                                        display: flex; 
+                                                        flex-direction: column;
+                                                        justify-content: center; 
+                                                        align-items: center; 
+                                                        height: 95vh; 
+                                                        margin: 0; 
+                                                        font-family: 'Cairo', sans-serif;
+                                                        padding: 10px;
+                                                    }
+                                                    .details-con {
+                                                        width: 100%;
+                                                        max-width: 600px;
+                                                        margin: 0 auto;
+                                                    }
+                                                    .detail {
+                                                        display: flex;
+                                                        justify-content: space-between;
+                                                        margin-bottom: 5px;
+                                                        padding: 5px 0;
+                                                        border-bottom: 1px solid #eee;
+                                                    }
+                                                    .detail strong {
+                                                        font-weight: bold;
+                                                    }
+                                                    #datetime-text {
+                                                        margin-bottom: 15px;
+                                                        font-size: 10px;
+                                                        font-weight: bold;
+                                                    }
+                                                    h2 {
+                                                        color: #333;
+                                                    }
+                                                </style>
+                                            </head>
+                                    
+                                                ${dateTimeElement.outerHTML}
+                                                ${customerName.outerHTML}
+                                                ${detailsContainer.outerHTML}
+                                            </body>
+                                        </html>
+                                    `);
 
                                 printFrame.contentWindow.document.close();
 
@@ -1134,59 +1255,51 @@
         document.body.appendChild(printFrame);
 
         const barcodeElement = document.getElementById('barcode').cloneNode(true);
-        const barcodeText = document.getElementById('barcode-text').cloneNode(true);
-
-        // Get current date and time
-        const now = new Date();
-        const dateTimeString = now.toLocaleString('ar-uk', {
-            weekday: 'long',
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit'
-        });
-
-        // Create date/time element
-        const dateTimeElement = document.createElement('div');
-        dateTimeElement.id = 'datetime-text';
-        dateTimeElement.textContent = dateTimeString;
 
         printFrame.contentWindow.document.write(`
             <html>
                 <head>
                     <style>
+                        @page {
+                            size: auto;
+                            margin: 0;
+                        }
                         body { 
                             display: flex; 
                             flex-direction: column;
-                            justify-content: center; 
+                            justify-content: space-between; 
                             align-items: center; 
-                            height: 50vh; 
+                            height: 6cm; 
                             margin: 0; 
+                            padding: 0.5cm;
                             font-family: 'Cairo', sans-serif;
-                            transform: translateY(5cm);
+                            box-sizing: border-box;
+                        }
+                        .notes-box {
+                            width: 100%;
+                            height: 2.5cm;
+                            border: 1px solid #000;
+                            margin-bottom: 0.5cm;
                         }
                         svg { 
                             max-width: 100%; 
-                            height: auto; 
+                            height: 2.5cm !important;
                         }
-                        #datetime-text {
-                            margin-bottom: 15px;
-                            font-size: 16px;
-                            font-weight: bold;
-                        }
-                        #barcode-text {
-                            margin-top: 10px;
-                            font-size: 18px;
-                            font-weight: bold;
+                        @media print {
+                            body {
+                                margin: 0;
+                                padding: 0.5cm;
+                                height: 6cm;
+                            }
+                            .notes-box {
+                                page-break-inside: avoid;
+                            }
                         }
                     </style>
                 </head>
                 <body>
-                  
+                    <div class="notes-box"></div>
                     ${barcodeElement.outerHTML}
-                  
                 </body>
             </html>
         `);
@@ -1337,6 +1450,269 @@
             manualPricingDiv.style.display = 'block';
         } else {
             manualPricingDiv.style.display = 'none';
+        }
+    }
+
+    // Add these functions to your existing script section
+    function checkExpiredSubscriptions() {
+        const parkingSlots = @json($parking_slots);
+        const now = new Date();
+        const notifications = JSON.parse(localStorage.getItem('notifications') || '[]');
+        const deletedNotifications = JSON.parse(localStorage.getItem('deletedNotifications') || '[]');
+        
+        console.log('Checking expired subscriptions...');
+        console.log('Current time:', now);
+        
+        parkingSlots.forEach(slot => {
+            if (slot.parking_type === 'monthly') {
+                const timeIn = new Date(slot.time_in);
+                console.log('Checking slot:', {
+                    customer: slot.vics.customer.name,
+                    plate: slot.vics.plate,
+                    timeIn: timeIn,
+                    parkingType: slot.parking_type
+                });
+                
+                // Calculate the difference in days
+                const diffTime = Math.abs(now - timeIn);
+                const daysDiff = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                
+                console.log('Days difference:', daysDiff);
+                
+                if (daysDiff >= 30) {
+                    console.log('Subscription expired for:', slot.vics.customer.name);
+                    const notificationExists = notifications.some(n => 
+                        n.parkingSlotId === slot.id && n.type === 'expired_subscription'
+                    );
+                    
+                    // Check if this notification was previously deleted
+                    const wasDeleted = deletedNotifications.includes(slot.id);
+                    
+                    if (!notificationExists && !wasDeleted) {
+                        console.log('Creating new notification');
+                        notifications.push({
+                            id: Date.now(),
+                            parkingSlotId: slot.id,
+                            type: 'expired_subscription',
+                            message: `قضى ${slot.vics.customer.name} (${slot.vics.plate}) مدة شهر في الكراج`,
+                            isRead: false,
+                            createdAt: new Date().toISOString()
+                        });
+                    } else {
+                        console.log('Notification already exists or was deleted');
+                    }
+                }
+            }
+        });
+        
+        localStorage.setItem('notifications', JSON.stringify(notifications));
+        updateNotificationBadge();
+        renderNotifications();
+    }
+
+    function updateNotificationBadge() {
+        const notifications = JSON.parse(localStorage.getItem('notifications') || '[]');
+        const unreadCount = notifications.filter(n => !n.isRead).length;
+        const badge = document.getElementById('notificationBadge');
+        
+        if (unreadCount > 0) {
+            badge.style.display = 'block';
+            badge.textContent = unreadCount;
+        } else {
+            badge.style.display = 'none';
+        }
+    }
+
+    function renderNotifications() {
+        const notifications = JSON.parse(localStorage.getItem('notifications') || '[]');
+        const notificationList = document.getElementById('notificationList');
+        
+        // Sort notifications by date, newest first
+        notifications.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        
+        notificationList.innerHTML = notifications.map(notification => {
+            const date = new Date(notification.createdAt);
+            const formattedDate = date.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            
+            return `
+                <div class="notification-item ${notification.isRead ? '' : 'unread'}">
+                    <div class="notification-content" onclick="markAsRead(${notification.id})">
+                        <div>${notification.message}</div>
+                        <small>${formattedDate}</small>
+                    </div>
+                    <button class="delete-notification" onclick="deleteNotification(${notification.id})">
+                        <p style="font-size:15px; color:red ;">Delete</p>
+                    </button>
+                </div>
+            `;
+        }).join('');
+    }
+
+    function deleteNotification(notificationId) {
+        const notifications = JSON.parse(localStorage.getItem('notifications') || '[]');
+        const deletedNotifications = JSON.parse(localStorage.getItem('deletedNotifications') || '[]');
+        
+        // Find the notification to get its parkingSlotId
+        const notificationToDelete = notifications.find(n => n.id === notificationId);
+        if (notificationToDelete) {
+            // Add the parkingSlotId to deletedNotifications
+            deletedNotifications.push(notificationToDelete.parkingSlotId);
+            localStorage.setItem('deletedNotifications', JSON.stringify(deletedNotifications));
+        }
+        
+        // Remove the notification
+        const updatedNotifications = notifications.filter(n => n.id !== notificationId);
+        localStorage.setItem('notifications', JSON.stringify(updatedNotifications));
+        updateNotificationBadge();
+        renderNotifications();
+    }
+
+    function toggleNotifications() {
+        const panel = document.getElementById('notificationPanel');
+        panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function markAsRead(notificationId) {
+        const notifications = JSON.parse(localStorage.getItem('notifications') || '[]');
+        const index = notifications.findIndex(n => n.id === notificationId);
+        
+        if (index !== -1) {
+            notifications[index].isRead = true;
+            localStorage.setItem('notifications', JSON.stringify(notifications));
+            updateNotificationBadge();
+            renderNotifications();
+        }
+    }
+
+    function markAllAsRead() {
+        const notifications = JSON.parse(localStorage.getItem('notifications') || '[]');
+        notifications.forEach(n => n.isRead = true);
+        localStorage.setItem('notifications', JSON.stringify(notifications));
+        updateNotificationBadge();
+        renderNotifications();
+    }
+
+    // Check for expired subscriptions when the page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('Page loaded, checking subscriptions...');
+        checkExpiredSubscriptions();
+        
+        // Check every minute for testing (you can change this back to 3600000 for production)
+        setInterval(checkExpiredSubscriptions, 60000);
+    });
+
+    // Close notification panel when clicking outside
+    document.addEventListener('click', function(event) {
+        const panel = document.getElementById('notificationPanel');
+        const container = document.querySelector('.notification-container');
+        
+        if (!container.contains(event.target)) {
+            panel.style.display = 'none';
+        }
+    });
+
+    // Add this to your existing JavaScript
+    document.addEventListener('DOMContentLoaded', function() {
+        const statusToggles = document.querySelectorAll('.status-toggle');
+        
+        statusToggles.forEach(toggle => {
+            toggle.addEventListener('change', function() {
+                const parkingSlotId = this.dataset.parkingSlotId;
+                
+                fetch(`/dashboard/toggle-status/${parkingSlotId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Show success message
+                        alert(data.message);
+                    } else {
+                        // Revert the toggle if there was an error
+                        this.checked = !this.checked;
+                        alert(data.message);
+                    }
+                })
+                .catch(error => {
+                    // Revert the toggle if there was an error
+                    this.checked = !this.checked;
+                    alert('An error occurred while updating the status');
+                });
+            });
+        });
+    });
+
+    let currentParkingSlotId = null;
+
+    function openPaymentModal(parkingSlotId) {
+        currentParkingSlotId = parkingSlotId;
+        const modal = document.getElementById('paymentModal');
+        modal.style.display = "block";
+        
+        // Fetch payment history
+        fetch(`/monthly-payments/${parkingSlotId}/history`)
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('totalAmount').textContent = data.total_amount;
+                document.getElementById('paidAmount').textContent = data.paid_amount;
+                document.getElementById('remainingAmount').textContent = data.remaining_amount;
+                document.getElementById('paymentAmount').max = data.remaining_amount;
+            });
+    }
+
+    function closePaymentModal() {
+        const modal = document.getElementById('paymentModal');
+        modal.style.display = "none";
+        currentParkingSlotId = null;
+    }
+
+    document.getElementById('paymentForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = {
+            amount: document.getElementById('paymentAmount').value,
+            payment_method: document.getElementById('paymentMethod').value,
+            notes: document.getElementById('paymentNotes').value
+        };
+        
+        fetch(`/monthly-payments/${currentParkingSlotId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            },
+            body: JSON.stringify(formData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('تم تسجيل الدفع بنجاح');
+                closePaymentModal();
+                location.reload(); // Refresh to update the UI
+            } else {
+                alert(data.message);
+            }
+        })
+        .catch(error => {
+            alert('حدث خطأ أثناء تسجيل الدفع');
+        });
+    });
+
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+        const modal = document.getElementById('paymentModal');
+        if (event.target == modal) {
+            closePaymentModal();
         }
     }
 </script>

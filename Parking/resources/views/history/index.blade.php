@@ -168,7 +168,21 @@
                     @forelse($filteredHistories as $history)
                         <tr>
                             <td>{{ $history->customer_name }}</td>
-                            <td>{{$history->parking_type}} </td>
+                            <td>
+                                @switch($history->parking_type)
+                                    @case('hourly')
+                                        ساعي
+                                        @break
+                                    @case('daily')
+                                        يومي
+                                        @break
+                                    @case('monthly')
+                                        شهري
+                                        @break
+                                    @default
+                                        {{ $history->parking_type }}
+                                @endswitch
+                            </td>
                             <td>{{ $history->vic_typ }}</td>
                             <td>{{ $history->vic_plate }}</td>
                             <td>{{ $history->time_in ? \Carbon\Carbon::parse($history->time_in)->format('Y-m-d H:i') : 'N/A' }}
