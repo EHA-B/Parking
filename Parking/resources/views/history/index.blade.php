@@ -260,15 +260,15 @@
                 @if ($filteredHistories->hasPages())
                     <div class="pagination-controls">
                         {{-- Previous Page Link --}}
-                        @if ($histories->onFirstPage())
+                        @if ($filteredHistories->onFirstPage())
                             <span class="disabled">Previous</span>
                         @else
-                            <a href="{{ $histories->previousPageUrl() }}" rel="prev">Previous</a>
+                            <a href="{{ $filteredHistories->previousPageUrl() }}" rel="prev">Previous</a>
                         @endif
 
                         {{-- Pagination Elements --}}
-                        @foreach ($histories->getUrlRange(max($histories->currentPage() - 2, 1), min($histories->currentPage() + 2, $histories->lastPage())) as $page => $url)
-                            @if ($page == $histories->currentPage())
+                        @foreach ($filteredHistories->getUrlRange(max($filteredHistories->currentPage() - 2, 1), min($filteredHistories->currentPage() + 2, $filteredHistories->lastPage())) as $page => $url)
+                            @if ($page == $filteredHistories->currentPage())
                                 <span class="current">{{ $page }}</span>
                             @else
                                 <a href="{{ $url }}">{{ $page }}</a>
@@ -276,8 +276,8 @@
                         @endforeach
 
                         {{-- Next Page Link --}}
-                        @if ($histories->hasMorePages())
-                            <a href="{{ $histories->nextPageUrl() }}" rel="next">Next</a>
+                        @if ($filteredHistories->hasMorePages())
+                            <a href="{{ $filteredHistories->nextPageUrl() }}" rel="next">Next</a>
                         @else
                             <span class="disabled">Next</span>
                         @endif

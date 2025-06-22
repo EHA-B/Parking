@@ -9,8 +9,12 @@ class CreatePricesTable extends Migration
     {  
         Schema::create('prices', function (Blueprint $table) {  
             $table->id();  
-            $table->decimal('car_price', 8, 2)->default(0);  
-            $table->decimal('moto_price', 8, 2)->default(0);  
+            $table->decimal('car_hourly_rate', 10, 2)->default(0);
+            $table->decimal('car_daily_rate', 10, 2)->default(0);
+            $table->decimal('car_monthly_rate', 10, 2)->default(0);
+            $table->decimal('moto_hourly_rate', 10, 2)->default(0);
+            $table->decimal('moto_daily_rate', 10, 2)->default(0);
+            $table->decimal('moto_monthly_rate', 10, 2)->default(0);
             $table->timestamps();  
         });  
     }  

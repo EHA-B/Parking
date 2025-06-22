@@ -138,7 +138,7 @@ class DashboardController extends Controller
         switch ($parking_slot->parking_type) {
             case 'hourly':
                 $rate = $is_motorcycle ? $price_model->moto_hourly_rate : $price_model->car_hourly_rate;
-                $total_price = $duration_hours * $rate;
+                $total_price = ceil($duration_hours) * $rate;
                 break;
             case 'daily':
                 $rate = $is_motorcycle ? $price_model->moto_daily_rate : $price_model->car_daily_rate;
