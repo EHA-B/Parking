@@ -720,3 +720,17 @@ a.cta {
     width: 100%;
     height: auto;
 }
+.select2-search{
+    width: 120px;
+    padding: 5px;
+    background-color: var(--secondary-color);
+    color: white;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    font-family: 'Cairo',sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-decoration: none;
+}
