@@ -5,15 +5,7 @@ use Illuminate\Http\Request;
 
 define('LARAVEL_START', microtime(true));
 
-// Find the USB drive path
-$secretKeyPath = "T:/.strangeThing";
-
-// Check if the USB drive with secret key is connected
-if (!file_exists($secretKeyPath)) {
-    // USB drive not connected or file not found
-    die('Secret key file not found on USB drive named "Parking"');
-}
-
+//
 // Determine if the application is in maintenance mode...
 if (file_exists($maintenance = __DIR__ . '/../storage/framework/maintenance.php')) {
     require $maintenance;

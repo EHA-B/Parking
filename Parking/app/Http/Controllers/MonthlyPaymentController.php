@@ -75,4 +75,4 @@ class MonthlyPaymentController extends Controller
             'remaining_amount' => $remainingAmount
         ]);
     }
-} 
+}

@@ -878,8 +878,13 @@
                                             <strong>:وقت الخروج</strong>
                                         </div>
                                         <div class="detail">
-                                            <p>{{ number_format($checkoutDetails['duration_minutes'], 2) }} minutes</p>
-                                            <strong>:المدة</strong>
+                                            @if($checkoutDetails['parking_type'] === 'hourly')
+                                                <p>{{ ceil($checkoutDetails['duration_minutes'] / 60) }} ساعة</p>
+                                                <strong>:المدة</strong>
+                                            @else
+                                                <p>{{ number_format($checkoutDetails['duration_minutes'], 2) }} دقيقة</p>
+                                                <strong>:المدة</strong>
+                                            @endif
                                         </div>
                                         <div class="detail">
                                             <p>{{ number_format($checkoutDetails['base_parking_price'], 2) }}</p>
@@ -1710,11 +1715,11 @@
     });
 
     // Declare variables at the top
-    let currentParkingSlotId = null;
     let parkingSlotId = 0;
-
+    
     function openPaymentModal(id) {
-        currentParkingSlotId = id;
+       
+       let currentParkingSlotId = id;
         const modal = document.getElementById('paymentModal');
         modal.style.display = "block";
         
