@@ -28,4 +28,25 @@ class ParkingSlot extends Model
     {
         return $this->belongsTo(Slot::class, 'slot_id');
     }
+
+    public function monthlyPayments()
+    {
+        return $this->hasMany(MonthlyPayment::class);
+    }
+
+    public function getTotalPaidAmount()
+    {
+        return $this->monthlyPayments()->sum('amount');
+    }
+
+    public function getRemainingAmount()
+    {
+        if ($this->parking_type !== 'monthly') {
+            return 0;
+        }
+        
+        $totalAmount = $this->price;
+        $paidAmount = $this->getTotalPaidAmount();
+        return max(0, $totalAmount - $paidAmount);
+    }
 }

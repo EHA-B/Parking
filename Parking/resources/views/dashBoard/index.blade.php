@@ -357,6 +357,51 @@
         .slider.round:before {
             border-radius: 50%;
         }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.4);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 500px;
+            border-radius: 5px;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: black;
+        }
+
+        #paymentInfo {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+
+        #paymentInfo p {
+            margin: 10px 0;
+            font-size: 16px;
+        }
     </style>
 </head>
 
@@ -508,6 +553,11 @@
                            حركة المركبة
                        </a>
                      @endif
+                     @if($parking_slot->parking_type === 'monthly')
+                         <button onclick="openPaymentModal({{ $parking_slot->id }})" class="serv-btn">
+                             <i class="fas fa-money-bill"></i> دفع
+                         </button>
+                     @endif
                      </td>
                  </tr>
                 @endforeach
@@ -587,6 +637,39 @@
         <svg id="barcode"></svg>
         <div id="barcode-text"></div>
         <button class="print-button" onclick="printBarcode()">طباعة الباركود</button>
+    </div>
+
+    <!-- Payment Modal -->
+    <div id="paymentModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closePaymentModal()">&times;</span>
+            <h2>دفع شهري</h2>
+            <div id="paymentInfo">
+                <p>المبلغ الكلي: <span id="totalAmount">0</span></p>
+                <p>المبلغ المدفوع: <span id="paidAmount">0</span></p>
+                <p>المبلغ المتبقي: <span id="remainingAmount">0</span></p>
+            </div>
+            <form id="paymentForm">
+                <div class="input-form">
+                    <input type="number" name="amount" id="paymentAmount" class="inp-text" required>
+                    <label>المبلغ</label>
+                </div>
+                <div class="input-form">
+                    <select hidden name="payment_method" id="paymentMethod" class="inp-text" required>
+                        <option value="cash">نقدي</option>
+                        
+                    </select>
+                
+                </div>
+                <div class="input-form">
+                    <input type="text" name="notes" id="paymentNotes" class="inp-text">
+                    <label>ملاحظات</label>
+                </div>
+                <button type="submit" class="button2">
+                    <span class="button-content">تأكيد الدفع</span>
+                </button>
+            </form>
+        </div>
     </div>
 
     <section class="left-side">
@@ -815,11 +898,11 @@
                                             <strong>:تكلفة المواد</strong>
                                         </div>
                                         @php
-                                            $total = ($checkoutDetails['manual_rate'] !== null
-                                                ? $checkoutDetails['manual_rate']
-                                                : $checkoutDetails['base_parking_price']
-                                            ) + $checkoutDetails['items_price'] + $checkoutDetails['services_price'];
-                                            $roundedTotal = ceil($total / 100) * 100;
+    $total = ($checkoutDetails['manual_rate'] !== null
+        ? $checkoutDetails['manual_rate']
+        : $checkoutDetails['base_parking_price']
+    ) + $checkoutDetails['items_price'] + $checkoutDetails['services_price'];
+    $roundedTotal = ceil($total / 100) * 100;
                                         @endphp
                                         <div class="detail">
                                             <p>{{ number_format($roundedTotal, 2) }}</p>
@@ -1590,6 +1673,129 @@
             panel.style.display = 'none';
         }
     });
+
+    // Add this to your existing JavaScript
+    document.addEventListener('DOMContentLoaded', function() {
+        const statusToggles = document.querySelectorAll('.status-toggle');
+        
+        statusToggles.forEach(toggle => {
+            toggle.addEventListener('change', function() {
+                const parkingSlotId = this.dataset.parkingSlotId;
+                
+                fetch(`/dashboard/toggle-status/${parkingSlotId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Show success message
+                        alert(data.message);
+                    } else {
+                        // Revert the toggle if there was an error
+                        this.checked = !this.checked;
+                        alert(data.message);
+                    }
+                })
+                .catch(error => {
+                    // Revert the toggle if there was an error
+                    this.checked = !this.checked;
+                    alert('An error occurred while updating the status');
+                });
+            });
+        });
+    });
+
+    // Declare variables at the top
+    let currentParkingSlotId = null;
+    let parkingSlotId = 0;
+
+    function openPaymentModal(id) {
+        currentParkingSlotId = id;
+        const modal = document.getElementById('paymentModal');
+        modal.style.display = "block";
+        
+        // Fetch payment history
+        fetch(`/monthly-payments/${id}/history`)
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('totalAmount').textContent = data.total_amount;
+                document.getElementById('paidAmount').textContent = data.paid_amount;
+                document.getElementById('remainingAmount').textContent = data.remaining_amount;
+                document.getElementById('paymentAmount').max = data.remaining_amount;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('حدث خطأ أثناء جلب معلومات الدفع');
+            });
+    }
+
+    function closePaymentModal() {
+        const modal = document.getElementById('paymentModal');
+        modal.style.display = "none";
+        currentParkingSlotId = null;
+        // Reset form
+        document.getElementById('paymentForm').reset();
+    }
+
+    // Add event listeners when the DOM is loaded
+    document.addEventListener('DOMContentLoaded', function() {
+        // Handle form submission
+        const paymentForm = document.getElementById('paymentForm');
+        if (paymentForm) {
+            paymentForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const formData = {
+                    amount: document.getElementById('paymentAmount').value,
+                    payment_method: document.getElementById('paymentMethod').value,
+                    notes: document.getElementById('paymentNotes').value
+                };
+                
+                fetch(`/monthly-payments/${currentParkingSlotId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    },
+                    body: JSON.stringify(formData)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('تم تسجيل الدفع بنجاح');
+                        closePaymentModal();
+                        location.reload();
+                    } else {
+                        alert(data.message || 'حدث خطأ أثناء تسجيل الدفع');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('حدث خطأ أثناء تسجيل الدفع');
+                });
+            });
+        }
+
+        // Handle modal close button
+        const closeButton = document.querySelector('#paymentModal .close');
+        if (closeButton) {
+            closeButton.addEventListener('click', closePaymentModal);
+        }
+
+        // Handle clicking outside modal
+        const modal = document.getElementById('paymentModal');
+        if (modal) {
+            modal.addEventListener('click', function(event) {
+                if (event.target === this) {
+                    closePaymentModal();
+                }
+            });
+        }
+    });
 </script>
 
-</html>
+</html> 

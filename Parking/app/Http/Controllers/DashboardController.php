@@ -386,10 +386,42 @@ class DashboardController extends Controller
         $history = ParkingStatusHistory::with(['parkingSlot.vics'])
             ->where('customer_id', $customer_id)
             ->orderBy('changed_at', 'desc')
-            ->get();
+            ->get()
+            ->map(function ($record) {
+                // Convert UTC time to local time for display
+                $record->changed_at = $record->changed_at->setTimezone('Asia/Amman');
+                return $record;
+            });
 
         return view('dashboard.status-history', [
             'history' => $history
         ]);
+    }
+
+    public function updateStatusTime(Request $request)
+    {
+        try {
+            $request->validate([
+                'record_id' => 'required|exists:parking_status_histories,id',
+                'new_time' => 'required|date'
+            ]);
+
+            $record = ParkingStatusHistory::findOrFail($request->record_id);
+            
+            // Convert the input time to UTC before saving
+            $newTime = Carbon::parse($request->new_time, 'Asia/Amman')->setTimezone('UTC');
+            $record->changed_at = $newTime;
+            $record->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'تم تحديث الوقت بنجاح'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'حدث خطأ أثناء تحديث الوقت: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }

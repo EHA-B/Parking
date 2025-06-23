@@ -6,6 +6,7 @@ use App\Http\Controllers\HistoryController;
 use App\Http\Controllers\ItemController;
 use App\Http\Controllers\PricingController;
 use App\Http\Controllers\ServiceController;
+use App\Http\Controllers\MonthlyPaymentController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -19,6 +20,7 @@ Route::post('/dashboard/confirm-checkout', [DashboardController::class, 'confirm
 Route::get('/dashboard/check-parcode', [DashboardController::class, 'checkParcode'])->name('dashboard.check-parcode');
 Route::post('/dashboard/add_service/{vic_id}/{parking_slot_id}', [DashboardController::class, 'add_service'])->name('dashboard.add_service');
 Route::post('/dashboard/toggle-status/{parking_slot_id}', [DashboardController::class, 'toggleStatus'])->name('dashboard.toggle-status');
+Route::post('/dashboard/update-status-time', [DashboardController::class, 'updateStatusTime'])->name('dashboard.update-status-time');
 
 // Replace the existing resource route with these explicit routes
 Route::get('/customers', [CustomerController::class, 'index'])->name('customers.index');
@@ -41,3 +43,7 @@ Route::get('items-services', [ItemController::class, 'index'])->name('items-serv
 Route::get('/history/report', [HistoryController::class, 'generateReport'])->name('history.report');
 
 Route::get('/dashboard/status-history/{customer_id}', [DashboardController::class, 'viewStatusHistory'])->name('dashboard.status-history');
+
+// Monthly Payment Routes
+Route::post('/monthly-payments/{parkingSlot}', [MonthlyPaymentController::class, 'store'])->name('monthly-payments.store');
+Route::get('/monthly-payments/{parkingSlot}/history', [MonthlyPaymentController::class, 'getPaymentHistory'])->name('monthly-payments.history');
