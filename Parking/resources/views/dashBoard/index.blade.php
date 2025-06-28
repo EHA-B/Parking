@@ -1749,14 +1749,12 @@
     });
 
     // Declare variables at the top
-    let parkingSlotId = 0;
+    let currentParkingSlotId = null;
     
     function openPaymentModal(id) {
-       
-       let currentParkingSlotId = id;
+        currentParkingSlotId = id;
         const modal = document.getElementById('paymentModal');
         modal.style.display = "block";
-        
         // Fetch payment history
         fetch(`/monthly-payments/${id}/history`)
             .then(response => response.json())
@@ -1770,6 +1768,8 @@
                 console.error('Error:', error);
                 alert('حدث خطأ أثناء جلب معلومات الدفع');
             });
+        // Reset form
+        document.getElementById('paymentForm').reset();
     }
 
     function closePaymentModal() {
