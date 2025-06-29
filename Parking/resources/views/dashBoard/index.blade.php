@@ -402,7 +402,6 @@
 
 <body>
     <!-- Add modal HTML structure -->
-    <h1>Hello</h1>
     <div id="carModal" class="modal">
         <div class="modal-content">
             <span class="close-modal" onclick="closeCarModal()">&times;</span>
