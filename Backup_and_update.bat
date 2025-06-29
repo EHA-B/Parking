@@ -43,7 +43,7 @@ echo Updating from git repository...
 cd /d "%GIT_REPO_PATH%"
 git add .
 git commit -m "Backup and update"
-git pull origin saleem
+git pull origin main
 
 if errorlevel 1 (
     echo Error occurred during git update
