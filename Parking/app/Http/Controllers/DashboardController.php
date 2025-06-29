@@ -74,7 +74,8 @@ class DashboardController extends Controller
             'time_in' => Carbon::now(),
             'time_out' => null,
             'notes' => $request->notes ?? " ",
-            'parking_type' => $request->parking_type ?? 'hourly'
+            'parking_type' => $request->parking_type ?? 'hourly',
+            'status' => 'in'
         ]);
 
         // Return the parcode with the redirect
@@ -105,7 +106,8 @@ class DashboardController extends Controller
             'time_in' => Carbon::now(),
             'time_out' => null,
             'notes' => $request->notes ?? " ",
-            'parking_type' => $request->parking_type ?? 'hourly'
+            'parking_type' => $request->parking_type ?? 'hourly',
+            'status' => 'in'
         ]);
 
         // Return the parcode with the redirect
@@ -407,7 +409,7 @@ class DashboardController extends Controller
             ]);
 
             $record = ParkingStatusHistory::findOrFail($request->record_id);
-            
+
             // Convert the input time to UTC before saving
             $newTime = Carbon::parse($request->new_time, 'Asia/Amman')->setTimezone('UTC');
             $record->changed_at = $newTime;

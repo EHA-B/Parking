@@ -31,6 +31,11 @@ Route::get('/customers/{customer}/edit', [CustomerController::class, 'edit'])->n
 Route::put('/customers/{customer}', [CustomerController::class, 'update'])->name('customers.update');
 Route::delete('/customers/{customer}', [CustomerController::class, 'destroy'])->name('customers.destroy');
 
+// Vehicle management routes
+Route::post('/customers/{customer}/vehicles', [CustomerController::class, 'addVehicle'])->name('customers.vehicles.store');
+Route::put('/customers/vehicles/{vic}', [CustomerController::class, 'updateVehicle'])->name('customers.vehicles.update');
+Route::delete('/customers/vehicles/{vic}', [CustomerController::class, 'deleteVehicle'])->name('customers.vehicles.destroy');
+
 Route::get('/pricing', [PricingController::class, 'index'])->name('pricing.index');
 Route::post('/pricing/update', [PricingController::class, 'update'])->name('pricing.update');
 

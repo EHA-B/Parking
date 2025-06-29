@@ -217,7 +217,7 @@ form{
 .table1 tbody {
     display: block;
     overflow-y: auto;
-    max-height: 86vh;
+    max-height: 80vh;
     overflow-x: hidden;
 }
 .table1 thead, .table1 tbody tr {

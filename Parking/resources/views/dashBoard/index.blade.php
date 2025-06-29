@@ -57,12 +57,12 @@
         .table1 {
             display: flex;
             flex-direction: column;
-            height: 100%;
+            height: 80%;
         }
 
         .body-overflow {
             display: block;
-            max-height: 500px;
+            max-height: 400px;
             overflow-y: auto;
         }
 
@@ -75,6 +75,7 @@
         .table1 tbody {
             display: block;
             width: 100%;
+            max-height:90%
         }
 
         .table1 tr {
@@ -181,24 +182,14 @@
             display: none;
             position: fixed;
             z-index: 1000;
-            left: 0;
-            top: 0;
+            place-self:center;
+            place-items:center;
+            place-content:center;
             width: 100%;
             height: 100%;
             background-color: rgba(0, 0, 0, 0.5);
         }
 
-        .modal-content {
-            background-color: #fefefe;
-            margin: 5% auto;
-            padding: 20px;
-            border: 1px solid #888;
-            height: 70%;
-            max-width: 500px;
-            border-radius: 8px;
-            position: relative;
-            overflow-y: scroll;
-        }
 
         .close-modal {
             color: #aaa;
@@ -379,6 +370,8 @@
             width: 80%;
             max-width: 500px;
             border-radius: 5px;
+            place-self:center;
+            height:60vh;
         }
 
         .close {
@@ -1711,41 +1704,6 @@
         if (!container.contains(event.target)) {
             panel.style.display = 'none';
         }
-    });
-
-    // Add this to your existing JavaScript
-    document.addEventListener('DOMContentLoaded', function() {
-        const statusToggles = document.querySelectorAll('.status-toggle');
-        
-        statusToggles.forEach(toggle => {
-            toggle.addEventListener('change', function() {
-                const parkingSlotId = this.dataset.parkingSlotId;
-                
-                fetch(`/dashboard/toggle-status/${parkingSlotId}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        // Show success message
-                        alert(data.message);
-                    } else {
-                        // Revert the toggle if there was an error
-                        this.checked = !this.checked;
-                        alert(data.message);
-                    }
-                })
-                .catch(error => {
-                    // Revert the toggle if there was an error
-                    this.checked = !this.checked;
-                    alert('An error occurred while updating the status');
-                });
-            });
-        });
     });
 
     // Declare variables at the top
