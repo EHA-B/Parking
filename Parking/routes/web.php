@@ -14,6 +14,8 @@ Route::get('/', [DashboardController::class, 'index'])->name('dashboard.index');
 Route::post('/dashboard/new', [DashboardController::class, 'newCustomer'])->name('dashboard.new');
 Route::post('/dashboard/old', [DashboardController::class, 'oldCustomer'])->name('dashboard.old');
 Route::get('/get-customer-vehicles/{customerId}', [DashboardController::class, 'getCustomerVehicles']);
+Route::get('/check-customer-exists', [DashboardController::class, 'checkCustomerExists'])->name('dashboard.check-customer-exists');
+Route::post('/dashboard/use-existing-customer', [DashboardController::class, 'useExistingCustomer'])->name('dashboard.use-existing-customer');
 
 Route::get('/dashboard/checkout/{parcode}', [DashboardController::class, 'checkout'])->name('dashboard.checkout');
 Route::post('/dashboard/confirm-checkout', [DashboardController::class, 'confirmCheckout'])->name('dashboard.confirm-checkout');

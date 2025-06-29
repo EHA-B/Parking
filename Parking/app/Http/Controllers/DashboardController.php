@@ -47,7 +47,88 @@ class DashboardController extends Controller
 
         return response()->json($vehicles);
     }
-    // ... existing code ...
+
+    // Method to check if a customer exists by name
+    public function checkCustomerExists(Request $request)
+    {
+        $name = trim($request->query('name'));
+        
+        if (!$name || strlen($name) < 2) {
+            return response()->json(['exists' => false]);
+        }
+
+        // Search for customers with similar names (case-insensitive)
+        $customers = Customer::whereRaw('LOWER(name) LIKE ?', ['%' . strtolower($name) . '%'])
+            ->with('vics')
+            ->limit(5)
+            ->get();
+        
+        if ($customers->count() > 0) {
+            return response()->json([
+                'exists' => true,
+                'customers' => $customers->map(function($customer) {
+                    return [
+                        'id' => $customer->id,
+                        'name' => $customer->name,
+                        'phone' => $customer->phone,
+                        'vehicles' => $customer->vics->map(function($vic) {
+                            return [
+                                'id' => $vic->id,
+                                'brand' => $vic->brand,
+                                'plate' => $vic->plate,
+                                'typ' => $vic->typ
+                            ];
+                        })
+                    ];
+                })
+            ]);
+        }
+
+        return response()->json(['exists' => false]);
+    }
+
+    public function useExistingCustomer(Request $request)
+    {
+        // Validate the request
+        $request->validate([
+            'customer_id' => 'required|exists:customers,id',
+            'vehicle_type' => 'required|in:مركبة كبيرة,مركبة صغيرة',
+            'brand' => 'required|string|max:255',
+            'plate' => 'required|string|max:20|unique:vics,plate',
+            'parking_type' => 'required|in:hourly,daily,monthly',
+            'manual_rate' => 'nullable|numeric|min:0',
+            'notes' => 'nullable|string|max:500'
+        ]);
+
+        // Find the existing customer
+        $customer = Customer::findOrFail($request->customer_id);
+
+        // Create a new vehicle for the existing customer
+        $vic = Vic::create([
+            'typ' => $request->vehicle_type,
+            'brand' => $request->brand,
+            'plate' => $request->plate,
+            'customer_id' => $customer->id
+        ]);
+
+        $parcode = $customer->id . $vic->id . $vic->plate;
+
+        // Create a new parking slot entry
+        $parking = ParkingSlot::create([
+            'price' => $request->manual_rate ? $request->manual_rate : null,
+            'vic_id' => $vic->id,
+            'parcode' => $parcode,
+            'time_in' => Carbon::now(),
+            'time_out' => null,
+            'notes' => $request->notes ?? " ",
+            'parking_type' => $request->parking_type ?? 'hourly',
+            'status' => 'in'
+        ]);
+
+        // Return the parcode with the redirect
+        return redirect()->route('dashboard.index')->with('new_parcode', $parcode);
+    }
+
     public function oldCustomer(Request $request)
     {
         // Find the existing customer
@@ -84,6 +165,15 @@ class DashboardController extends Controller
 
     public function newCustomer(Request $request)
     {
+        // Check if customer already exists
+        $existingCustomer = Customer::where('name', $request->name)->first();
+        
+        if ($existingCustomer) {
+            return redirect()->back()
+                ->withInput()
+                ->withErrors(['name' => 'هذا العميل موجود بالفعل في النظام. يرجى استخدام بيانات العميل الموجود.']);
+        }
+
         $customer = Customer::create([
             'name' => $request->name,
             'phone' => $request->phone,

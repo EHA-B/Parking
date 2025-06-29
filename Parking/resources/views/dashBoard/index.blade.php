@@ -397,6 +397,56 @@
             margin: 10px 0;
             font-size: 16px;
         }
+
+        /* Customer info display styles */
+        .customer-info {
+            background-color: #e8f5e8;
+            border: 1px solid #28a745;
+            border-radius: 5px;
+            padding: 10px;
+            margin: 10px 0;
+            display: none;
+        }
+
+        .customer-info h4 {
+            color: #28a745;
+            margin: 0 0 10px 0;
+        }
+
+        .customer-vehicles {
+            margin-top: 10px;
+        }
+
+        .vehicle-item {
+            background-color: #f8f9fa;
+            padding: 5px 10px;
+            margin: 5px 0;
+            border-radius: 3px;
+            border-left: 3px solid #28a745;
+        }
+
+        .use-existing-customer {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .use-existing-customer:hover {
+            background-color: #218838;
+        }
+
+        .customer-warning {
+            background-color: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 5px;
+            padding: 10px;
+            margin: 10px 0;
+            display: none;
+        }
     </style>
 </head>
 
@@ -417,7 +467,27 @@
                             <input type="text" name="name" class="inp-text" placeholder="name...." id="nameInput"
                                 required>
                             <label for="nameInput">: الاسم الكامل</label>
+                            @if ($errors->has('name'))
+                                <div class="error-feedback" style="color: red; font-size: 12px; margin-top: 5px;">
+                                    {{ $errors->first('name') }}
+                                </div>
+                            @endif
                         </div>
+                        
+                        <!-- Customer info display for car modal -->
+                        <div id="carCustomerInfo" class="customer-info">
+                            <h4>تم العثور على عميل موجود:</h4>
+                            <p><strong>الاسم:</strong> <span id="carCustomerName"></span></p>
+                            <p><strong>الهاتف:</strong> <span id="carCustomerPhone"></span></p>
+                            <div class="customer-vehicles">
+                                <strong>المركبات المسجلة:</strong>
+                                <div id="carCustomerVehicles"></div>
+                            </div>
+                            <button type="button" class="use-existing-customer" onclick="useExistingCustomer('car')">
+                                استخدم هذا العميل
+                            </button>
+                        </div>
+                        
                         <div class="input-form" id="newCustomerPhone">
                             <input type="text" name="phone" class="inp-text" placeholder="phone...." id="phoneInput"
                                 required>
@@ -435,6 +505,11 @@
                             <input type="text" name="plate" class="inp-text" placeholder="plate...." id="plateInput"
                                 required>
                             <label for="plateInput">: رقم اللوحة</label>
+                            @if ($errors->has('plate'))
+                                <div class="error-feedback" style="color: red; font-size: 12px; margin-top: 5px;">
+                                    {{ $errors->first('plate') }}
+                                </div>
+                            @endif
                         </div>
                         <div class="input-form">
                             <select name="parking_type" id="parkingType" onchange="toggleManualPricing()"
@@ -595,7 +670,27 @@
                             <input type="text" name="name" class="inp-text" placeholder="name...." id="motorNameInput"
                                 required>
                             <label for="motorNameInput">: الاسم الكامل</label>
+                            @if ($errors->has('name'))
+                                <div class="error-feedback" style="color: red; font-size: 12px; margin-top: 5px;">
+                                    {{ $errors->first('name') }}
+                                </div>
+                            @endif
                         </div>
+                        
+                        <!-- Customer info display for motor modal -->
+                        <div id="motorCustomerInfo" class="customer-info">
+                            <h4>تم العثور على عميل موجود:</h4>
+                            <p><strong>الاسم:</strong> <span id="motorCustomerName"></span></p>
+                            <p><strong>الهاتف:</strong> <span id="motorCustomerPhone"></span></p>
+                            <div class="customer-vehicles">
+                                <strong>المركبات المسجلة:</strong>
+                                <div id="motorCustomerVehicles"></div>
+                            </div>
+                            <button type="button" class="use-existing-customer" onclick="useExistingCustomer('motor')">
+                                استخدم هذا العميل
+                            </button>
+                        </div>
+                        
                         <div class="input-form" id="motorCustomerPhone">
                             <input type="text" name="phone" class="inp-text" placeholder="phone...."
                                 id="motorPhoneInput" required>
@@ -613,6 +708,11 @@
                             <input type="text" name="plate" class="inp-text" placeholder="plate...."
                                 id="motorPlateInput" required>
                             <label for="motorPlateInput">: رقم اللوحة</label>
+                            @if ($errors->has('plate'))
+                                <div class="error-feedback" style="color: red; font-size: 12px; margin-top: 5px;">
+                                    {{ $errors->first('plate') }}
+                                </div>
+                            @endif
                         </div>
                         <div class="input-form">
                             <select name="parking_type" id="motorParkingType" onchange="toggleMotorManualPricing()"
@@ -955,7 +1055,27 @@
 
         <script>
             function carFormPopup() {
-
+                const modal = document.getElementById('carModal');
+                modal.style.display = "block";
+                
+                // Reset form action to new customer route
+                const form = document.getElementById('form1');
+                form.action = "{{ route('dashboard.new') }}";
+                
+                // Remove customer_id field if it exists
+                const customerIdField = form.querySelector('input[name="customer_id"]');
+                if (customerIdField) {
+                    customerIdField.remove();
+                }
+                
+                // Clear customer info display
+                hideCustomerInfo('car');
+                
+                // Automatically select "مركبة كبيرة" in the vehicle type dropdown
+                const vehicleTypeSelect = modal.querySelector('#typInput');
+                if (vehicleTypeSelect) {
+                    vehicleTypeSelect.value = "مركبة كبيرة";
+                }
             }
 
 
@@ -1413,6 +1533,22 @@
             });
         }
 
+        // Add event listeners for customer name checking
+        const carNameInput = document.getElementById('nameInput');
+        const motorNameInput = document.getElementById('motorNameInput');
+
+        if (carNameInput) {
+            carNameInput.addEventListener('input', (e) => {
+                debouncedCustomerCheck(e.target.value, 'car');
+            });
+        }
+
+        if (motorNameInput) {
+            motorNameInput.addEventListener('input', (e) => {
+                debouncedCustomerCheck(e.target.value, 'motor');
+            });
+        }
+
         // Event delegation for notification panel
         document.addEventListener('click', function (event) {
             const panel = document.getElementById('notificationPanel');
@@ -1489,6 +1625,19 @@
         const modal = document.getElementById('carModal');
         modal.style.display = "block";
         
+        // Reset form action to new customer route
+        const form = document.getElementById('form1');
+        form.action = "{{ route('dashboard.new') }}";
+        
+        // Remove customer_id field if it exists
+        const customerIdField = form.querySelector('input[name="customer_id"]');
+        if (customerIdField) {
+            customerIdField.remove();
+        }
+        
+        // Clear customer info display
+        hideCustomerInfo('car');
+        
         // Automatically select "مركبة كبيرة" in the vehicle type dropdown
         const vehicleTypeSelect = modal.querySelector('#typInput');
         if (vehicleTypeSelect) {
@@ -1525,6 +1674,19 @@
     function motorFormPopup() {
         const modal = document.getElementById('motorModal');
         modal.style.display = "block";
+        
+        // Reset form action to new customer route
+        const form = document.getElementById('motorForm');
+        form.action = "{{ route('dashboard.new') }}";
+        
+        // Remove customer_id field if it exists
+        const customerIdField = form.querySelector('input[name="customer_id"]');
+        if (customerIdField) {
+            customerIdField.remove();
+        }
+        
+        // Clear customer info display
+        hideCustomerInfo('motor');
     }
 
     function closeMotorModal() {
@@ -1708,6 +1870,114 @@
 
     // Declare variables at the top
     let currentParkingSlotId = null;
+    let existingCustomerData = null;
+    
+    // Function to check if customer exists
+    function checkCustomerExists(name, modalType) {
+        if (name.length < 2) {
+            hideCustomerInfo(modalType);
+            return;
+        }
+
+        fetch(`{{ route('dashboard.check-customer-exists') }}?name=${encodeURIComponent(name)}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.exists) {
+                    showCustomerInfo(data.customers, modalType);
+                    if (data.customers.length === 1) {
+                        existingCustomerData = data.customers[0];
+                    } else {
+                        existingCustomerData = null;
+                    }
+                } else {
+                    hideCustomerInfo(modalType);
+                    existingCustomerData = null;
+                }
+            })
+            .catch(error => {
+                console.error('Error checking customer:', error);
+                hideCustomerInfo(modalType);
+            });
+    }
+
+    // Function to show customer info
+    function showCustomerInfo(customers, modalType) {
+        const infoDiv = document.getElementById(`${modalType}CustomerInfo`);
+        const nameSpan = document.getElementById(`${modalType}CustomerName`);
+        const phoneSpan = document.getElementById(`${modalType}CustomerPhone`);
+        const vehiclesDiv = document.getElementById(`${modalType}CustomerVehicles`);
+
+        nameSpan.textContent = customer.name;
+        phoneSpan.textContent = customer.phone;
+
+        // Display vehicles
+        vehiclesDiv.innerHTML = '';
+        customer.vehicles.forEach(vehicle => {
+            const vehicleItem = document.createElement('div');
+            vehicleItem.className = 'vehicle-item';
+            vehicleItem.innerHTML = `
+                <strong>${vehicle.brand}</strong> - ${vehicle.plate} (${vehicle.typ})
+            `;
+            vehiclesDiv.appendChild(vehicleItem);
+        });
+
+        infoDiv.style.display = 'block';
+    }
+
+    // Function to hide customer info
+    function hideCustomerInfo(modalType) {
+        const infoDiv = document.getElementById(`${modalType}CustomerInfo`);
+        infoDiv.style.display = 'none';
+    }
+
+    // Function to use existing customer
+    function useExistingCustomer(modalType, customer = null) {
+        const customerToUse = customer || existingCustomerData;
+        if (!customerToUse) return;
+
+        const nameInput = document.getElementById(`${modalType}NameInput`);
+        const phoneInput = document.getElementById(`${modalType}PhoneInput`);
+        const formId = modalType === 'car' ? 'form1' : 'motorForm';
+        const form = document.getElementById(formId);
+
+        // Set the form values
+        nameInput.value = customerToUse.name;
+        phoneInput.value = customerToUse.phone;
+
+        // Add or update hidden customer_id field
+        let customerIdField = form.querySelector('input[name="customer_id"]');
+        if (!customerIdField) {
+            customerIdField = document.createElement('input');
+            customerIdField.type = 'hidden';
+            customerIdField.name = 'customer_id';
+            form.appendChild(customerIdField);
+        }
+        customerIdField.value = customerToUse.id;
+
+        // Change form action to use existing customer route
+        form.action = "{{ route('dashboard.use-existing-customer') }}";
+
+        // Hide the customer info display
+        hideCustomerInfo(modalType);
+
+        // Show a success message
+        alert(`تم استخدام بيانات العميل: ${customerToUse.name}`);
+    }
+
+    // Debounce function for customer name checking
+    function debounceCustomerCheck(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+
+    const debouncedCustomerCheck = debounceCustomerCheck(checkCustomerExists, 500);
     
     function openPaymentModal(id) {
         currentParkingSlotId = id;
