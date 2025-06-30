@@ -569,7 +569,7 @@
 
                 <!-- Filtered Search -->
                 <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
-                    <select id="parkingTypeFilter" class="select2-search" >
+                    <select id="parkingTypeFilter" class="select2-search1" >
                         <option value="all">جميع الانواع</option>
                         <option value="hourly">ساعي</option>
                         <option value="daily">يومي</option>
@@ -811,7 +811,7 @@
                         src="{{ asset('build/assets/history.svg') }}" alt="history" width="40px" loading="lazy"></a>
                 <a href="{{route('items-services.index')}}" class="history" id="pass3"><img
                         src="{{ asset('build/assets/serv.svg') }}" alt="items_services" width="40px" loading="lazy"></a>
-                <a href="{{route('box.index')}}" class="box" id="box"><img
+                <a href="{{route('box.index')}}" class="history" id="pass4"><img
                         src="{{ asset('build/assets/box.svg') }}" alt="box" width="40px" loading="lazy"></a>
                         
 
@@ -841,6 +841,14 @@
                         // If correct, navigation proceeds
                     });
                     document.getElementById('pass3').addEventListener('click', function (event) {
+                        var password = prompt("ادخل كلمة المرور:");
+                        if (password !== "123456") {
+                            event.preventDefault(); // Block navigation if password is wrong
+                            alert("كلمة المرور غير صحيحة");
+                        }
+                        // If correct, navigation proceeds
+                    });
+                    document.getElementById('pass4').addEventListener('click', function (event) {
                         var password = prompt("ادخل كلمة المرور:");
                         if (password !== "123456") {
                             event.preventDefault(); // Block navigation if password is wrong

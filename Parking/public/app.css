@@ -278,8 +278,9 @@ form{
     color: #fff;
     border: none;
     cursor: pointer;
-    
+    text-decoration: none;    
 }
+
 
 .button2:hover::before {
     transform: scaleX(1);
@@ -723,6 +724,20 @@ a.cta {
 .select2-search{
     width: 120px;
     padding: 5px;
+    
+    color: white;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    font-family: 'Cairo',sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-decoration: none;
+}
+.select2-search1{
+    width: 120px;
+    padding: 5px;
     background-color: var(--secondary-color);
     color: white;
     border-radius: 5px;
@@ -734,3 +749,70 @@ a.cta {
     letter-spacing: 0.05em;
     text-decoration: none;
 }
+ .all {
+    display: flex;
+    flex-direction: column;
+    background-color: var(--whites);
+    place-self: center;
+ }
+
+ .form2 {
+     display: flex;
+     flex-direction: column;
+     gap: 10px;
+     margin-bottom: 20px;
+ }
+
+ .input-form {
+     display: flex;
+     flex-direction: column;
+     gap: 5px;
+ }
+
+ .income-outcome-container {
+     display: flex;
+     gap: 40px;
+     margin-bottom: 30px;
+ }
+
+ .income-box,
+ .outcome-box {
+     flex: 1;
+     background: #f8f9fa;
+     border-radius: 8px;
+     padding: 20px;
+     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+     flex-direction: column;
+     align-content: space-between;
+ }
+ .outcome-box button{
+    margin-top: 9.5vh;
+ }
+
+ .table1 {
+     width: 100%;
+     border-collapse: collapse;
+     margin-top: 20px;
+     color: #000;
+ }
+
+ .table1 th,
+ .table1 td {
+     border: 1px solid #ddd;
+     padding: 8px;
+     text-align: center;
+     background-color: white;
+ }
+
+ .table1 th {
+     background: #e9ecef;
+ }
+
+ .title {
+     text-align: center;
+     margin: 30px 0 20px 0;
+ }
+ .select2-selection{
+    width: 25vh;
+    place-self: center;
+ }
