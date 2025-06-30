@@ -389,6 +389,14 @@ class DashboardController extends Controller
             'parking_type' => $parking_slot->parking_type
         ]);
 
+        // Add to box as income
+        \App\Models\BoxTransaction::create([
+            'amount' => $total,
+            'type' => 'income',
+            'customer_id' => $customer->id,
+            'notes' => 'دفع عند الخروج للعميل: ' . $customer->name
+        ]);
+
         $parking_slot->delete();
 
         // Redirect back to the dashboard
