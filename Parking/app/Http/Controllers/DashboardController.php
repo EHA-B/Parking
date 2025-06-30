@@ -523,19 +523,22 @@ class DashboardController extends Controller
 
     public function extendMonthly(ParkingSlot $parkingSlot)
     {
-        if ($parkingSlot->parking_type !== 'monthly') {
-            return response()->json(['success' => false, 'message' => 'Not a monthly slot'], 400);
+        if ($parkingSlot->parking_type !== 'monthly' || $parkingSlot->time_out) {
+            return response()->json(['success' => false, 'message' => 'Not an active monthly slot'], 400);
         }
-        // Extend by 30 days from NOW
-        $parkingSlot->time_in = now();
-        
+        $vic = $parkingSlot->vics;
+        if (!$vic) {
+            return response()->json(['success' => false, 'message' => 'No vehicle found'], 400);
+        }
         $price_model = \App\Models\Price::first();
-        $is_motorcycle = $parkingSlot->vics->typ === 'مركبة صغيرة';
+        if (!$price_model) {
+            return response()->json(['success' => false, 'message' => 'No price model found'], 500);
+        }
+        $is_motorcycle = $vic->typ === 'مركبة صغيرة';
         $add_price = $is_motorcycle ? $price_model->moto_monthly_rate : $price_model->car_monthly_rate;
-        
+        $parkingSlot->time_in = \Carbon\Carbon::parse($parkingSlot->time_in)->addDays(30);
         $parkingSlot->price += $add_price;
         $parkingSlot->save();
-        
         return response()->json(['success' => true]);
     }
 

@@ -1708,15 +1708,27 @@
         const notifications = JSON.parse(localStorage.getItem('notifications') || '[]');
         const deletedNotifications = JSON.parse(localStorage.getItem('deletedNotifications') || '[]');
         
+        console.log('Checking expired subscriptions...');
+        console.log('Current time:', now);
+        
         parkingSlots.forEach(slot => {
             if (slot.parking_type === 'monthly') {
                 const timeIn = new Date(slot.time_in);
+                console.log('Checking slot:', {
+                    customer: slot.vics.customer.name,
+                    plate: slot.vics.plate,
+                    timeIn: timeIn,
+                    parkingType: slot.parking_type
+                });
                 
                 // Calculate the difference in days
                 const diffTime = Math.abs(now - timeIn);
                 const daysDiff = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
                 
+                console.log('Days difference:', daysDiff);
+                
                 if (daysDiff >= 30) {
+                    console.log('Subscription expired for:', slot.vics.customer.name);
                     const notificationExists = notifications.some(n => 
                         n.parkingSlotId === slot.id && n.type === 'expired_subscription'
                     );
@@ -1725,6 +1737,7 @@
                     const wasDeleted = deletedNotifications.includes(slot.id);
                     
                     if (!notificationExists && !wasDeleted) {
+                        console.log('Creating new notification');
                         notifications.push({
                             id: Date.now(),
                             parkingSlotId: slot.id,
@@ -1733,6 +1746,8 @@
                             isRead: false,
                             createdAt: new Date().toISOString()
                         });
+                    } else {
+                        console.log('Notification already exists or was deleted');
                     }
                 }
             }
@@ -1763,8 +1778,7 @@
         notificationList.innerHTML = notifications.map(notification => {
             const date = new Date(notification.createdAt);
             const formattedDate = date.toLocaleDateString('en-US', {
-                year: 'numeric', month: '2-digit', day: '2-digit',
-                hour: '2-digit', minute: '2-digit'
+                year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit'
             });
             return `
                 <div class="notification-item ${notification.isRead ? '' : 'unread'}">
@@ -1797,9 +1811,7 @@
                 alert(data.message || 'حدث خطأ أثناء التمديد');
             }
         })
-        .catch(error => {
-            alert('حدث خطأ أثناء التمديد');
-        });
+        .catch(() => alert('حدث خطأ أثناء التمديد'));
     }
 
     function goToCheckout(parkingSlotId) {
@@ -1812,9 +1824,7 @@
                     alert('لم يتم العثور على رمز الوقوف');
                 }
             })
-            .catch(error => {
-                alert('حدث خطأ أثناء الذهاب إلى الخروج');
-            });
+            .catch(() => alert('حدث خطأ أثناء الذهاب إلى الخروج'));
     }
 
     function deleteNotification(notificationId) {
@@ -1863,6 +1873,7 @@
 
     // Check for expired subscriptions when the page loads
     document.addEventListener('DOMContentLoaded', function() {
+        console.log('Page loaded, checking subscriptions...');
         checkExpiredSubscriptions();
         
         // Check every minute for testing (you can change this back to 3600000 for production)
