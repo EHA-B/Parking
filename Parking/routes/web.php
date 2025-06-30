@@ -7,6 +7,7 @@ use App\Http\Controllers\ItemController;
 use App\Http\Controllers\PricingController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\MonthlyPaymentController;
+use App\Http\Controllers\BoxController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -54,3 +55,12 @@ Route::get('/dashboard/status-history/{customer_id}', [DashboardController::clas
 // Monthly Payment Routes
 Route::post('/monthly-payments/{parkingSlot}', [MonthlyPaymentController::class, 'store'])->name('monthly-payments.store');
 Route::get('/monthly-payments/{parkingSlot}/history', [MonthlyPaymentController::class, 'getPaymentHistory'])->name('monthly-payments.history');
+
+// Box (income/outcome) routes
+Route::get('/box', [BoxController::class, 'index'])->name('box.index');
+Route::post('/box/income', [BoxController::class, 'storeIncome'])->name('box.income.store');
+Route::post('/box/outcome', [BoxController::class, 'storeOutcome'])->name('box.outcome.store');
+
+// Extend monthly slot and get parcode for notifications
+Route::post('/dashboard/extend-monthly/{parkingSlot}', [DashboardController::class, 'extendMonthly'])->name('dashboard.extend-monthly');
+Route::get('/dashboard/get-parcode/{parkingSlot}', [DashboardController::class, 'getParcode'])->name('dashboard.get-parcode');

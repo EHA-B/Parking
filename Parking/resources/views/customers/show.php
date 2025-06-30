@@ -29,9 +29,15 @@
                     </h3>
                     <h4>:عدد الساعات</h4>
                 </div>
-
-
             </div>
+
+            <?php if ($monthlySlot): ?>
+                <div style="background:#e8f5e8; border:1px solid #28a745; border-radius:8px; padding:20px; margin:20px 0;">
+                    <h3 style="color:#28a745;">حساب الاشتراك الشهري</h3>
+                    <p>المبلغ المستحق: <strong><?php echo number_format($monthlyBalance, 2); ?></strong></p>
+                   
+                </div>
+            <?php endif; ?>
 
             <h3>المركبات</h3>
             <?php if (count($customer->vics) > 0): ?>

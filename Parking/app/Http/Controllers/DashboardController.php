@@ -253,6 +253,11 @@ class DashboardController extends Controller
         // $price_with_services = $total_price + $services_price + $items_price;
 
         // Prepare checkout details to pass to the view
+        $manual_rate = $parking_slot->price;
+        $real_value = $manual_rate;
+        if ($parking_slot->parking_type === 'monthly') {
+            $real_value = $parking_slot->getRemainingAmount();
+        }
         $checkoutDetails = [
             'customer_name' => $customer->name,
             'vehicle_type' => $vic->typ,
@@ -262,10 +267,9 @@ class DashboardController extends Controller
             'duration_minutes' => $duration_minutes,
             'parking_type' => $parking_slot->parking_type,
             'base_parking_price' => $total_price,
-            'manual_rate' => $parking_slot->price,
+            'manual_rate' => $real_value,
             'services_price' => $services_price,
             'items_price' => $items_price,
-
             'vic_id' => $vic_id,
             'parking_slot_id' => $parking_slot->id
         ];
@@ -515,5 +519,28 @@ class DashboardController extends Controller
                 'message' => 'حدث خطأ أثناء تحديث الوقت: ' . $e->getMessage()
             ], 500);
         }
+    }
+
+    public function extendMonthly(ParkingSlot $parkingSlot)
+    {
+        if ($parkingSlot->parking_type !== 'monthly') {
+            return response()->json(['success' => false, 'message' => 'Not a monthly slot'], 400);
+        }
+        // Extend by 30 days from NOW
+        $parkingSlot->time_in = now();
+        
+        $price_model = \App\Models\Price::first();
+        $is_motorcycle = $parkingSlot->vics->typ === 'مركبة صغيرة';
+        $add_price = $is_motorcycle ? $price_model->moto_monthly_rate : $price_model->car_monthly_rate;
+        
+        $parkingSlot->price += $add_price;
+        $parkingSlot->save();
+        
+        return response()->json(['success' => true]);
+    }
+
+    public function getParcode(ParkingSlot $parkingSlot)
+    {
+        return response()->json(['parcode' => $parkingSlot->parcode]);
     }
 }

@@ -640,11 +640,6 @@
                                                     حركة المركبة
                                                 </a>
                                             @endif
-                                            @if($parking_slot->parking_type === 'monthly')
-                                                <button onclick="openPaymentModal({{ $parking_slot->id }})" class="serv-btn">
-                                                    <i class="fas fa-money-bill"></i> دفع
-                                                </button>
-                                            @endif
                                         </td>
                                     </tr>
                     @endforeach
@@ -771,9 +766,7 @@
                 <div class="input-form">
                     <select hidden name="payment_method" id="paymentMethod" class="inp-text" required>
                         <option value="cash">نقدي</option>
-
                     </select>
-
                 </div>
                 <div class="input-form">
                     <input type="text" name="notes" id="paymentNotes" class="inp-text">
@@ -818,6 +811,10 @@
                         src="{{ asset('build/assets/history.svg') }}" alt="history" width="40px" loading="lazy"></a>
                 <a href="{{route('items-services.index')}}" class="history" id="pass3"><img
                         src="{{ asset('build/assets/serv.svg') }}" alt="items_services" width="40px" loading="lazy"></a>
+                <a href="{{route('box.index')}}" class="box" id="box"><img
+                        src="{{ asset('build/assets/box.svg') }}" alt="box" width="40px" loading="lazy"></a>
+                        
+
                 <script>
                     document.getElementById('pass').addEventListener('click', function (event) {
                         var password = prompt("ادخل كلمة المرور:");
@@ -1711,27 +1708,15 @@
         const notifications = JSON.parse(localStorage.getItem('notifications') || '[]');
         const deletedNotifications = JSON.parse(localStorage.getItem('deletedNotifications') || '[]');
         
-        console.log('Checking expired subscriptions...');
-        console.log('Current time:', now);
-        
         parkingSlots.forEach(slot => {
             if (slot.parking_type === 'monthly') {
                 const timeIn = new Date(slot.time_in);
-                console.log('Checking slot:', {
-                    customer: slot.vics.customer.name,
-                    plate: slot.vics.plate,
-                    timeIn: timeIn,
-                    parkingType: slot.parking_type
-                });
                 
                 // Calculate the difference in days
                 const diffTime = Math.abs(now - timeIn);
                 const daysDiff = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
                 
-                console.log('Days difference:', daysDiff);
-                
                 if (daysDiff >= 30) {
-                    console.log('Subscription expired for:', slot.vics.customer.name);
                     const notificationExists = notifications.some(n => 
                         n.parkingSlotId === slot.id && n.type === 'expired_subscription'
                     );
@@ -1740,7 +1725,6 @@
                     const wasDeleted = deletedNotifications.includes(slot.id);
                     
                     if (!notificationExists && !wasDeleted) {
-                        console.log('Creating new notification');
                         notifications.push({
                             id: Date.now(),
                             parkingSlotId: slot.id,
@@ -1749,8 +1733,6 @@
                             isRead: false,
                             createdAt: new Date().toISOString()
                         });
-                    } else {
-                        console.log('Notification already exists or was deleted');
                     }
                 }
             }
@@ -1777,32 +1759,62 @@
     function renderNotifications() {
         const notifications = JSON.parse(localStorage.getItem('notifications') || '[]');
         const notificationList = document.getElementById('notificationList');
-        
-        // Sort notifications by date, newest first
         notifications.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-        
         notificationList.innerHTML = notifications.map(notification => {
             const date = new Date(notification.createdAt);
             const formattedDate = date.toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: '2-digit',
-                day: '2-digit',
-                hour: '2-digit',
-                minute: '2-digit'
+                year: 'numeric', month: '2-digit', day: '2-digit',
+                hour: '2-digit', minute: '2-digit'
             });
-            
             return `
                 <div class="notification-item ${notification.isRead ? '' : 'unread'}">
                     <div class="notification-content" onclick="markAsRead(${notification.id})">
                         <div>${notification.message}</div>
                         <small>${formattedDate}</small>
                     </div>
-                    <button class="delete-notification" onclick="deleteNotification(${notification.id})">
-                        <p style="font-size:15px; color:red ;">Delete</p>
-                    </button>
+                    <button onclick="extendMonthly(${notification.parkingSlotId}, ${notification.id})" style="color:green;">تمديد</button>
+                    <button onclick="goToCheckout(${notification.parkingSlotId})" style="color:blue;">خروج</button>
                 </div>
             `;
         }).join('');
+    }
+
+    function extendMonthly(parkingSlotId, notificationId) {
+        fetch(`/dashboard/extend-monthly/${parkingSlotId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name=\"csrf-token\"]').content
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('تم تمديد الاشتراك بنجاح');
+                deleteNotification(notificationId);
+                location.reload();
+            } else {
+                alert(data.message || 'حدث خطأ أثناء التمديد');
+            }
+        })
+        .catch(error => {
+            alert('حدث خطأ أثناء التمديد');
+        });
+    }
+
+    function goToCheckout(parkingSlotId) {
+        fetch(`/dashboard/get-parcode/${parkingSlotId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.parcode) {
+                    window.location.href = `/dashboard/checkout/${data.parcode}`;
+                } else {
+                    alert('لم يتم العثور على رمز الوقوف');
+                }
+            })
+            .catch(error => {
+                alert('حدث خطأ أثناء الذهاب إلى الخروج');
+            });
     }
 
     function deleteNotification(notificationId) {
@@ -1851,7 +1863,6 @@
 
     // Check for expired subscriptions when the page loads
     document.addEventListener('DOMContentLoaded', function() {
-        console.log('Page loaded, checking subscriptions...');
         checkExpiredSubscriptions();
         
         // Check every minute for testing (you can change this back to 3600000 for production)

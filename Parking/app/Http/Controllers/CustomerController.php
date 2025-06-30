@@ -41,7 +41,19 @@ class CustomerController extends Controller
     {
         // Eager load the VICs to avoid N+1 query problem
         $customer->load('vics');
-        return view('customers.show', compact('customer'));
+
+        // Find active monthly parking slot (if any)
+        $monthlySlot = null;
+        $monthlyBalance = null;
+        foreach ($customer->vics as $vic) {
+            $slot = $vic->parkingSlots()->where('parking_type', 'monthly')->whereNull('time_out')->first();
+            if ($slot) {
+                $monthlySlot = $slot;
+                $monthlyBalance = $slot->getRemainingAmount();
+                break;
+            }
+        }
+        return view('customers.show', compact('customer', 'monthlySlot', 'monthlyBalance'));
     }
 
     // Show form to edit a customer
