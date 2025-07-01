@@ -364,14 +364,16 @@
 
         .modal-content {
             background-color: #fefefe;
-            margin: 15% auto;
-            padding: 20px;
+            
+            padding: 5px;
             border: 1px solid #888;
             width: 80%;
             max-width: 500px;
             border-radius: 5px;
+            
             place-self:center;
-            height:60vh;
+            
+            height:100vh;
         }
 
         .close {
@@ -466,7 +468,7 @@
                         <div class="input-form">
                             <input type="text" name="name" class="inp-text" placeholder="name...." id="nameInput"
                                 required>
-                            <label for="nameInput">: الاسم الكامل</label>
+                            <label for="nameInput" style="font-size: 15px;">:الاسم الكامل</label>
                             @if ($errors->has('name'))
                                 <div class="error-feedback" style="color: red; font-size: 12px; margin-top: 5px;">
                                     {{ $errors->first('name') }}
@@ -664,7 +666,7 @@
                         <div class="input-form">
                             <input type="text" name="name" class="inp-text" placeholder="name...." id="motorNameInput"
                                 required>
-                            <label for="motorNameInput">: الاسم الكامل</label>
+                            <label for="motorNameInput" style="font-size: 15px;">: الاسم الكامل</label>
                             @if ($errors->has('name'))
                                 <div class="error-feedback" style="color: red; font-size: 12px; margin-top: 5px;">
                                     {{ $errors->first('name') }}
