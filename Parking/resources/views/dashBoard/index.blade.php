@@ -977,14 +977,14 @@
                     </div>
                 </div>
                 <div class="card-body" onclick="garageFormPopup()">
-                    <h1>الكراج</h1>
+                    <h1>كراج السيارات</h1>
                     <div class="card-img">
                         <img src="{{ asset('build/assets/parking.jpg') }}" loading="lazy" />
                     </div>
                 </div>
 
                 <div class="card-body" onclick="garageFormPopupMoto()">
-                    <h1>الكراج</h1>
+                    <h1>كراج الدراجات</h1>
                     <div class="card-img">
                         <img src="{{ asset('build/assets/parking.jpg') }}" loading="lazy" />
                     </div>
