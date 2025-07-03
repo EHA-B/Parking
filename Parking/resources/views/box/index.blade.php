@@ -58,14 +58,69 @@
                 </form>
             </div>
         </div>
-        <div style="display:flex; justify-content:center; margin-bottom:30px;">
+        <!-- عرض رصيد الصندوق الحالي -->
+        <div style="display:flex; justify-content:center; margin-bottom:20px;">
             <div
-                style="background:#e8f5e8; border:1px solid #28a745; border-radius:8px; padding:20px 40px; min-width:220px; text-align:center; font-size:1.5em; font-weight:bold; color:#28a745;">
-                إجمالي الصندوق: {{ number_format($totalBox, 2) }}
+                style="background:#fffbe8; border:1px solid #ffc107; border-radius:8px; padding:20px 40px; min-width:220px; text-align:center; font-size:1.5em; font-weight:bold; color:#856404;">
+                رصيد الصندوق الحالي: {{ number_format($currentBoxBalance, 2) }}
             </div>
         </div>
+        <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 20px;">
+            <button id="toggleMonthlyProfits" class="button2" type="button">عرض أرباح الأشهر</button>
+            <form action="{{ route('box.calculate-month-profit') }}" method="POST" style="display:inline;">
+                @csrf
+                <button type="submit" class="button2" style="background:#007bff;">حساب ربح الشهر الحالي</button>
+            </form>
+            <button id="toggleTransactions" class="button2" type="button">إظهار/إخفاء سجل الحركات</button>
+        </div>
+        <!-- قائمة أرباح الأشهر -->
+        <div id="monthlyProfitsList" style="display:none; margin-bottom:20px;">
+            <h2 style="text-align:center;">أرباح الأشهر</h2>
+            <table class="table1">
+                <thead>
+                    <tr>
+                        <th>الشهر</th>
+                        <th>السنة</th>
+                        <th>الربح</th>
+                        <th>تاريخ الحساب</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($monthlyProfits as $profit)
+                        <tr>
+                            <td>{{ $profit->month }}</td>
+                            <td>{{ $profit->year }}</td>
+                            <td>{{ number_format($profit->profit, 2) }}</td>
+                            <td>{{ $profit->calculated_at }}</td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
         <h2 style="text-align:center;">سجل الحركات</h2>
-        <table class="table1">
+        <!-- فلتر شهر/سنة وعرض الرصيد النهائي -->
+        <form id="filterForm" method="GET" style="display: flex; justify-content: center; gap: 10px; margin-bottom: 10px; align-items: center;">
+            <select name="month" id="filterMonth" class="inp-text" style="width: 120px;">
+                @for ($m = 1; $m <= 12; $m++)
+                    <option value="{{ $m }}" {{ $m == $selectedMonth ? 'selected' : '' }}>شهر {{ $m }}</option>
+                @endfor
+            </select>
+            <select name="year" id="filterYear" class="inp-text" style="width: 120px;">
+                @for ($y = now()->year; $y >= now()->year - 5; $y--)
+                    <option value="{{ $y }}" {{ $y == $selectedYear ? 'selected' : '' }}>{{ $y }}</option>
+                @endfor
+            </select>
+            <span style="font-weight:bold; color:#007bff; font-size:1.1em;">
+                الرصيد النهائي لهذا الشهر:
+                @if(!is_null($closingBalance))
+                    {{ number_format($closingBalance, 2) }}
+                @else
+                    ---
+                @endif
+            </span>
+        </form>
+        <div id="transactionsLog">
+        <table class="table1" id="transactionsTable">
             <thead>
                 <tr>
                     <th>النوع</th>
@@ -77,7 +132,7 @@
             </thead>
             <tbody>
                 @foreach($transactions as $transaction)
-                    <tr>
+                    <tr data-month="{{ \Carbon\Carbon::parse($transaction->created_at)->month }}" data-year="{{ \Carbon\Carbon::parse($transaction->created_at)->year }}">
                         <td>{{ $transaction->type == 'income' ? 'دخل' : 'مصروف' }}</td>
                         <td>{{ $transaction->amount }}</td>
                         <td>{{ $transaction->customer ? $transaction->customer->name : '-' }}</td>
@@ -87,6 +142,7 @@
                 @endforeach
             </tbody>
         </table>
+        </div>
     </div>
     <script>
         $(document).ready(function () {
@@ -95,6 +151,34 @@
                 allowClear: true,
                 width: '100%'
             });
+            // Toggle monthly profits list
+            $('#toggleMonthlyProfits').on('click', function() {
+                $('#monthlyProfitsList').toggle();
+            });
+            // Toggle transactions log
+            $('#toggleTransactions').on('click', function() {
+                $('#transactionsLog').toggle();
+            });
+            // عند تغيير الفلتر أرسل النموذج لجلب الرصيد الصحيح
+            $('#filterMonth, #filterYear').on('change', function() {
+                $('#filterForm').submit();
+            });
+            // فلترة سجل الحركات حسب الشهر والسنة (بعد تحميل الصفحة)
+            function filterTransactions() {
+                var selectedMonth = $('#filterMonth').val();
+                var selectedYear = $('#filterYear').val();
+                $('#transactionsTable tbody tr').each(function() {
+                    var rowMonth = $(this).data('month').toString();
+                    var rowYear = $(this).data('year').toString();
+                    if (rowMonth === selectedMonth && rowYear === selectedYear) {
+                        $(this).show();
+                    } else {
+                        $(this).hide();
+                    }
+                });
+            }
+            // فلترة تلقائية عند التحميل
+            filterTransactions();
         });
     </script>
 </body>

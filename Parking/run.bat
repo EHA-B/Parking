@@ -31,7 +31,7 @@ if not defined IP (
 echo Starting PHP server on %IP%:8000...
 
 REM Start the PHP server in a new command window
-start cmd /k "php artisan serve --host=%IP% --port=8000"
+start cmd /k "php artisan serve"
 
 REM Set the URL of your localhost site
 set URL=http://%IP%:8000/
@@ -40,4 +40,4 @@ REM Allow some time for the server to start
 timeout /t 5 /nobreak > NUL
 
 REM Check if the URL is already open in Chrome
-start msedge --new-window --app="%URL%" || start msedge --start-fullscreen "%URL%"
+start msedge --new-window --app="http://127.0.0.1:8000" || start msedge --start-fullscreen "%URL%"

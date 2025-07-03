@@ -60,6 +60,9 @@ Route::get('/monthly-payments/{parkingSlot}/history', [MonthlyPaymentController:
 Route::get('/box', [BoxController::class, 'index'])->name('box.index');
 Route::post('/box/income', [BoxController::class, 'storeIncome'])->name('box.income.store');
 Route::post('/box/outcome', [BoxController::class, 'storeOutcome'])->name('box.outcome.store');
+Route::post('/box/calculate-month-profit', [BoxController::class, 'calculateAndStoreCurrentMonthProfit'])->name('box.calculate-month-profit');
+// (Optional) API for monthly profits
+Route::get('/box/monthly-profits', [BoxController::class, 'monthlyProfits'])->name('box.monthly-profits');
 
 // Extend monthly slot and get parcode for notifications
 Route::post('/dashboard/extend-monthly/{parkingSlot}', [DashboardController::class, 'extendMonthly'])->name('dashboard.extend-monthly');

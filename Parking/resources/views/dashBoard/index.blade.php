@@ -540,38 +540,31 @@
             </div>
         </div>
     </div>
-    <!-- garage modal -->
+    <!-- garage modal for cars -->
     <div id="garageModal" class="modal">
         <div class="list-container">
             <span class="close-modal" onclick="closeGarageModal()">&times;</span>
-            <br>
-            <br>
+            <br><br>
             @if(session('new_parcode'))
                 <div class="success-message"
                     style="background-color: var(--secondary-color); color: white; padding: 10px; margin-bottom: 10px; border-radius: 5px; text-align: center;">
                     تم إنشاء رمز وقوف السيارات بنجاح: {{ session('new_parcode') }}
                 </div>
             @endif
-
             @if(session('success'))
                 <div class="success-message"
                     style="background-color: var(--secondary-color); color: white; padding: 10px; margin-bottom: 10px; border-radius: 5px; text-align: center;">
                     {{ session('success') }}
                 </div>
             @endif
-
-            <div class="search-container"
-                style="margin-bottom: 15px; display: flex; flex-direction: column; gap: 10px;">
-                <!-- Regular Search -->
+            <div class="search-container" style="margin-bottom: 15px; display: flex; flex-direction: column; gap: 10px;">
                 <div style="display: flex; align-items: center;">
-                    <input type="text" id="tableSearch" class="inp-text" placeholder="بحث عام..."
+                    <input type="text" id="carTableSearch" class="inp-text" placeholder="بحث عام..."
                         style="flex: 1; padding: 4px; border-radius: 5px; margin-left:5px">
-                    <label for="tableSearch" style="padding-left: 5px">:بحث عام</label>
+                    <label for="carTableSearch" style="padding-left: 5px">:بحث عام</label>
                 </div>
-
-                <!-- Filtered Search -->
                 <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
-                    <select id="parkingTypeFilter" class="select2-search1" >
+                    <select id="carParkingTypeFilter" class="select2-search1" >
                         <option value="all">جميع الانواع</option>
                         <option value="hourly">ساعي</option>
                         <option value="daily">يومي</option>
@@ -580,8 +573,7 @@
                     <label style="padding-left: 5px">:نوع الوقوف</label>
                 </div>
             </div>
-
-            <table class="table1">
+            <table class="table1" id="carTable">
                 <tr>
                     <th>ID</th>
                     <th>الزبون</th>
@@ -595,55 +587,58 @@
                 </tr>
                 <tbody class="body-overflow">
                     @foreach($parking_slots as $parking_slot)
-                                    <tr class="data" data-parking-slot-id="{{ $parking_slot->id }}">
-                                        <td onclick="showParcodePopup('{{ $parking_slot->parcode }}')" style="cursor:pointer;">
-                                            {{$parking_slot->id}}
-                                        </td>
-                                        <td>{{$parking_slot->vics->customer->name}}</td>
-                                        <td>
-                                            <img src="{{ $parking_slot->vics->typ == "مركبة صغيرة" ? asset('build/assets/motor.svg') : asset('build/assets/car.svg') }}"
-                                                alt={{$parking_slot->vics->typ == "مركبة صغيرة" ? "Motor" : "Car"}} width="40"
-                                                loading="lazy">
-                                        </td>
-                                        <td>{{$parking_slot->vics->brand}}</td>
-                                        <td>{{$parking_slot->vics->plate}}</td>
-                                        <td>{{ \Carbon\Carbon::parse($parking_slot->time_in)->format('Y-m-d H:i:s') }}</td>
-                                        <td>
-                                            {{
+                        @if($parking_slot->vics->typ == 'مركبة كبيرة')
+                            <tr class="data" data-parking-slot-id="{{ $parking_slot->id }}">
+                                <td onclick="showParcodePopup('{{ $parking_slot->parcode }}')" style="cursor:pointer;">
+                                    {{$parking_slot->id}}
+                                </td>
+                                <td>{{$parking_slot->vics->customer->name}}</td>
+                                <td>
+                                    <label style="font-size: 12px;" hidden>{{$parking_slot->vics->typ}}</label>
+                                    <img src="{{ $parking_slot->vics->typ == "مركبة صغيرة" ? asset('build/assets/motor.svg') : asset('build/assets/car.svg') }}"
+                                        alt={{$parking_slot->vics->typ == "مركبة صغيرة" ? "Motor" : "Car"}} width="40"
+                                        loading="lazy">
+                                </td>
+                                <td>{{$parking_slot->vics->brand}}</td>
+                                <td>{{$parking_slot->vics->plate}}</td>
+                                <td>{{ \Carbon\Carbon::parse($parking_slot->time_in)->format('Y-m-d H:i:s') }}</td>
+                                <td>
+                                    {{
                         $parking_slot->parking_type === 'hourly' ? 'ساعي' :
                         ($parking_slot->parking_type === 'daily' ? 'يومي' : 'شهري')
-                                        }}
-                                        </td>
-                                        <td>
-                                            <div style="display: flex; flex-direction: row; gap: 10px; align-items: center;">
-                                                @if($parking_slot->parking_type === 'monthly')
-                                                    <p>خارج</p>
-                                                    <div>
-                                                        <label class="switch">
-                                                            <input type="checkbox" class="status-toggle"
-                                                                data-parking-slot-id="{{ $parking_slot->id }}" {{ $parking_slot->status === 'in' ? 'checked' : '' }}>
-                                                            <span class="slider round"></span>
-                                                        </label>
-                                                    </div>
-                                                    <p>داخل</p>
-                                                @endif
+                                    }}
+                                </td>
+                                <td>
+                                    <div style="display: flex; flex-direction: row; gap: 10px; align-items: center;">
+                                        @if($parking_slot->parking_type === 'monthly')
+                                            <p>خارج</p>
+                                            <div>
+                                                <label class="switch">
+                                                    <input type="checkbox" class="status-toggle"
+                                                        data-parking-slot-id="{{ $parking_slot->id }}" {{ $parking_slot->status === 'in' ? 'checked' : '' }}>
+                                                    <span class="slider round"></span>
+                                                </label>
                                             </div>
-                                        </td>
-                                        <td class="action-td">
-                                            <button onclick="openServicePopup({{ $parking_slot->vics->id }}, {{ $parking_slot->id }})"
-                                                class="serv-btn">
-                                                <i class="fas fa-plus"></i> خدمة
-                                            </button>
-                                            <a href="{{ route('dashboard.checkout', ['parcode' => $parking_slot->parcode]) }}"
-                                                class="btn checkout-btn">خروج</a>
-                                            @if($parking_slot->parking_type === 'monthly')
-                                                <a href="{{ route('dashboard.status-history', $parking_slot->vics->customer->id) }}"
-                                                    class="serv-btn">
-                                                    حركة المركبة
-                                                </a>
-                                            @endif
-                                        </td>
-                                    </tr>
+                                            <p>داخل</p>
+                                        @endif
+                                    </div>
+                                </td>
+                                <td class="action-td">
+                                    <button onclick="openServicePopup({{ $parking_slot->vics->id }}, {{ $parking_slot->id }})"
+                                        class="serv-btn">
+                                        <i class="fas fa-plus"></i> خدمة
+                                    </button>
+                                    <a href="{{ route('dashboard.checkout', ['parcode' => $parking_slot->parcode]) }}"
+                                        class="btn checkout-btn">خروج</a>
+                                    @if($parking_slot->parking_type === 'monthly')
+                                        <a href="{{ route('dashboard.status-history', $parking_slot->vics->customer->id) }}"
+                                            class="serv-btn">
+                                            حركة المركبة
+                                        </a>
+                                    @endif
+                                </td>
+                            </tr>
+                        @endif
                     @endforeach
                 </tbody>
 
@@ -651,6 +646,113 @@
             </table>
         </div>
     </div>
+    <!-- garage modal for moto -->
+    <div id="garageModalMoto" class="modal">
+        <div class="list-container">
+            <span class="close-modal" onclick="closeGarageModalMoto()">&times;</span>
+            <br><br>
+            @if(session('new_parcode'))
+                <div class="success-message"
+                    style="background-color: var(--secondary-color); color: white; padding: 10px; margin-bottom: 10px; border-radius: 5px; text-align: center;">
+                    تم إنشاء رمز وقوف السيارات بنجاح: {{ session('new_parcode') }}
+                </div>
+            @endif
+            @if(session('success'))
+                <div class="success-message"
+                    style="background-color: var(--secondary-color); color: white; padding: 10px; margin-bottom: 10px; border-radius: 5px; text-align: center;">
+                    {{ session('success') }}
+                </div>
+            @endif
+            <div class="search-container" style="margin-bottom: 15px; display: flex; flex-direction: column; gap: 10px;">
+                <div style="display: flex; align-items: center;">
+                    <input type="text" id="motoTableSearch" class="inp-text" placeholder="بحث عام..."
+                        style="flex: 1; padding: 4px; border-radius: 5px; margin-left:5px">
+                    <label for="motoTableSearch" style="padding-left: 5px">:بحث عام</label>
+                </div>
+                <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
+                    <select id="motoParkingTypeFilter" class="select2-search1" >
+                        <option value="all">جميع الانواع</option>
+                        <option value="hourly">ساعي</option>
+                        <option value="daily">يومي</option>
+                        <option value="monthly">شهري</option>
+                    </select>
+                    <label style="padding-left: 5px">:نوع الوقوف</label>
+                </div>
+            </div>
+            <table class="table1" id="motoTable">
+                <tr>
+                    <th>ID</th>
+                    <th>الزبون</th>
+                    <th>فئة المركبة</th>
+                    <th>نوع المركبة</th>
+                    <th>رقم اللوحة</th>
+                    <th>وقت الدخول</th>
+                    <th>نوع الوقوف</th>
+                    <th>الحالة</th>
+                    <th>تحرير</th>
+                </tr>
+                <tbody class="body-overflow">
+                    @foreach($parking_slots as $parking_slot)
+                        @if($parking_slot->vics->typ == 'مركبة صغيرة')
+                            <tr class="data" data-parking-slot-id="{{ $parking_slot->id }}">
+                                <td onclick="showParcodePopup('{{ $parking_slot->parcode }}')" style="cursor:pointer;">
+                                    {{$parking_slot->id}}
+                                </td>
+                                <td>{{$parking_slot->vics->customer->name}}</td>
+                                <td>
+                                    <label style="font-size: 12px;" hidden>{{$parking_slot->vics->typ}}</label>
+                                    <img src="{{ $parking_slot->vics->typ == "مركبة صغيرة" ? asset('build/assets/motor.svg') : asset('build/assets/car.svg') }}"
+                                        alt={{$parking_slot->vics->typ == "مركبة صغيرة" ? "Motor" : "Car"}} width="40"
+                                        loading="lazy">
+                                </td>
+                                <td>{{$parking_slot->vics->brand}}</td>
+                                <td>{{$parking_slot->vics->plate}}</td>
+                                <td>{{ \Carbon\Carbon::parse($parking_slot->time_in)->format('Y-m-d H:i:s') }}</td>
+                                <td>
+                                    {{
+                        $parking_slot->parking_type === 'hourly' ? 'ساعي' :
+                        ($parking_slot->parking_type === 'daily' ? 'يومي' : 'شهري')
+                                    }}
+                                </td>
+                                <td>
+                                    <div style="display: flex; flex-direction: row; gap: 10px; align-items: center;">
+                                        @if($parking_slot->parking_type === 'monthly')
+                                            <p>خارج</p>
+                                            <div>
+                                                <label class="switch">
+                                                    <input type="checkbox" class="status-toggle"
+                                                        data-parking-slot-id="{{ $parking_slot->id }}" {{ $parking_slot->status === 'in' ? 'checked' : '' }}>
+                                                    <span class="slider round"></span>
+                                                </label>
+                                            </div>
+                                            <p>داخل</p>
+                                        @endif
+                                    </div>
+                                </td>
+                                <td class="action-td">
+                                    <button onclick="openServicePopup({{ $parking_slot->vics->id }}, {{ $parking_slot->id }})"
+                                        class="serv-btn">
+                                        <i class="fas fa-plus"></i> خدمة
+                                    </button>
+                                    <a href="{{ route('dashboard.checkout', ['parcode' => $parking_slot->parcode]) }}"
+                                        class="btn checkout-btn">خروج</a>
+                                    @if($parking_slot->parking_type === 'monthly')
+                                        <a href="{{ route('dashboard.status-history', $parking_slot->vics->customer->id) }}"
+                                            class="serv-btn">
+                                            حركة المركبة
+                                        </a>
+                                    @endif
+                                </td>
+                            </tr>
+                        @endif
+                    @endforeach
+                </tbody>
+
+
+            </table>
+        </div>
+    </div>
+
     <!-- Add motor modal HTML structure -->
     <div id="motorModal" class="modal">
         <div class="modal-content">
@@ -875,6 +977,13 @@
                     </div>
                 </div>
                 <div class="card-body" onclick="garageFormPopup()">
+                    <h1>الكراج</h1>
+                    <div class="card-img">
+                        <img src="{{ asset('build/assets/parking.jpg') }}" loading="lazy" />
+                    </div>
+                </div>
+
+                <div class="card-body" onclick="garageFormPopupMoto()">
                     <h1>الكراج</h1>
                     <div class="card-img">
                         <img src="{{ asset('build/assets/parking.jpg') }}" loading="lazy" />
@@ -1526,36 +1635,39 @@
 
     // Event listeners
     document.addEventListener('DOMContentLoaded', function () {
-        const searchInput = document.getElementById('tableSearch');
-        const parkingTypeFilter = document.getElementById('parkingTypeFilter');
-
-        if (searchInput) {
-            searchInput.addEventListener('input', (e) => debouncedSearch(e.target.value));
-            searchInput.addEventListener('search', (e) => debouncedSearch(''));
+        // CAR MODAL SEARCH
+        const carSearchInput = document.getElementById('carTableSearch');
+        const carParkingTypeFilter = document.getElementById('carParkingTypeFilter');
+        if (carSearchInput) {
+            carSearchInput.addEventListener('input', filterCarTable);
+            carSearchInput.addEventListener('search', filterCarTable);
         }
-
-        if (parkingTypeFilter) {
-            parkingTypeFilter.addEventListener('change', () => {
-                debouncedSearch(searchInput.value);
-            });
+        if (carParkingTypeFilter) {
+            carParkingTypeFilter.addEventListener('change', filterCarTable);
         }
-
+        // MOTO MODAL SEARCH
+        const motoSearchInput = document.getElementById('motoTableSearch');
+        const motoParkingTypeFilter = document.getElementById('motoParkingTypeFilter');
+        if (motoSearchInput) {
+            motoSearchInput.addEventListener('input', filterMotoTable);
+            motoSearchInput.addEventListener('search', filterMotoTable);
+        }
+        if (motoParkingTypeFilter) {
+            motoParkingTypeFilter.addEventListener('change', filterMotoTable);
+        }
         // Add event listeners for customer name checking
         const carNameInput = document.getElementById('nameInput');
         const motorNameInput = document.getElementById('motorNameInput');
-
         if (carNameInput) {
             carNameInput.addEventListener('input', (e) => {
                 debouncedCustomerCheck(e.target.value, 'car');
             });
         }
-
         if (motorNameInput) {
             motorNameInput.addEventListener('input', (e) => {
                 debouncedCustomerCheck(e.target.value, 'motor');
             });
         }
-
         // Event delegation for notification panel
         document.addEventListener('click', function (event) {
             const panel = document.getElementById('notificationPanel');
@@ -1655,7 +1767,16 @@
         const modal = document.getElementById('garageModal');
         modal.style.display="block"
     }
+    function garageFormPopupMoto(){
+        const modal = document.getElementById('garageModalMoto');
+        modal.style.display="block"
+    }
     
+    
+    function closeGarageModalMoto() {
+        const modal = document.getElementById('garageModalMoto');
+        modal.style.display = "none";
+    }
 
     function closeGarageModal() {
         const modal = document.getElementById('garageModal');
@@ -2095,6 +2216,53 @@
             });
         }
     });
+
+    // فلترة جدول السيارات
+    function filterCarTable() {
+        const searchInput = document.getElementById('carTableSearch');
+        const parkingTypeFilter = document.getElementById('carParkingTypeFilter');
+        const tableRows = document.querySelectorAll('#carTable tbody tr');
+        const searchTerms = searchInput.value.toLowerCase().split(' ').filter(term => term.length > 0);
+        const parkingType = parkingTypeFilter.value;
+        tableRows.forEach(row => {
+            const rowText = Array.from(row.querySelectorAll('td'))
+                .map(cell => cell.textContent.trim().toLowerCase())
+                .join(' ');
+            const tds = row.querySelectorAll('td');
+            const rowParkingType = tds[6] ? tds[6].textContent.trim().toLowerCase() : '';
+            const matchesAllTerms = searchTerms.every(term => rowText.includes(term));
+            const matchesParkingType = parkingType === 'all' ||
+                (parkingType === 'hourly' && rowParkingType.includes('ساعي')) ||
+                (parkingType === 'daily' && rowParkingType.includes('يومي')) ||
+                (parkingType === 'monthly' && rowParkingType.includes('شهري'));
+            row.style.display = (matchesAllTerms || searchTerms.length === 0) && matchesParkingType ? '' : 'none';
+        });
+    }
+    document.getElementById('carTableSearch').addEventListener('input', filterCarTable);
+    document.getElementById('carParkingTypeFilter').addEventListener('change', filterCarTable);
+    // فلترة جدول الدراجات
+    function filterMotoTable() {
+        const searchInput = document.getElementById('motoTableSearch');
+        const parkingTypeFilter = document.getElementById('motoParkingTypeFilter');
+        const tableRows = document.querySelectorAll('#motoTable tbody tr');
+        const searchTerms = searchInput.value.toLowerCase().split(' ').filter(term => term.length > 0);
+        const parkingType = parkingTypeFilter.value;
+        tableRows.forEach(row => {
+            const rowText = Array.from(row.querySelectorAll('td'))
+                .map(cell => cell.textContent.trim().toLowerCase())
+                .join(' ');
+            const tds = row.querySelectorAll('td');
+            const rowParkingType = tds[6] ? tds[6].textContent.trim().toLowerCase() : '';
+            const matchesAllTerms = searchTerms.every(term => rowText.includes(term));
+            const matchesParkingType = parkingType === 'all' ||
+                (parkingType === 'hourly' && rowParkingType.includes('ساعي')) ||
+                (parkingType === 'daily' && rowParkingType.includes('يومي')) ||
+                (parkingType === 'monthly' && rowParkingType.includes('شهري'));
+            row.style.display = (matchesAllTerms || searchTerms.length === 0) && matchesParkingType ? '' : 'none';
+        });
+    }
+    document.getElementById('motoTableSearch').addEventListener('input', filterMotoTable);
+    document.getElementById('motoParkingTypeFilter').addEventListener('change', filterMotoTable);
 </script>
 
 </html> 

@@ -33,10 +33,19 @@
             </div>
 
             <?php if (session('success')): ?>
-                <div class="alert alert-success">
+                <div class="alert alert-success"> 
                     <?php echo session('success'); ?>
                 </div>
             <?php endif; ?>
+
+            <!-- Search Bar -->
+            <div class="search-container" style="margin-bottom: 15px; display: flex; flex-direction: column; gap: 10px;">
+                <div style="display: flex; align-items: center;">
+                    <input type="text" id="customerTableSearch" class="inp-text" placeholder="بحث عن عميل..."
+                        style="flex: 1; padding: 4px; border-radius: 5px; margin-left:5px">
+                    <label for="customerTableSearch" style="padding-left: 5px">:بحث عن عميل</label>
+                </div>
+            </div>
 
             <table class="table1">
                 <tr>
@@ -84,6 +93,42 @@
         </div>
 
     </section>
+    <script>
+    // Debounce function to limit how often a function can be called
+    function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+
+    // Search functionality for customers table
+    const debouncedCustomerSearch = debounce(function (searchText) {
+        const searchTerms = searchText.toLowerCase().split(' ').filter(term => term.length > 0);
+        const tableRows = document.querySelectorAll('.table1 tbody tr.data');
+
+        tableRows.forEach(row => {
+            const rowText = Array.from(row.querySelectorAll('td'))
+                .map(cell => cell.textContent.trim().toLowerCase())
+                .join(' ');
+            const matchesAllTerms = searchTerms.every(term => rowText.includes(term));
+            row.style.display = (matchesAllTerms || searchTerms.length === 0) ? '' : 'none';
+        });
+    }, 250);
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const searchInput = document.getElementById('customerTableSearch');
+        if (searchInput) {
+            searchInput.addEventListener('input', (e) => debouncedCustomerSearch(e.target.value));
+            searchInput.addEventListener('search', (e) => debouncedCustomerSearch(''));
+        }
+    });
+    </script>
 </body>
 
 </html>
