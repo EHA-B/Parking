@@ -464,16 +464,21 @@
                     @csrf
 
                     <h2>ادخل عميل</h2>
+                    @if ($errors->has('duplicate'))
+                        <div class="error-feedback" style="color: red; font-size: 12px; margin-top: 5px;">
+                            {{ $errors->first('duplicate') }}
+                        </div>
+                    @endif
                     <div class="form">
                         <div class="input-form">
-                            <input type="text" name="name" class="inp-text" placeholder="name...." id="nameInput"
-                                required>
                             <label for="nameInput" style="font-size: 15px;">:الاسم الكامل</label>
                             @if ($errors->has('name'))
                                 <div class="error-feedback" style="color: red; font-size: 12px; margin-top: 5px;">
                                     {{ $errors->first('name') }}
                                 </div>
                             @endif
+                            <input type="text" name="name" class="inp-text" placeholder="name...." id="nameInput"
+                                required>
                         </div>
                         
                         <!-- Customer info display for car modal -->
@@ -491,22 +496,22 @@
                         </div>
                         
                         <div class="input-form" id="newCustomerPhone">
+                            <label for="phoneInput">: رقم الهاتف</label>
                             <input type="text" name="phone" class="inp-text" placeholder="phone...." id="phoneInput"
                                 required>
-                            <label for="phoneInput">: رقم الهاتف</label>
                         </div>
 
                         <input type="hidden" name="vehicle_type" value="مركبة كبيرة">
 
                         <div class="input-form">
+                            <label for="brandInput">: نوع المركبة</label>
                             <input type="text" name="brand" class="inp-text" placeholder="vehicle...." id="brandInput"
                                 required>
-                            <label for="brandInput">: نوع المركبة</label>
                         </div>
                         <div class="input-form">
+                            <label for="plateInput">: رقم اللوحة</label>
                             <input type="text" name="plate" class="inp-text" placeholder="plate...." id="plateInput"
                                 required>
-                            <label for="plateInput">: رقم اللوحة</label>
                             @if ($errors->has('plate'))
                                 <div class="error-feedback" style="color: red; font-size: 12px; margin-top: 5px;">
                                     {{ $errors->first('plate') }}
@@ -514,24 +519,24 @@
                             @endif
                         </div>
                         <div class="input-form">
+                            <label>نوع الوقوف</label>
                             <select name="parking_type" id="parkingType" onchange="toggleManualPricing()"
                                 class="inp-text">
                                 <option value="hourly">ساعي</option>
                                 <option value="daily">يومي</option>
                                 <option value="monthly">شهري</option>
                             </select>
-                            <label>نوع الوقوف</label>
                         </div>
                         <div id="manualPricing" style="display: none;">
 
                             <div class="input-form">
-                                <input type="number" name="manual_rate" class="inp-text" placeholder="أدخل السعر">
                                 <label>السعر </label>
+                                <input type="number" name="manual_rate" class="inp-text" placeholder="أدخل السعر">
                             </div>
                         </div>
                         <div class="input-form">
-                            <input type="text" name="notes" class="inp-text" placeholder="notes...." id="notes">
                             <label for="notes">: ملاحظات</label>
+                            <input type="text" name="notes" class="inp-text" placeholder="notes...." id="notes">
                         </div>
                     </div>
                     <br>
@@ -604,8 +609,8 @@
                                 <td>{{ \Carbon\Carbon::parse($parking_slot->time_in)->format('Y-m-d H:i:s') }}</td>
                                 <td>
                                     {{
-                        $parking_slot->parking_type === 'hourly' ? 'ساعي' :
-                        ($parking_slot->parking_type === 'daily' ? 'يومي' : 'شهري')
+            $parking_slot->parking_type === 'hourly' ? 'ساعي' :
+            ($parking_slot->parking_type === 'daily' ? 'يومي' : 'شهري')
                                     }}
                                 </td>
                                 <td>
@@ -710,8 +715,8 @@
                                 <td>{{ \Carbon\Carbon::parse($parking_slot->time_in)->format('Y-m-d H:i:s') }}</td>
                                 <td>
                                     {{
-                        $parking_slot->parking_type === 'hourly' ? 'ساعي' :
-                        ($parking_slot->parking_type === 'daily' ? 'يومي' : 'شهري')
+            $parking_slot->parking_type === 'hourly' ? 'ساعي' :
+            ($parking_slot->parking_type === 'daily' ? 'يومي' : 'شهري')
                                     }}
                                 </td>
                                 <td>
@@ -764,11 +769,16 @@
                     @csrf
 
                     <h2>ادخل عميل</h2>
+                    @if ($errors->has('duplicate'))
+                        <div class="error-feedback" style="color: red; font-size: 12px; margin-top: 5px;">
+                            {{ $errors->first('duplicate') }}
+                        </div>
+                    @endif
                     <div class="form">
                         <div class="input-form">
+                            <label for="motorNameInput" style="font-size: 15px;">: الاسم الكامل</label>
                             <input type="text" name="name" class="inp-text" placeholder="name...." id="motorNameInput"
                                 required>
-                            <label for="motorNameInput" style="font-size: 15px;">: الاسم الكامل</label>
                             @if ($errors->has('name'))
                                 <div class="error-feedback" style="color: red; font-size: 12px; margin-top: 5px;">
                                     {{ $errors->first('name') }}
@@ -791,22 +801,22 @@
                         </div>
                         
                         <div class="input-form" id="motorCustomerPhone">
+                            <label for="motorPhoneInput">: رقم الهاتف</label>
                             <input type="text" name="phone" class="inp-text" placeholder="phone...."
                                 id="motorPhoneInput" required>
-                            <label for="motorPhoneInput">: رقم الهاتف</label>
                         </div>
 
                         <input type="hidden" name="vehicle_type" value="مركبة صغيرة">
 
                         <div class="input-form">
+                            <label for="motorBrandInput">: نوع المركبة</label>
                             <input type="text" name="brand" class="inp-text" placeholder="vehicle...."
                                 id="motorBrandInput" required>
-                            <label for="motorBrandInput">: نوع المركبة</label>
                         </div>
                         <div class="input-form">
+                            <label for="motorPlateInput">: رقم اللوحة</label>
                             <input type="text" name="plate" class="inp-text" placeholder="plate...."
                                 id="motorPlateInput" required>
-                            <label for="motorPlateInput">: رقم اللوحة</label>
                             @if ($errors->has('plate'))
                                 <div class="error-feedback" style="color: red; font-size: 12px; margin-top: 5px;">
                                     {{ $errors->first('plate') }}
@@ -814,23 +824,23 @@
                             @endif
                         </div>
                         <div class="input-form">
+                            <label>نوع الوقوف</label>
                             <select name="parking_type" id="motorParkingType" onchange="toggleMotorManualPricing()"
                                 class="inp-text">
                                 <option value="hourly">ساعي</option>
                                 <option value="daily">يومي</option>
                                 <option value="monthly">شهري</option>
                             </select>
-                            <label>نوع الوقوف</label>
                         </div>
                         <div id="motorManualPricing" style="display: none;">
                             <div class="input-form">
-                                <input type="number" name="manual_rate" class="inp-text" placeholder="أدخل السعر">
                                 <label>السعر </label>
+                                <input type="number" name="manual_rate" class="inp-text" placeholder="أدخل السعر">
                             </div>
                         </div>
                         <div class="input-form">
-                            <input type="text" name="notes" class="inp-text" placeholder="notes...." id="motorNotes">
                             <label for="motorNotes">: ملاحظات</label>
+                            <input type="text" name="notes" class="inp-text" placeholder="notes...." id="motorNotes">
                         </div>
                     </div>
                     <br>
@@ -1134,11 +1144,11 @@
                             <strong>:تكلفة المواد</strong>
                         </div>
                         @php
-                            $total = ($checkoutDetails['manual_rate'] !== null
-                                ? $checkoutDetails['manual_rate']
-                                : $checkoutDetails['base_parking_price']
-                            ) + $checkoutDetails['items_price'] + $checkoutDetails['services_price'];
-                            $roundedTotal = ceil($total / 100) * 100;
+    $total = ($checkoutDetails['manual_rate'] !== null
+        ? $checkoutDetails['manual_rate']
+        : $checkoutDetails['base_parking_price']
+    ) + $checkoutDetails['items_price'] + $checkoutDetails['services_price'];
+    $roundedTotal = ceil($total / 100) * 100;
                         @endphp
                         <div class="detail">
                             <p>{{ number_format($roundedTotal, 2) }}</p>

@@ -63,6 +63,9 @@ Route::post('/box/outcome', [BoxController::class, 'storeOutcome'])->name('box.o
 Route::post('/box/calculate-month-profit', [BoxController::class, 'calculateAndStoreCurrentMonthProfit'])->name('box.calculate-month-profit');
 // (Optional) API for monthly profits
 Route::get('/box/monthly-profits', [BoxController::class, 'monthlyProfits'])->name('box.monthly-profits');
+Route::post('/box/calculate-specific-month-profit', [App\Http\Controllers\BoxController::class, 'calculateSpecificMonthProfit'])->name('box.calculate-specific-month-profit');
+Route::put('/box/transactions/{id}', [App\Http\Controllers\BoxController::class, 'updateTransaction'])->name('box.transactions.update');
+Route::delete('/box/transactions/{id}', [App\Http\Controllers\BoxController::class, 'destroyTransaction'])->name('box.transactions.destroy');
 
 // Extend monthly slot and get parcode for notifications
 Route::post('/dashboard/extend-monthly/{parkingSlot}', [DashboardController::class, 'extendMonthly'])->name('dashboard.extend-monthly');

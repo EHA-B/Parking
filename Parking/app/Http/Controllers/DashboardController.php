@@ -52,7 +52,7 @@ class DashboardController extends Controller
     public function checkCustomerExists(Request $request)
     {
         $name = trim($request->query('name'));
-        
+
         if (!$name || strlen($name) < 2) {
             return response()->json(['exists' => false]);
         }
@@ -62,16 +62,16 @@ class DashboardController extends Controller
             ->with('vics')
             ->limit(5)
             ->get();
-        
+
         if ($customers->count() > 0) {
             return response()->json([
                 'exists' => true,
-                'customers' => $customers->map(function($customer) {
+                'customers' => $customers->map(function ($customer) {
                     return [
                         'id' => $customer->id,
                         'name' => $customer->name,
                         'phone' => $customer->phone,
-                        'vehicles' => $customer->vics->map(function($vic) {
+                        'vehicles' => $customer->vics->map(function ($vic) {
                             return [
                                 'id' => $vic->id,
                                 'brand' => $vic->brand,
@@ -99,6 +99,17 @@ class DashboardController extends Controller
             'manual_rate' => 'nullable|numeric|min:0',
             'notes' => 'nullable|string|max:500'
         ]);
+
+        // Check for duplicate: same customer, plate, and brand
+        $duplicate = Vic::where('customer_id', $request->customer_id)
+            ->where('plate', $request->plate)
+            ->where('brand', $request->brand)
+            ->first();
+        if ($duplicate) {
+            return redirect()->back()
+                ->withInput()
+                ->withErrors(['duplicate' => 'هذا العميل والمركبة مسجلين بالفعل.']);
+        }
 
         // Find the existing customer
         $customer = Customer::findOrFail($request->customer_id);
@@ -134,16 +145,25 @@ class DashboardController extends Controller
         // Find the existing customer
         $customer = Customer::findOrFail($request->customer_id);
 
-        // Create a new vehicle for the existing customer
-        $vic = Vic::find($request->vehicle_choose);
-
+        // If adding a new vehicle, check for duplicate
         if ($request->vehicle_choose == "add_vic") {
+            $duplicate = Vic::where('customer_id', $customer->id)
+                ->where('plate', $request->plate)
+                ->where('brand', $request->brand)
+                ->first();
+            if ($duplicate) {
+                return redirect()->back()
+                    ->withInput()
+                    ->withErrors(['duplicate' => 'هذا العميل والمركبة مسجلين بالفعل.']);
+            }
             $vic = Vic::create([
                 'typ' => $request->vehicle_type,
                 'brand' => $request->brand,
                 'plate' => $request->plate,
                 'customer_id' => $customer->id
             ]);
+        } else {
+            $vic = Vic::find($request->vehicle_choose);
         }
         $parcode = $customer->id . $vic->id . $vic->plate;
 
@@ -165,13 +185,18 @@ class DashboardController extends Controller
 
     public function newCustomer(Request $request)
     {
-        // Check if customer already exists
+        // Check for duplicate: same customer name, plate, and brand
         $existingCustomer = Customer::where('name', $request->name)->first();
-        
         if ($existingCustomer) {
-            return redirect()->back()
-                ->withInput()
-                ->withErrors(['name' => 'هذا العميل موجود بالفعل في النظام. يرجى استخدام بيانات العميل الموجود.']);
+            $duplicate = Vic::where('customer_id', $existingCustomer->id)
+                ->where('plate', $request->plate)
+                ->where('brand', $request->brand)
+                ->first();
+            if ($duplicate) {
+                return redirect()->back()
+                    ->withInput()
+                    ->withErrors(['duplicate' => 'هذا العميل والمركبة مسجلين بالفعل.']);
+            }
         }
 
         $customer = Customer::create([

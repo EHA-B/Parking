@@ -14,7 +14,7 @@
 
 <body>
     <div class="all">
-        <a href="{{ route('dashboard.index') }}" class="button2" style="width:100px; margin:10px;">العودة للرئيسية</a>
+        <a href="{{ route('dashboard.index') }}" class="serv-btn" style="width:100px; margin:10px;">العودة للرئيسية</a>
 
         <h1 class="title">إدارة الصندوق</h1>
         <div class="income-outcome-container">
@@ -39,7 +39,7 @@
                         <label>ملاحظات</label>
                         <input type="text" name="notes" class="inp-text">
                     </div>
-                    <button type="submit" class="button2">إضافة دخل</button>
+                    <button type="submit" class="serv-btn" style="width:100px; place-self:center;">إضافة دخل</button>
                 </form>
             </div>
             <div class="outcome-box">
@@ -54,7 +54,8 @@
                         <label>ملاحظات</label>
                         <input type="text" name="notes" class="inp-text">
                     </div>
-                    <button type="submit" class="button2" style="background:#dc3545;">إضافة مصروف</button>
+                    <button type="submit" class="serv-btn"
+                        style="background:#dc3545;  width:100px; place-self:center;">إضافة مصروف</button>
                 </form>
             </div>
         </div>
@@ -65,13 +66,39 @@
                 رصيد الصندوق الحالي: {{ number_format($currentBoxBalance, 2) }}
             </div>
         </div>
-        <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 20px;">
-            <button id="toggleMonthlyProfits" class="button2" type="button">عرض أرباح الأشهر</button>
+        <div style="display: flex; justify-content: center; gap: 15px; margin-bottom: 20px;">
+            <button id="toggleMonthlyProfits" class="serv-btn" type="button">عرض أرباح الأشهر</button>
             <form action="{{ route('box.calculate-month-profit') }}" method="POST" style="display:inline;">
                 @csrf
-                <button type="submit" class="button2" style="background:#007bff;">حساب ربح الشهر الحالي</button>
+                <button type="submit" class="serv-btn" style="background:#007bff;">حساب ربح الشهر الحالي</button>
             </form>
-            <button id="toggleTransactions" class="button2" type="button">إظهار/إخفاء سجل الحركات</button>
+
+
+            <div>
+
+                <button id="showCustomMonthProfitForm" class="serv-btn" type="button" style="background:#28a745;">حساب
+                    ربح
+                    الشهر المخصص</button>
+                <form id="customMonthProfitForm" action="{{ route('box.calculate-specific-month-profit') }}"
+                    method="POST"
+                    style="display:none; gap:10px; align-items:center; margin-top:10px; background-color: #fff; border:1px solid #000; border-radius:8px; padding:20px 40px; min-width:220px; text-align:center; font-size:1.5em; font-weight:bold; color:#856404;">
+                    @csrf
+                    <select name="month" class="inp-text" style="width: 100px;">
+                        @for ($m = 1; $m <= 12; $m++)
+                            <option value="{{ $m }}">شهر {{ $m }}</option>
+                        @endfor
+                    </select>
+                    <select name="year" class="inp-text" style="width: 100px;">
+                        @for ($y = now()->year; $y >= now()->year - 5; $y--)
+                            <option value="{{ $y }}">{{ $y }}</option>
+                        @endfor
+                    </select>
+                    <button type="submit" class="serv-btn" style="background:#28a745;">احسب</button>
+                </form>
+            </div>
+
+
+            <button id="toggleTransactions" class="serv-btn" type="button">إظهار/إخفاء سجل الحركات</button>
         </div>
         <!-- قائمة أرباح الأشهر -->
         <div id="monthlyProfitsList" style="display:none; margin-bottom:20px;">
@@ -97,9 +124,16 @@
                 </tbody>
             </table>
         </div>
+        @if(session('custom_month_profit'))
+            <div style="background:#e0ffe0; border:1px solid #28a745; padding:10px; margin:10px; text-align:center;">
+                ربح شهر {{ session('custom_month_profit.month') }}/{{ session('custom_month_profit.year') }}:
+                <strong>{{ number_format(session('custom_month_profit.profit'), 2) }}</strong>
+            </div>
+        @endif
         <h2 style="text-align:center;">سجل الحركات</h2>
         <!-- فلتر شهر/سنة وعرض الرصيد النهائي -->
-        <form id="filterForm" method="GET" style="display: flex; justify-content: center; gap: 10px; margin-bottom: 10px; align-items: center;">
+        <form id="filterForm" method="GET"
+            style="display: flex; justify-content: center; gap: 10px; margin-bottom: 10px; align-items: center;">
             <select name="month" id="filterMonth" class="inp-text" style="width: 120px;">
                 @for ($m = 1; $m <= 12; $m++)
                     <option value="{{ $m }}" {{ $m == $selectedMonth ? 'selected' : '' }}>شهر {{ $m }}</option>
@@ -120,28 +154,61 @@
             </span>
         </form>
         <div id="transactionsLog">
-        <table class="table1" id="transactionsTable">
-            <thead>
-                <tr>
-                    <th>النوع</th>
-                    <th>المبلغ</th>
-                    <th>العميل</th>
-                    <th>ملاحظات</th>
-                    <th>التاريخ</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($transactions as $transaction)
-                    <tr data-month="{{ \Carbon\Carbon::parse($transaction->created_at)->month }}" data-year="{{ \Carbon\Carbon::parse($transaction->created_at)->year }}">
-                        <td>{{ $transaction->type == 'income' ? 'دخل' : 'مصروف' }}</td>
-                        <td>{{ $transaction->amount }}</td>
-                        <td>{{ $transaction->customer ? $transaction->customer->name : '-' }}</td>
-                        <td>{{ $transaction->notes }}</td>
-                        <td>{{ $transaction->created_at }}</td>
+            <table class="table1" id="transactionsTable">
+                <thead>
+                    <tr>
+                        <th>النوع</th>
+                        <th>المبلغ</th>
+                        <th>العميل</th>
+                        <th>ملاحظات</th>
+                        <th>التاريخ</th>
+                        <th>إجراءات</th>
                     </tr>
-                @endforeach
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    @foreach($transactions as $transaction)
+                        <tr data-id="{{ $transaction->id }}"
+                            data-month="{{ \Carbon\Carbon::parse($transaction->created_at)->month }}"
+                            data-year="{{ \Carbon\Carbon::parse($transaction->created_at)->year }}">
+                            <td>{{ $transaction->type == 'income' ? 'دخل' : 'مصروف' }}</td>
+                            <td>{{ $transaction->amount }}</td>
+                            <td>{{ $transaction->customer ? $transaction->customer->name : '-' }}</td>
+                            <td>{{ $transaction->notes }}</td>
+                            <td>{{ $transaction->created_at }}</td>
+                            <td><button class="edit-transaction-btn serv-btn" type="button">تعديل</button>
+                                <form class="delete-transaction-form" method="POST" style="display:inline;">
+                                    @csrf
+                                    <input type="hidden" name="_method" value="DELETE">
+                                    <button type="submit" class="serv-btn"
+                                        style="background:#dc3545; margin-right:5px;">حذف</button>
+                                </form>
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <!-- Edit Transaction Modal -->
+    <div id="editTransactionModal"
+        style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.4); align-items:center; justify-content:center; z-index:9999;">
+        <div
+            style="background:#fff; padding:30px; border-radius:10px; min-width:300px; position:relative; margin:auto; top:10vh;">
+            <form id="editTransactionForm" method="POST">
+                @csrf
+                <input type="hidden" name="_method" value="PUT">
+                <input type="hidden" name="transaction_id" id="editTransactionId">
+                <div class="input-form">
+                    <label>المبلغ</label>
+                    <input type="number" name="amount" id="editAmount" class="inp-text" required>
+                </div>
+                <div class="input-form">
+                    <label>ملاحظات</label>
+                    <input type="text" name="notes" id="editNotes" class="inp-text">
+                </div>
+                <button type="submit" class="serv-btn">حفظ التعديلات</button>
+                <button type="button" id="closeEditModal" class="serv-btn" style="background:#dc3545;">إلغاء</button>
+            </form>
         </div>
     </div>
     <script>
@@ -152,22 +219,26 @@
                 width: '100%'
             });
             // Toggle monthly profits list
-            $('#toggleMonthlyProfits').on('click', function() {
+            $('#toggleMonthlyProfits').on('click', function () {
                 $('#monthlyProfitsList').toggle();
             });
             // Toggle transactions log
-            $('#toggleTransactions').on('click', function() {
+            $('#toggleTransactions').on('click', function () {
                 $('#transactionsLog').toggle();
             });
+            // Toggle custom month profit form
+            $('#showCustomMonthProfitForm').on('click', function () {
+                $('#customMonthProfitForm').toggle();
+            });
             // عند تغيير الفلتر أرسل النموذج لجلب الرصيد الصحيح
-            $('#filterMonth, #filterYear').on('change', function() {
+            $('#filterMonth, #filterYear').on('change', function () {
                 $('#filterForm').submit();
             });
             // فلترة سجل الحركات حسب الشهر والسنة (بعد تحميل الصفحة)
             function filterTransactions() {
                 var selectedMonth = $('#filterMonth').val();
                 var selectedYear = $('#filterYear').val();
-                $('#transactionsTable tbody tr').each(function() {
+                $('#transactionsTable tbody tr').each(function () {
                     var rowMonth = $(this).data('month').toString();
                     var rowYear = $(this).data('year').toString();
                     if (rowMonth === selectedMonth && rowYear === selectedYear) {
@@ -179,6 +250,58 @@
             }
             // فلترة تلقائية عند التحميل
             filterTransactions();
+
+            // Edit transaction modal logic
+            $(document).on('click', '.edit-transaction-btn', function () {
+                var row = $(this).closest('tr');
+                var id = row.data('id');
+                var amount = row.find('td').eq(1).text().trim();
+                var notes = row.find('td').eq(3).text().trim();
+                $('#editTransactionId').val(id);
+                $('#editAmount').val(amount);
+                $('#editNotes').val(notes);
+                $('#editTransactionModal').show();
+            });
+            $('#closeEditModal').on('click', function () {
+                $('#editTransactionModal').hide();
+            });
+            $('#editTransactionForm').on('submit', function (e) {
+                e.preventDefault();
+                var id = $('#editTransactionId').val();
+                var data = $(this).serialize();
+                $.ajax({
+                    url: '/box/transactions/' + id,
+                    method: 'POST',
+                    data: data,
+                    headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+                    success: function (response) {
+                        location.reload();
+                    },
+                    error: function (xhr) {
+                        alert('حدث خطأ أثناء التعديل');
+                    }
+                });
+            });
+
+            $(document).on('submit', '.delete-transaction-form', function (e) {
+                e.preventDefault();
+                if (!confirm('هل أنت متأكد من حذف هذه الحركة؟')) return;
+                var row = $(this).closest('tr');
+                var id = row.data('id');
+                var form = $(this);
+                $.ajax({
+                    url: '/box/transactions/' + id,
+                    method: 'DELETE',
+                    data: form.serialize(),
+                    headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+                    success: function (response) {
+                        location.reload();
+                    },
+                    error: function (xhr) {
+                        alert('حدث خطأ أثناء الحذف');
+                    }
+                });
+            });
         });
     </script>
 </body>

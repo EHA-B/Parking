@@ -132,4 +132,55 @@ class BoxController extends Controller
 
         return redirect()->route('box.index')->with('success', 'تم حساب وتخزين ربح الشهر الحالي وتخزين رصيد الصندوق بنجاح! وتم تصفير الصندوق الحالي.');
     }
-} 
+
+    public function calculateSpecificMonthProfit(Request $request)
+    {
+        $month = $request->input('month');
+        $year = $request->input('year');
+        $profit = BoxTransaction::whereMonth('created_at', $month)
+            ->whereYear('created_at', $year)
+            ->sum(DB::raw("CASE WHEN type = 'income' THEN amount ELSE -amount END"));
+        return redirect()->route('box.index')->with('custom_month_profit', [
+            'month' => $month,
+            'year' => $year,
+            'profit' => $profit,
+        ]);
+    }
+
+    /**
+     * Update a transaction's amount and notes.
+     */
+    public function updateTransaction(Request $request, $id)
+    {
+        $request->validate([
+            'amount' => 'required|numeric|min:0',
+            'notes' => 'nullable|string|max:255',
+        ]);
+        $transaction = BoxTransaction::findOrFail($id);
+        // Optionally, add authorization here
+        $transaction->amount = $request->input('amount');
+        $transaction->notes = $request->input('notes');
+        $transaction->save();
+        return response()->json(['success' => true]);
+    }
+
+    /**
+     * Delete a transaction and update the current box balance.
+     */
+    public function destroyTransaction(Request $request, $id)
+    {
+        $transaction = BoxTransaction::findOrFail($id);
+        // Update current box balance
+        $box = CurrentBox::first();
+        if ($box) {
+            if ($transaction->type === 'income') {
+                $box->current_balance -= $transaction->amount;
+            } else {
+                $box->current_balance += $transaction->amount;
+            }
+            $box->save();
+        }
+        $transaction->delete();
+        return response()->json(['success' => true]);
+    }
+}
