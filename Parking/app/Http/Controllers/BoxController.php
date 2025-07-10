@@ -137,9 +137,27 @@ class BoxController extends Controller
     {
         $month = $request->input('month');
         $year = $request->input('year');
+        $now = now();
         $profit = BoxTransaction::whereMonth('created_at', $month)
             ->whereYear('created_at', $year)
             ->sum(DB::raw("CASE WHEN type = 'income' THEN amount ELSE -amount END"));
+
+        // Insert or update the box_monthly_profits table
+        $existing = BoxMonthlyProfit::where('month', $month)->where('year', $year)->first();
+        if ($existing) {
+            $existing->update([
+                'profit' => $profit,
+                'calculated_at' => $now,
+            ]);
+        } else {
+            BoxMonthlyProfit::create([
+                'month' => $month,
+                'year' => $year,
+                'profit' => $profit,
+                'calculated_at' => $now,
+            ]);
+        }
+
         return redirect()->route('box.index')->with('custom_month_profit', [
             'month' => $month,
             'year' => $year,
