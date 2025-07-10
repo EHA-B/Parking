@@ -51,6 +51,36 @@ class BoxController extends Controller
         }
         $box->current_balance += $request->amount;
         $box->save();
+
+        // If a customer is selected, add a MonthlyPayment for their active monthly slot
+        if ($request->customer_id) {
+            $customer = \App\Models\Customer::find($request->customer_id);
+            if ($customer) {
+                foreach ($customer->vics as $vic) {
+                    $slot = $vic->parkingSlots()->where('parking_type', 'monthly')->whereNull('time_out')->first();
+                    if ($slot) {
+                        $totalAmount = $slot->price;
+                        $paidAmount = $slot->getTotalPaidAmount();
+                        $remainingAmount = max(0, $totalAmount - $paidAmount);
+                        $paymentAmount = min($request->amount, $remainingAmount);
+                        if ($paymentAmount > 0) {
+                            $newRemaining = $remainingAmount - $paymentAmount;
+                            $status = ($newRemaining == 0) ? 'completed' : 'partial';
+                            \App\Models\MonthlyPayment::create([
+                                'parking_slot_id' => $slot->id,
+                                'amount' => $paymentAmount,
+                                'remaining_amount' => $newRemaining,
+                                'payment_status' => $status,
+                                'payment_date' => now(),
+                                'payment_method' => 'box',
+                                'notes' => $request->notes,
+                            ]);
+                        }
+                        break;
+                    }
+                }
+            }
+        }
         return redirect()->route('box.index');
     }
 
